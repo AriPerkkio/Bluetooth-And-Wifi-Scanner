@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">BtWifiScan</string>
+    <string name="title_activity_new_scan">newScanActivity</string>
+    <string name="title_activity_scan">scanActivity</string>
+</resources>
