@@ -1,5 +1,6 @@
 package com.example.ariperkkio.btwifiscan;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
@@ -10,12 +11,16 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class newScanActivity extends Activity implements View.OnClickListener {
 
+    //
     private Intent intent;
+    private BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+    int REQUEST_ENABLE_BT;
 
     //General widgets
     private Button back;
@@ -29,6 +34,8 @@ public class newScanActivity extends Activity implements View.OnClickListener {
     private CheckBox btDevAddr;
     private CheckBox btDevType;
     private CheckBox btRSSI;
+    private TextView btEnabled;
+    private Intent enableBtIntent;
 
     //Widgets for Wifi options
     private Switch switchWifi;
@@ -67,6 +74,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         btDevType.setOnClickListener(this);
         btRSSI = (CheckBox) findViewById(R.id.newScanBtRssiChk);
         btRSSI.setOnClickListener(this);
+        btEnabled = (TextView) findViewById(R.id.newScanBtStatus);
 
         // Widgets for Wifi
         switchWifi = (Switch) findViewById(R.id.newScanWifiSwitch);
@@ -82,7 +90,33 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         wifiFrequency = (CheckBox) findViewById(R.id.newScanWifiFreqChk);
         wifiFrequency.setOnClickListener(this);
 
+        if(switchBluetooth.isChecked()) {
+            // Check if device's bluetooth is enabled/disabled
+            if (btAdapter.isEnabled())
+                btEnabled.setText("Enabled");
+            else {
+                btEnabled.setText("Disabled");
+                setBtOptionsOFF();
+                switchBluetooth.setChecked(false);
+            }
+        }
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_ENABLE_BT){
+            if (resultCode == RESULT_OK){
+                switchBluetooth.setChecked(true);
+                setBtOptionsON();
+                btEnabled.setText("Enabled");
+            }
+            if(resultCode == RESULT_CANCELED){
+                switchBluetooth.setChecked(false);
+                setBtOptionsOFF();
+                btEnabled.setText("Disabled");
+            }
+        }
+    }//
 
     public void onClick(View v) {
         switch (v.getId()) {
@@ -95,32 +129,17 @@ public class newScanActivity extends Activity implements View.OnClickListener {
 
             // Switch to enable/disable options for bluetooth
             case (R.id.newScanBtSwitch):
+                // Check if device's bluetooth is enabled/disabled
+                if (!btAdapter.isEnabled()) {
+                    enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                }
                 // When switch is ON, enable option-checkboxes and set color default
-                if(switchBluetooth.isChecked()) {
-                    btDevName.setEnabled(true);
-                    btDevAddr.setEnabled(true);
-                    btDevType.setEnabled(true);
-                    btRSSI.setEnabled(true);
-                    btDevName.setTextColor(getResources().getColor(R.color.mainColorCyan));
-                    btDevAddr.setTextColor(getResources().getColor(R.color.mainColorCyan));
-                    btDevType.setTextColor(getResources().getColor(R.color.mainColorCyan));
-                    btRSSI.setTextColor(getResources().getColor(R.color.mainColorCyan));
-                }
-                // When switch is OFF, disable option-checkboxes and set color grey
-                else {
-                    btDevName.setEnabled(false);
-                    btDevAddr.setEnabled(false);
-                    btDevType.setEnabled(false);
-                    btRSSI.setEnabled(false);
-                    btDevName.setChecked(false);
-                    btDevAddr.setChecked(false);
-                    btDevType.setChecked(false);
-                    btRSSI.setChecked(false);
-                    btDevName.setTextColor(getResources().getColor(R.color.material_grey_600));
-                    btDevAddr.setTextColor(getResources().getColor(R.color.material_grey_600));
-                    btDevType.setTextColor(getResources().getColor(R.color.material_grey_600));
-                    btRSSI.setTextColor(getResources().getColor(R.color.material_grey_600));
-                }
+                if(switchBluetooth.isChecked() && btAdapter.isEnabled())
+                    setBtOptionsON();
+                else
+                    setBtOptionsOFF();
+
             break;
 
             // Switch to enable/disable options for wifi
@@ -183,12 +202,27 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                 }
 
                 else {
-                    Toast.makeText(this, "Start scanning", Toast.LENGTH_SHORT).show();
-
                     intent = new Intent(newScanActivity.this, scanActivity.class); //Create intent for scanActivity
-                    //intent.putExtra("extraCountry", selectedCountry); //Add selectedCountry to intent as data,
+                    // Fill in options for bluetooth scanning
+                    if(switchBluetooth.isChecked()) {
+                        intent.putExtra("btStatus", switchBluetooth.isChecked());
+                        intent.putExtra("btDevName", btDevName.isChecked());
+                        intent.putExtra("btDevAddr", btDevAddr.isChecked());
+                        intent.putExtra("btDevType", btDevType.isChecked());
+                        intent.putExtra("btRSSI", btRSSI.isChecked());
+                    }
+                    // Fill in options for wifi scanning
+                    if(switchWifi.isChecked()) {
+                        intent.putExtra("wifiStatus", switchWifi.isChecked());
+                        intent.putExtra("wifiSSID", wifiSSID.isChecked());
+                        intent.putExtra("wifiBSSIDr", wifiBSSID.isChecked());
+                        intent.putExtra("wifiCapabilities", wifiCapabilities.isChecked());
+                        intent.putExtra("wifiFrequency", wifiFrequency.isChecked());
+                        intent.putExtra("wifiRSSI", wifiRSSI.isChecked());
+                    }
+
                     finish(); //Finish this activity and start new scan
-                    startActivity(intent);                            //and mark the country as "extraCountry"
+                    startActivity(intent);
 
                 }
 
@@ -197,5 +231,30 @@ public class newScanActivity extends Activity implements View.OnClickListener {
 
         }
 
+    }
+
+    private void setBtOptionsOFF() {
+        btDevName.setEnabled(false);
+        btDevAddr.setEnabled(false);
+        btDevType.setEnabled(false);
+        btRSSI.setEnabled(false);
+        btDevName.setChecked(false);
+        btDevAddr.setChecked(false);
+        btDevType.setChecked(false);
+        btRSSI.setChecked(false);
+        btDevName.setTextColor(getResources().getColor(R.color.material_grey_600));
+        btDevAddr.setTextColor(getResources().getColor(R.color.material_grey_600));
+        btDevType.setTextColor(getResources().getColor(R.color.material_grey_600));
+        btRSSI.setTextColor(getResources().getColor(R.color.material_grey_600));
+    }
+    private void setBtOptionsON() {
+        btDevName.setEnabled(true);
+        btDevAddr.setEnabled(true);
+        btDevType.setEnabled(true);
+        btRSSI.setEnabled(true);
+        btDevName.setTextColor(getResources().getColor(R.color.mainColorCyan));
+        btDevAddr.setTextColor(getResources().getColor(R.color.mainColorCyan));
+        btDevType.setTextColor(getResources().getColor(R.color.mainColorCyan));
+        btRSSI.setTextColor(getResources().getColor(R.color.mainColorCyan));
     }
 }
