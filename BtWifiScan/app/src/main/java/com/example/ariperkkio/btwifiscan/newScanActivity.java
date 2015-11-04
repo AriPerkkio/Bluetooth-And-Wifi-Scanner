@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.app.Activity;
-import android.provider.Settings;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -15,7 +14,6 @@ import android.widget.NumberPicker;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 public class newScanActivity extends Activity implements View.OnClickListener {
 
@@ -62,7 +60,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         back.setOnClickListener(this);
         startScan = (Button) findViewById(R.id.newScanStartScan);
         startScan.setOnClickListener(this);
-        scanName = (EditText) findViewById(R.id.newScanName);
+        scanName = (EditText) findViewById(R.id.ScanName);
         sampleRate = (NumberPicker) findViewById(R.id.newScanRateNumber);
         sampleRate.setMinValue(30);
         sampleRate.setMaxValue(900);
