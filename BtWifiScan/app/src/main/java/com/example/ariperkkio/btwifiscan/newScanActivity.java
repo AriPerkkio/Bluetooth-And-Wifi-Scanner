@@ -2,8 +2,10 @@ package com.example.ariperkkio.btwifiscan;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.app.Activity;
+import android.provider.Settings;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -17,10 +19,10 @@ import android.widget.ToggleButton;
 
 public class newScanActivity extends Activity implements View.OnClickListener {
 
-    //
     private Intent intent;
     private BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
     int REQUEST_ENABLE_BT;
+    private WifiManager wifiManager;
 
     //General widgets
     private Button back;
@@ -44,6 +46,8 @@ public class newScanActivity extends Activity implements View.OnClickListener {
     private CheckBox wifiCapabilities;
     private CheckBox wifiRSSI;
     private CheckBox wifiFrequency;
+    private TextView wifiEnabled;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,20 +93,28 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         wifiRSSI.setOnClickListener(this);
         wifiFrequency = (CheckBox) findViewById(R.id.newScanWifiFreqChk);
         wifiFrequency.setOnClickListener(this);
+        wifiEnabled = (TextView) findViewById(R.id.newScanWifiStatus);
+        wifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
 
-        if(switchBluetooth.isChecked()) {
-            // Check if device's bluetooth is enabled/disabled
-            if (btAdapter.isEnabled())
-                btEnabled.setText("Enabled");
-            else {
-                btEnabled.setText("Disabled");
-                setBtOptionsOFF();
-                switchBluetooth.setChecked(false);
-            }
+        // Check if device's bluetooth is ON when activity launched
+        if (btAdapter.isEnabled())
+            btEnabled.setText("Enabled");
+        else {
+            btEnabled.setText("Disabled");
+            setBtOptionsOFF();
+            switchBluetooth.setChecked(false);
+        }
+        // Check if device's wifi is ON when activity launched
+        if (wifiManager.isWifiEnabled())
+            wifiEnabled.setText("Enabled");
+        else {
+            wifiEnabled.setText("Disabled");
+            setWifiOptionsOFF();
+            switchWifi.setChecked(false);
         }
     }
 
-    @Override
+    @Override // Check which option user selected on Bluetooth request
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_ENABLE_BT){
             if (resultCode == RESULT_OK){
@@ -116,65 +128,45 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                 btEnabled.setText("Disabled");
             }
         }
-    }//
+    }
 
     public void onClick(View v) {
         switch (v.getId()) {
 
             // 'Back' button finish activity
             case (R.id.newScanBack):
-                //Toast.makeText(this, "Back", Toast.LENGTH_SHORT).show();
                 finish();
             break;
 
             // Switch to enable/disable options for bluetooth
             case (R.id.newScanBtSwitch):
                 // Check if device's bluetooth is enabled/disabled
-                if (!btAdapter.isEnabled()) {
+                if (!btAdapter.isEnabled()) { //disabled -> prompt user to enable Bt
                     enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT); //Result of selection to REQUEST_ENABLE_BT
                 }
-                // When switch is ON, enable option-checkboxes and set color default
+                // Enable/disable check boxes depending on switch state
                 if(switchBluetooth.isChecked() && btAdapter.isEnabled())
                     setBtOptionsON();
                 else
                     setBtOptionsOFF();
-
             break;
 
             // Switch to enable/disable options for wifi
             case (R.id.newScanWifiSwitch):
-                // When switch is ON, enable option-checkboxes and set color default
-                if(switchWifi.isChecked()) {
-                    wifiSSID.setEnabled(true);
-                    wifiBSSID.setEnabled(true);
-                    wifiCapabilities.setEnabled(true);
-                    wifiFrequency.setEnabled(true);
-                    wifiRSSI.setEnabled(true);
-                    wifiSSID.setTextColor(getResources().getColor(R.color.mainColorCyan));
-                    wifiBSSID.setTextColor(getResources().getColor(R.color.mainColorCyan));
-                    wifiCapabilities.setTextColor(getResources().getColor(R.color.mainColorCyan));
-                    wifiFrequency.setTextColor(getResources().getColor(R.color.mainColorCyan));
-                    wifiRSSI.setTextColor(getResources().getColor(R.color.mainColorCyan));
+                // Check if device's wifi is enabled/disabled
+                if(!wifiManager.isWifiEnabled()){
+                    wifiManager.setWifiEnabled(true); // Turn wifi ON
+                    Toast.makeText(this, "Wifi enabled.", Toast.LENGTH_SHORT).show();
+                    switchWifi.setChecked(true);
+                    setWifiOptionsON();
+                    wifiEnabled.setText("Enabled");
                 }
-                // When switch is OFF, disable option-checkboxes and set color grey
-                else {
-                    wifiSSID.setEnabled(false);
-                    wifiBSSID.setEnabled(false);
-                    wifiCapabilities.setEnabled(false);
-                    wifiFrequency.setEnabled(false);
-                    wifiRSSI.setEnabled(false);
-                    wifiSSID.setChecked(false);
-                    wifiBSSID.setChecked(false);
-                    wifiCapabilities.setChecked(false);
-                    wifiFrequency.setChecked(false);
-                    wifiRSSI.setChecked(false);
-                    wifiSSID.setTextColor(getResources().getColor(R.color.material_grey_600));
-                    wifiBSSID.setTextColor(getResources().getColor(R.color.material_grey_600));
-                    wifiCapabilities.setTextColor(getResources().getColor(R.color.material_grey_600));
-                    wifiFrequency.setTextColor(getResources().getColor(R.color.material_grey_600));
-                    wifiRSSI.setTextColor(getResources().getColor(R.color.material_grey_600));
-                }
+                    // Enable/disable check boxes depending on switch state
+                if(switchWifi.isChecked() && wifiManager.isWifiEnabled())
+                    setWifiOptionsON();
+                else
+                    setWifiOptionsOFF();
             break;
 
             // 'Start scanning' button to start new activity with chosen options
@@ -201,8 +193,13 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     break;
                 }
 
-                else {
+                else { // OK, gather options
                     intent = new Intent(newScanActivity.this, scanActivity.class); //Create intent for scanActivity
+
+                    // Fill in Sample Rate and Scan Name
+                    intent.putExtra("sampleRate", sampleRate.getValue());
+                    intent.putExtra("scanName", scanName.getText().toString());
+
                     // Fill in options for bluetooth scanning
                     if(switchBluetooth.isChecked()) {
                         intent.putExtra("btStatus", switchBluetooth.isChecked());
@@ -220,19 +217,14 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                         intent.putExtra("wifiFrequency", wifiFrequency.isChecked());
                         intent.putExtra("wifiRSSI", wifiRSSI.isChecked());
                     }
-
                     finish(); //Finish this activity and start new scan
                     startActivity(intent);
-
                 }
-
             break;
-
-
         }
 
     }
-
+    // Set Bluetooth Options' checkboxes OFF and color grey
     private void setBtOptionsOFF() {
         btDevName.setEnabled(false);
         btDevAddr.setEnabled(false);
@@ -247,6 +239,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         btDevType.setTextColor(getResources().getColor(R.color.material_grey_600));
         btRSSI.setTextColor(getResources().getColor(R.color.material_grey_600));
     }
+    // Set Bluetooth Options' checkboxes enabled and color normal
     private void setBtOptionsON() {
         btDevName.setEnabled(true);
         btDevAddr.setEnabled(true);
@@ -256,5 +249,36 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         btDevAddr.setTextColor(getResources().getColor(R.color.mainColorCyan));
         btDevType.setTextColor(getResources().getColor(R.color.mainColorCyan));
         btRSSI.setTextColor(getResources().getColor(R.color.mainColorCyan));
+    }
+    // Set Wifi Options' checkboxes enabled and color normal
+    private void setWifiOptionsON() {
+        wifiSSID.setEnabled(true);
+        wifiBSSID.setEnabled(true);
+        wifiCapabilities.setEnabled(true);
+        wifiFrequency.setEnabled(true);
+        wifiRSSI.setEnabled(true);
+        wifiSSID.setTextColor(getResources().getColor(R.color.mainColorCyan));
+        wifiBSSID.setTextColor(getResources().getColor(R.color.mainColorCyan));
+        wifiCapabilities.setTextColor(getResources().getColor(R.color.mainColorCyan));
+        wifiFrequency.setTextColor(getResources().getColor(R.color.mainColorCyan));
+        wifiRSSI.setTextColor(getResources().getColor(R.color.mainColorCyan));
+    }
+    // Set Wifi Options' checkboxes OFF and color grey
+    private void setWifiOptionsOFF() {
+        wifiSSID.setEnabled(false);
+        wifiBSSID.setEnabled(false);
+        wifiCapabilities.setEnabled(false);
+        wifiFrequency.setEnabled(false);
+        wifiRSSI.setEnabled(false);
+        wifiSSID.setChecked(false);
+        wifiBSSID.setChecked(false);
+        wifiCapabilities.setChecked(false);
+        wifiFrequency.setChecked(false);
+        wifiRSSI.setChecked(false);
+        wifiSSID.setTextColor(getResources().getColor(R.color.material_grey_600));
+        wifiBSSID.setTextColor(getResources().getColor(R.color.material_grey_600));
+        wifiCapabilities.setTextColor(getResources().getColor(R.color.material_grey_600));
+        wifiFrequency.setTextColor(getResources().getColor(R.color.material_grey_600));
+        wifiRSSI.setTextColor(getResources().getColor(R.color.material_grey_600));
     }
 }
