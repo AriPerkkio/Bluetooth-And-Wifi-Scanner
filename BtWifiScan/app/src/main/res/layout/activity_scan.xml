@@ -22,12 +22,110 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Stop"
-        android:id="@+id/scanBack"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
+        android:text="End scanning"
+        android:id="@+id/scanEnd"
         android:background="@android:color/background_dark"
         android:paddingRight="5dp"
         android:paddingLeft="5dp"
+        android:textColor="@color/mainColorCyan"
+        android:layout_above="@+id/space17"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="temp button"
+        android:id="@+id/newScanManual"
+        android:layout_above="@+id/ScanName"
+        android:layout_alignEnd="@+id/space16" />
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="20dp"
+        android:layout_below="@+id/scanHeader"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/space16" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Scan name: "
+        android:id="@+id/ScanNameText"
+        android:textColor="@color/mainColorCyan"
+        android:layout_alignTop="@+id/ScanName"
+        android:layout_toEndOf="@+id/space19" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Error reading scan name"
+        android:id="@+id/ScanName"
+        android:layout_below="@+id/space16"
+        android:layout_toEndOf="@+id/ScanNameText"
         android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Wifi networks found: "
+        android:id="@+id/ScanWifiFoundText"
+        android:textColor="@color/mainColorCyan"
+        android:layout_below="@+id/ScanNameText"
+        android:layout_toEndOf="@+id/space19" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Bluetooth devices found: "
+        android:id="@+id/ScanBtFoundText"
+        android:textColor="@color/mainColorCyan"
+        android:layout_below="@+id/ScanWifiFoundText"
+        android:layout_toEndOf="@+id/space19" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/space17" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_above="@+id/scanEnd"
+        android:layout_alignParentStart="true"
+        android:id="@+id/space18" />
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="20dp"
+        android:layout_below="@+id/ScanBtFoundText"
+        android:layout_alignParentStart="true"
+        android:id="@+id/space20" />
+
+    <Space
+        android:layout_width="20dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/space21" />
+
+    <Space
+        android:layout_width="20dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/space19" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ScanList"
+        android:layout_below="@+id/space20"
+        android:layout_above="@+id/space18"
+        android:layout_toStartOf="@+id/space21"
+        android:layout_toEndOf="@+id/space19" />
 </RelativeLayout>
