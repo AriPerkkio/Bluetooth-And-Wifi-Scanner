@@ -11,6 +11,9 @@ public class scanActivity extends Activity implements View.OnClickListener{
 
     Button back;
 
+    String scanName;
+    int sampleRate;
+
     // booleans to check options for bluetooth
     boolean btStatus;
     boolean btDevName;
@@ -35,6 +38,10 @@ public class scanActivity extends Activity implements View.OnClickListener{
             btDevType = getIntent().getExtras().getBoolean("btDevType");
             btRSSI = getIntent().getExtras().getBoolean("btRSSI");
         }
+
+        scanName = getIntent().getExtras().getString("scanName");
+        sampleRate = getIntent().getExtras().getInt("sampleRate");
+
 
     }
 
