@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <ImageView
+        android:layout_width="73dp"
+        android:layout_height="65dp"
+        android:id="@+id/scanrowIcon"
+        android:src="@android:mipmap/sym_def_app_icon"
+        android:layout_weight="0.03"
+        android:layout_alignBottom="@+id/scanrowThree" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="FieldOne"
+        android:id="@+id/scanrowOne"
+        android:layout_weight="0.03"
+        android:layout_marginStart="35dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/scanrowIcon"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="FieldTwo"
+        android:id="@+id/scanrowTwo"
+        android:layout_below="@+id/scanrowOne"
+        android:layout_alignStart="@+id/scanrowOne"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="FieldThree"
+        android:id="@+id/scanrowThree"
+        android:layout_below="@+id/scanrowTwo"
+        android:layout_alignStart="@+id/scanrowTwo"
+        android:textColor="@color/mainColorCyan" />
+
+    <Space
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/scanrowTwo"
+        android:layout_toEndOf="@+id/scanrowTwo"
+        android:id="@+id/space22" />
+
+    <Space
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/space22"
+        android:layout_toEndOf="@+id/scanrowTwo"
+        android:layout_alignBottom="@+id/scanrowTwo"
+        android:id="@+id/space23" />
+
+    <Space
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/space23"
+        android:layout_toEndOf="@+id/scanrowThree"
+        android:layout_alignBottom="@+id/scanrowThree"
+        android:id="@+id/space24" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="FieldFour"
+        android:id="@+id/scanrowFour"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/space22"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="FieldFive"
+        android:id="@+id/scanrowFive"
+        android:layout_below="@+id/space22"
+        android:layout_toEndOf="@+id/space22"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="FieldSix"
+        android:id="@+id/scanrowSix"
+        android:layout_below="@+id/scanrowFive"
+        android:layout_toEndOf="@+id/space24"
+        android:textColor="@color/mainColorCyan" />
+
+</RelativeLayout>
