@@ -187,12 +187,12 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/space9"
             android:layout_toEndOf="@+id/space11"
             android:layout_toStartOf="@+id/space10"
             android:background="@color/material_blue_grey_800"
             android:id="@+id/relativeLayout2"
-            android:layout_above="@+id/newScanRateNumber">
+            android:layout_above="@+id/space15"
+            android:layout_below="@+id/space9">
 
             <Space
                 android:layout_width="match_parent"
@@ -210,7 +210,7 @@
                 android:layout_centerHorizontal="true"
                 android:textColor="@color/mainColorCyan"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="28dp"
+                android:textSize="@dimen/abc_text_size_display_1_material"
                 android:enabled="true"
                 android:checked="true" />
 
@@ -224,7 +224,7 @@
                 android:layout_marginTop="20dp"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="15dp"
+                android:textSize="@dimen/abc_text_size_medium_material"
                 android:enabled="true"
                 android:checked="true" />
 
@@ -235,7 +235,7 @@
                 android:id="@+id/newScanDevAddrChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="15dp"
+                android:textSize="@dimen/abc_text_size_medium_material"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanDevNameChk"
@@ -248,7 +248,7 @@
                 android:id="@+id/newScanDevTypChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="15dp"
+                android:textSize="@dimen/abc_text_size_medium_material"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanDevAddrChk"
@@ -261,7 +261,7 @@
                 android:id="@+id/newScanBtRssiChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="15dp"
+                android:textSize="@dimen/abc_text_size_medium_material"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanDevTypChk"
@@ -300,7 +300,7 @@
                 android:id="@+id/newScanWifiSsidChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="15dp"
+                android:textSize="@dimen/abc_text_size_medium_material"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_marginTop="20dp"
@@ -314,7 +314,7 @@
                 android:id="@+id/newScanWifiBssidChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="15dp"
+                android:textSize="@dimen/abc_text_size_medium_material"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanWifiSsidChk"
@@ -327,7 +327,7 @@
                 android:id="@+id/newScanWifiCapaChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="15dp"
+                android:textSize="@dimen/abc_text_size_medium_material"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanWifiBssidChk"
@@ -347,7 +347,7 @@
                 android:id="@+id/newScanWifiSwitch"
                 android:textColor="@color/mainColorCyan"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="28dp"
+                android:textSize="@dimen/abc_text_size_display_1_material"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/space14"
@@ -361,7 +361,7 @@
                 android:id="@+id/newScanWifiRssiChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="15dp"
+                android:textSize="@dimen/abc_text_size_medium_material"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanWifiCapaChk"
@@ -374,7 +374,7 @@
                 android:id="@+id/newScanWifiFreqChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="15dp"
+                android:textSize="@dimen/abc_text_size_medium_material"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanWifiRssiChk"
@@ -386,7 +386,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/newScanRateNumber"
             android:layout_above="@+id/space6"
-            android:layout_toEndOf="@+id/newScanRateText" />
+            android:layout_toEndOf="@+id/newScanRateText"/>
 
         <Space
             android:layout_width="match_parent"
@@ -394,6 +394,13 @@
             android:layout_alignEnd="@+id/relativeLayout3"
             android:id="@+id/space7"
             android:layout_above="@+id/space6" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_above="@+id/newScanRateText"
+            android:layout_toStartOf="@+id/space10"
+            android:id="@+id/space15" />
 
     </RelativeLayout>
 
