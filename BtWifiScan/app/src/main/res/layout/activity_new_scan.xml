@@ -111,7 +111,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Scan name: "
-            android:id="@+id/newScanNameText"
+            android:id="@+id/ScanNameText"
             android:textColor="@color/mainColorCyan"
             android:layout_below="@+id/space3"
             android:layout_toEndOf="@+id/space11" />
@@ -119,20 +119,20 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/newScanName"
+            android:id="@+id/ScanName"
             android:singleLine="true"
             android:textColor="@color/mainColorCyan"
             android:textSize="20dp"
             android:layout_alignParentTop="true"
             android:maxLength="40"
-            android:layout_toEndOf="@+id/newScanNameText"
+            android:layout_toEndOf="@+id/ScanNameText"
             android:layout_toStartOf="@+id/space12" />
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="20dp"
             android:layout_alignParentBottom="true"
-            android:layout_toEndOf="@+id/newScanNameText"
+            android:layout_toEndOf="@+id/ScanNameText"
             android:layout_alignParentStart="true"
             android:id="@+id/space6" />
 
@@ -155,7 +155,7 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="20dp"
-            android:layout_below="@+id/newScanName"
+            android:layout_below="@+id/ScanName"
             android:layout_alignParentEnd="true"
             android:id="@+id/space9" />
 
@@ -173,7 +173,7 @@
         <Space
             android:layout_width="20dp"
             android:layout_height="match_parent"
-            android:layout_below="@+id/newScanName"
+            android:layout_below="@+id/ScanName"
             android:layout_centerHorizontal="true"
             android:id="@+id/space10" />
 
@@ -286,7 +286,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/material_blue_grey_800"
-            android:layout_alignEnd="@+id/newScanName"
+            android:layout_alignEnd="@+id/ScanName"
             android:layout_toEndOf="@+id/space10"
             android:layout_below="@+id/space9"
             android:layout_alignBottom="@+id/relativeLayout2"
