@@ -5,20 +5,32 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.List;
+import java.util.Vector;
 
 public class scanActivity extends Activity implements View.OnClickListener{
 
     private Button back;
+    // Bluetooth scanning objects
     private BluetoothAdapter btAdapter;
     private BluetoothDevice btDevice;
 
-    private String scanName;
+    //Wifi scanning objects
+    private WifiManager wifiManager;
+    private List<ScanResult> wifiScanResults;
+
+    private TextView scanName;
     private int sampleRate;
 
     // booleans to check options for bluetooth
@@ -38,6 +50,8 @@ public class scanActivity extends Activity implements View.OnClickListener{
     private boolean wifiFrequency;
     private boolean wifiRSSI;
 
+    private Button manualButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,8 +59,13 @@ public class scanActivity extends Activity implements View.OnClickListener{
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //Set full screen
         setContentView(R.layout.activity_scan);
 
-        back = (Button) findViewById(R.id.scanBack);
+        back = (Button) findViewById(R.id.scanEnd);
         back.setOnClickListener(this);
+
+        scanName = (TextView) findViewById(R.id.ScanName);
+
+        btAdapter = BluetoothAdapter.getDefaultAdapter();
+        wifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
 
         // Get options for Bluetooth scanning
         if(btStatus = getIntent().getExtras().getBoolean("btStatus")) {
@@ -64,8 +83,11 @@ public class scanActivity extends Activity implements View.OnClickListener{
             wifiRSSI = getIntent().getExtras().getBoolean("wifiRSSI");
         }
         // Get scan name and sample rate
-        scanName = getIntent().getExtras().getString("scanName");
+        scanName.setText(getIntent().getExtras().getString("scanName"));
         sampleRate = getIntent().getExtras().getInt("sampleRate");
+
+        manualButton = (Button) findViewById(R.id.newScanManual);
+        manualButton.setOnClickListener(this);
 
     }
 
@@ -78,21 +100,37 @@ public class scanActivity extends Activity implements View.OnClickListener{
                 // Get the BluetoothDevice object from the Intent
                 btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 btDeviceRSSI = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
-                // device.getName()
-                // device.getAddress()
-                // btDeviceRSSI + "dBm"
-                // btDevice.getType()
             }
         }
     };
 
     public void onClick(View v) {
         switch(v.getId()) {
-            case (R.id.scanBack):
+            case (R.id.scanEnd):
                 finish();
+            break;
+
+            case (R.id.newScanManual): //Temp button, will be replaced to be set by timer
+
+                wifiManager.startScan();
+                wifiScanResults = wifiManager.getScanResults();
+
+                if(btAdapter.isDiscovering())
+                    btAdapter.cancelDiscovery();
+
+                else {
+                    btAdapter.startDiscovery();
+                    registerReceiver(mReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+                }
             break;
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
     }
 
 }
