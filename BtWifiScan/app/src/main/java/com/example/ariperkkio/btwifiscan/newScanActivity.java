@@ -212,7 +212,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     if(switchWifi.isChecked()) {
                         intent.putExtra("wifiStatus", switchWifi.isChecked());
                         intent.putExtra("wifiSSID", wifiSSID.isChecked());
-                        intent.putExtra("wifiBSSIDr", wifiBSSID.isChecked());
+                        intent.putExtra("wifiBSSID", wifiBSSID.isChecked());
                         intent.putExtra("wifiCapabilities", wifiCapabilities.isChecked());
                         intent.putExtra("wifiFrequency", wifiFrequency.isChecked());
                         intent.putExtra("wifiRSSI", wifiRSSI.isChecked());
