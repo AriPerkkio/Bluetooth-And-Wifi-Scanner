@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.ariperkkio.btwifiscan" >
+
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -26,6 +27,10 @@
         <activity
             android:name=".scanActivity"
             android:label="@string/title_activity_scan" >
+        </activity>
+        <activity
+            android:name=".previousScansActivity"
+            android:label="@string/title_activity_previous_scans" >
         </activity>
     </application>
 
