@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -15,12 +16,15 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.sql.SQLException;
+
 public class newScanActivity extends Activity implements View.OnClickListener {
 
     private Intent intent;
     private BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
     int REQUEST_ENABLE_BT;
     private WifiManager wifiManager;
+
 
     //General widgets
     private Button back;
@@ -93,6 +97,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         wifiFrequency.setOnClickListener(this);
         wifiEnabled = (TextView) findViewById(R.id.newScanWifiStatus);
         wifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
+
 
         // Check if device's bluetooth is ON when activity launched
         if (btAdapter.isEnabled())
