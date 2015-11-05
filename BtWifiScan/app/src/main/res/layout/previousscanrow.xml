@@ -1,5 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
 
-</RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:background="@color/material_blue_grey_900">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Scan name"
+            android:id="@+id/prevscanrowName"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/mainColorCyan" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Date"
+            android:id="@+id/prevscanrowDate"
+            android:layout_below="@+id/prevscanrowName"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/mainColorCyan" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="ID"
+            android:id="@+id/prevscanrowId"
+            android:textColor="@color/mainColorCyan"
+            android:textSize="35dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_above="@+id/space123" />
+
+        <Space
+            android:layout_width="fill_parent"
+            android:layout_height="10dp"
+            android:layout_below="@+id/prevscanrowDate"
+            android:layout_alignParentStart="true"
+            android:id="@+id/space123"
+            android:background="@color/material_blue_grey_950" />
+
+    </RelativeLayout>
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="10dp"
+        android:layout_gravity="bottom"
+        android:background="@color/material_blue_grey_950" />
+
+</LinearLayout>
