@@ -23,15 +23,13 @@ public class customAdapter extends ArrayAdapter<scanResult>  {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        View row = convertView; //Use old view if possible - don't make things twice!
-
-        if(row == null) {
-            LayoutInflater inflater = LayoutInflater.from(getContext()); // Method getLayoutInflater() not working when not nested class
-            row = inflater.inflate(R.layout.scanrow, parent, false);
+        if(convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.scanrow, parent, false);
         }
 
         scanResult scanresult = getItem(position); //Get item form current position
 
+        ImageView icon = (ImageView) convertView.findViewById(R.id.scanrowIcon);
         TextView fieldOne = (TextView) convertView.findViewById(R.id.scanrowOne);
         TextView fieldTwo = (TextView) convertView.findViewById(R.id.scanrowTwo);
         TextView fieldThree = (TextView) convertView.findViewById(R.id.scanrowThree);
@@ -40,18 +38,37 @@ public class customAdapter extends ArrayAdapter<scanResult>  {
         TextView fieldSix = (TextView) convertView.findViewById(R.id.scanrowSix);
 
         if(scanresult != null) {
+
             if(scanresult.technology.equals("Bluetooth")) {
+                icon.setImageResource(R.drawable.bticon);
                 fieldOne.setText(scanresult.btDevName);
-                fieldTwo.setText(scanresult.btDevAddr);
+                fieldTwo.setText("");
+                fieldThree.setText(scanresult.btDevAddr);
+                fieldFour.setText(scanresult.btDevType);
+                fieldFive.setText("");
+                if(scanresult.btRSSI==0) // btRSSI is 0 when user unchecks it from newScanActivity
+                    fieldSix.setText("");
+                else
+                    fieldSix.setText("RSSI: " + scanresult.btRSSI+" dBm"); // crashes when only int as text
             }
 
             if(scanresult.technology.equals("Wifi")) {
+                icon.setImageResource(R.drawable.wifiicon);
                 fieldOne.setText(scanresult.wifiSSID);
                 fieldTwo.setText(scanresult.wifiBSSID);
+                fieldThree.setText(scanresult.wifiCapabilities);
+                fieldFour.setText("");
+                if(scanresult.wifiFrequency==0) // wifiFrequency is 0 when user unchecks it from newScanActivity
+                    fieldFive.setText("");
+                else
+                    fieldFive.setText(scanresult.wifiFrequency + " MHz");
+                if(scanresult.wifiRSSI==0) // wifiRSSI is 0 when user unchecks it from newScanActivity
+                    fieldSix.setText("");
+                else
+                    fieldSix.setText("RSSI: "+scanresult.wifiRSSI+" dbm"); // crashes when only int as text
             }
         }
-
-        return row;
+        return convertView;
     }
 }
 
