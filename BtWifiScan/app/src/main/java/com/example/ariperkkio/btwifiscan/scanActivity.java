@@ -10,6 +10,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -17,6 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -28,7 +30,7 @@ public class scanActivity extends Activity implements View.OnClickListener{
     private TextView scanName;
     private TextView scanFoundBt;
     private TextView scanFoundWifi;
-
+    private databaseManager database;
 
     // Bluetooth scanning objects
     private BluetoothAdapter btAdapter; //btAdapter for accessing bluetooth
@@ -107,6 +109,8 @@ public class scanActivity extends Activity implements View.OnClickListener{
         manualButton = (Button) findViewById(R.id.newScanManual);
         manualButton.setOnClickListener(this);
 
+        database = new databaseManager(this);
+
         scanresults = new ArrayList<scanResult>();
         scanresults.add(new scanResult("Test Device with long name ABCDEFG", "12:34:56:78:90", 3, -88));
         scanresults.add(new scanResult("Test Wifi network with very long name ABCDEFG","12:34:56:78:90", "[WPA][AES256]", 2445 , -85));
@@ -157,6 +161,13 @@ public class scanActivity extends Activity implements View.OnClickListener{
             case (R.id.scanEnd): // End scan button
                 // Todo: Don't finish activity. Hide Button and bring Save / Don't save visible.
                 // Todo  Enable onItemClickListener (may require flag to see if scanning ended)
+                try {
+                    database.open();
+                    database.insertIntoScans(getIntent().getExtras().getString("scanName"));
+                    database.close();
+                }catch (SQLException e) {
+                    Log.e("InsertIntoScans", e.toString());
+                }
                 finish();
             break;
 
