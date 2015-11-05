@@ -18,20 +18,41 @@ public class scanResult {
     public String wifiSSID;
     public String wifiBSSID;
     public String wifiCapabilities;
-    public String wifiFrequency;
+    public int wifiFrequency;
     public int wifiRSSI;
 
     // Constructoor for Bt
-    public scanResult(String btDevName, String btDevAddr, String btDevType, int btRSSI) {
+    public scanResult(String btDevName, String btDevAddr, int btDevType, int btRSSI) {
         this.technology = "Bluetooth";
         this.btDevName = btDevName;
         this.btDevAddr = btDevAddr;
-        this.btDevType = btDevType;
         this.btRSSI = btRSSI;
+
+        switch(btDevType) { // Convert int getType() into correct string
+            case(0):
+                this.btDevType = "Unknown";
+            break;
+
+            case(1):
+                this.btDevType = "Classic";
+            break;
+
+            case(2):
+                this.btDevType = "Low Energy";
+            break;
+
+            case(3):
+                this.btDevType = "Dual Mode";
+            break;
+
+            case(4): // This is set when user unchecks Device Type from newScanActivity
+                this.btDevType = "";
+            break;
+        }
     }
 
     // Constructoor for Wifi
-    public scanResult(String wifiSSID, String wifiBSSID, String wifiCapabilities, String wifiFrequency, int wifiRSSI) {
+    public scanResult(String wifiSSID, String wifiBSSID, String wifiCapabilities, int wifiFrequency, int wifiRSSI) {
         this.technology = "Wifi";
         this.wifiSSID = wifiSSID;
         this.wifiBSSID = wifiBSSID;
