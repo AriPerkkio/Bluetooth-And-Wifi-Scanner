@@ -60,4 +60,44 @@ public class scanResult {
         this.wifiFrequency = wifiFrequency;
         this.wifiRSSI = wifiRSSI;
     }
+
+    public String getTechnology() {
+        return technology;
+    }
+
+    public String getBtDevName() {
+        return btDevName;
+    }
+
+    public String getBtDevAddr() {
+        return btDevAddr;
+    }
+
+    public String getBtDevType() {
+        return btDevType;
+    }
+
+    public int getBtRSSI() {
+        return btRSSI;
+    }
+
+    public String getWifiSSID() {
+        return wifiSSID;
+    }
+
+    public String getWifiBSSID() {
+        return wifiBSSID;
+    }
+
+    public String getWifiCapabilities() {
+        return wifiCapabilities;
+    }
+
+    public int getWifiFrequency() {
+        return wifiFrequency;
+    }
+
+    public int getWifiRSSI() {
+        return wifiRSSI;
+    }
 }
