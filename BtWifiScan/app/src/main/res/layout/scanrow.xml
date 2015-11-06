@@ -33,24 +33,28 @@
             android:singleLine="true" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="FieldTwo"
             android:id="@+id/scanrowTwo"
             android:layout_below="@+id/scanrowOne"
             android:layout_alignStart="@+id/scanrowOne"
-            android:textColor="@color/mainColorCyan" />
+            android:textColor="@color/mainColorCyan"
+            android:layout_alignEnd="@+id/scanrowOne"
+            android:singleLine="true" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="FieldThree"
             android:id="@+id/scanrowThree"
             android:layout_below="@+id/scanrowTwo"
             android:layout_alignStart="@+id/scanrowTwo"
-            android:textColor="@color/mainColorCyan" />
+            android:textColor="@color/mainColorCyan"
+            android:singleLine="true"
+            android:layout_toStartOf="@+id/scanrowSix" />
 
         <Space
             android:layout_width="20dp"
@@ -83,7 +87,8 @@
             android:id="@+id/scanrowFour"
             android:textColor="@color/mainColorCyan"
             android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:singleLine="true" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -93,7 +98,8 @@
             android:id="@+id/scanrowFive"
             android:textColor="@color/mainColorCyan"
             android:layout_below="@+id/scanrowFour"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:singleLine="true" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -103,7 +109,8 @@
             android:id="@+id/scanrowSix"
             android:textColor="@color/mainColorCyan"
             android:layout_alignTop="@+id/space24"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:singleLine="true" />
 
         <Space
             android:layout_width="fill_parent"
