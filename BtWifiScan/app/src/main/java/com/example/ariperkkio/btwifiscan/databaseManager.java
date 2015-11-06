@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 
 import java.sql.SQLException;
 
@@ -145,6 +146,11 @@ public class databaseManager {
             mCursor.moveToFirst();
         }
         return mCursor;
+    }
+
+    public int getHighestId() {
+        final SQLiteStatement statement = db.compileStatement("SELECT MAX(_id) FROM Scans");
+        return (int) statement.simpleQueryForLong();
     }
 /*
     public Cursor getAll() throws SQLException {
