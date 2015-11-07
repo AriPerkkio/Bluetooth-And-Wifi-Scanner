@@ -123,8 +123,8 @@ public class scanActivity extends Activity implements View.OnClickListener{
         database = new databaseManager(this);
 
         scanresults = new ArrayList<scanResult>();
-        scanresults.add(new scanResult("Test Device with long name ABCDEFG", "12:34:56:78:90", 3, -88));
-        scanresults.add(new scanResult("Test Wifi network with very long name ABCDEFG","12:34:56:78:90:AA", "[WPA][AES256]+[WPA-PSK-TKIP]", 2445 , -85));
+       // scanresults.add(new scanResult("Test Device with long name ABCDEFG", "12:34:56:78:90", 3, -88));
+       // scanresults.add(new scanResult("Test Wifi network with very long name ABCDEFG","12:34:56:78:90:AA", "[WPA][AES256]+[WPA-PSK-TKIP]", 2445 , -85));
 
         scanResultList = (ListView) findViewById(R.id.ScanList);
         listAdapter = new customAdapter(this, scanresults);
