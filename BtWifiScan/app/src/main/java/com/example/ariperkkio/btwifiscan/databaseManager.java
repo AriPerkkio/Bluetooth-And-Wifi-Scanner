@@ -152,14 +152,14 @@ public class databaseManager {
         final SQLiteStatement statement = db.compileStatement("SELECT MAX(_id) FROM Scans");
         return (int) statement.simpleQueryForLong();
     }
-/*
-    public Cursor getAll() throws SQLException {
-        Cursor mCursor = db.query(true, DATABASE_TABLE, new String[] {
-                KEY_ROWID, KEY_TASKNAME, KEY_TASKDESC, KEY_COMPSTATUS}, null, null, null, null, null, null);
+
+    public Cursor getBtResultsById(int rowId) throws SQLException {
+        Cursor mCursor = db.query(true, DATABASE_TABLE_BTRESULTS, new String[] {
+                btResults_ScanId, btResults_DevName, btResults_DevAddr, btResults_DevType, btResults_RSSI}, btResults_ScanId + "=" + rowId, null, null, null, null, null);
         if(mCursor!=null) {
             mCursor.moveToFirst();
         }
         return mCursor;
     }
-*/
+
 }
