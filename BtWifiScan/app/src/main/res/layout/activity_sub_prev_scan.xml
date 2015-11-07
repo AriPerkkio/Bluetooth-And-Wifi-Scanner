@@ -49,7 +49,7 @@
         android:background="@android:color/background_dark" />
 
     <EditText
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/subPrevScanName"
         android:text="scanName"
@@ -57,7 +57,8 @@
         android:textSize="28dp"
         android:singleLine="true"
         android:layout_alignBottom="@+id/subPrevScanRename"
-        android:layout_toEndOf="@+id/space32" />
+        android:layout_toStartOf="@+id/subPrevScanRename"
+        android:layout_toEndOf="@+id/space23" />
 
     <Button
         android:layout_width="wrap_content"
