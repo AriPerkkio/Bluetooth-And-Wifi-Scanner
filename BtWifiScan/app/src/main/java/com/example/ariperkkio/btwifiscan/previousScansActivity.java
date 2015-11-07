@@ -1,6 +1,7 @@
 package com.example.ariperkkio.btwifiscan;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.app.Activity;
@@ -9,20 +10,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.sql.SQLException;
 
-public class previousScansActivity extends Activity implements View.OnClickListener {
+public class previousScansActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener {
 
     private Button back;
     private ListView list;
     private prevScanCursorAdapter customCursorAdapter;
     private Cursor dataCursor;
     private databaseManager db = new databaseManager(this);
+    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +39,7 @@ public class previousScansActivity extends Activity implements View.OnClickListe
         back.setOnClickListener(this);
 
         list = (ListView) findViewById(R.id.previousscanlist);
+        list.setOnItemClickListener(this);
 
         try{
             db.open();
@@ -54,6 +59,18 @@ public class previousScansActivity extends Activity implements View.OnClickListe
                 finish();
                 break;
         }
+    }
+
+    public void onItemClick(AdapterView<?> adapterView, View v, int position, long arg)
+    {
+        Cursor selectedObject = (Cursor) (list.getItemAtPosition(position));
+
+        intent = new Intent(previousScansActivity.this, subPrevScanActivity.class); //Create intent for scanActivity
+        // Fill in details of selected scan
+        intent.putExtra("scanId", selectedObject.getInt(0));
+        intent.putExtra("scanName", selectedObject.getString(1));
+        intent.putExtra("scanDate", selectedObject.getString(2));
+        startActivity(intent); // Start subPrevScanActivity but keep this one alive
     }
 
     private class prevScanCursorAdapter extends CursorAdapter {
