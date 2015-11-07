@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.example.ariperkkio.btwifiscan.subPrevScanActivity"
+    android:background="@color/material_blue_grey_950">
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="20dp"
+        android:id="@+id/space30"
+        android:layout_below="@+id/subPrevScanName"
+        android:layout_alignParentEnd="true" />
+
+    <Space
+        android:layout_width="20dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/space32" />
+
+    <Space
+        android:layout_width="20dp"
+        android:layout_height="fill_parent"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/space35" />
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/space31" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        android:id="@+id/subPrevScanBack"
+        android:layout_above="@+id/space31"
+        android:layout_toEndOf="@+id/space32"
+        android:textColor="@color/mainColorCyan"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:background="@android:color/background_dark" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/subPrevScanName"
+        android:text="scanName"
+        android:textColor="@color/mainColorCyan"
+        android:textSize="28dp"
+        android:singleLine="true"
+        android:layout_alignBottom="@+id/subPrevScanRename"
+        android:layout_toEndOf="@+id/space32" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rename scan"
+        android:id="@+id/subPrevScanRename"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:textColor="@color/mainColorCyan"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:background="@android:color/background_dark" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Scan started: "
+        android:id="@+id/subPrevScanText1"
+        android:layout_below="@+id/space30"
+        android:layout_toEndOf="@+id/space32"
+        android:singleLine="true"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="YEAR-MM-DD HH-MIN-SEC"
+        android:id="@+id/subPrevScanDate"
+        android:layout_below="@+id/space30"
+        android:layout_toEndOf="@+id/subPrevScanText1"
+        android:textColor="@color/mainColorCyan"
+        android:singleLine="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Wifi networks found: "
+        android:id="@+id/subPrevScanText2"
+        android:layout_below="@+id/subPrevScanText1"
+        android:layout_toEndOf="@+id/space32"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="NumberOfWifiFound"
+        android:id="@+id/subPrevScanWifiNumber"
+        android:layout_below="@+id/subPrevScanDate"
+        android:layout_toEndOf="@+id/subPrevScanText2"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Bluetooth devices found: "
+        android:id="@+id/subPrevScanText3"
+        android:layout_below="@+id/subPrevScanText2"
+        android:layout_toEndOf="@+id/space32"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="NumberOfBtDevices"
+        android:id="@+id/subPrevScanBtNumber"
+        android:layout_below="@+id/subPrevScanWifiNumber"
+        android:layout_toEndOf="@+id/subPrevScanText3"
+        android:textColor="@color/mainColorCyan" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_below="@+id/subPrevScanText3"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/space33" />
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="20dp"
+        android:layout_above="@+id/subPrevScanBack"
+        android:layout_alignStart="@+id/subPrevScanBack"
+        android:id="@+id/space34" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/subPrevScanList"
+        android:layout_below="@+id/space33"
+        android:layout_above="@+id/space34"
+        android:layout_toEndOf="@+id/space32"
+        android:layout_toStartOf="@+id/space35" />
+</RelativeLayout>
