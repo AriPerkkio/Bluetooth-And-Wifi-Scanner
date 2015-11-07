@@ -154,7 +154,7 @@ public class databaseManager {
     }
 
     public Cursor getBtResultsById(int rowId) throws SQLException {
-        Cursor mCursor = db.query(true, DATABASE_TABLE_BTRESULTS, new String[] {
+        Cursor mCursor = db.query(true, DATABASE_TABLE_BTRESULTS, new String[]{
                 btResults_ScanId, btResults_DevName, btResults_DevAddr, btResults_DevType, btResults_RSSI}, btResults_ScanId + "=" + rowId, null, null, null, null, null);
         if(mCursor!=null) {
             mCursor.moveToFirst();
@@ -162,4 +162,12 @@ public class databaseManager {
         return mCursor;
     }
 
+    public Cursor getWifiResultsById(int rowId) throws SQLException {
+        Cursor mCursor = db.query(true, DATABASE_TABLE_WIFIRESULTS, new String[] {
+                wifiResults_ScanId, wifiResults_SSID, wifiResults_BSSID, wifiResults_Capabilities, wifiResults_Frequency, wifiResults_RSSI}, wifiResults_ScanId + "=" + rowId, null, null, null, null, null);
+        if(mCursor!=null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
 }
