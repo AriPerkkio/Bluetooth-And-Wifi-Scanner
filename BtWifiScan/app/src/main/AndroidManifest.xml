@@ -32,6 +32,10 @@
             android:name=".previousScansActivity"
             android:label="@string/title_activity_previous_scans" >
         </activity>
+        <activity
+            android:name=".subPrevScanActivity"
+            android:label="@string/title_activity_sub_prev_scan" >
+        </activity>
     </application>
 
 </manifest>
