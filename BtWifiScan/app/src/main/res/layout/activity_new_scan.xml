@@ -126,8 +126,7 @@
             android:layout_alignParentTop="true"
             android:maxLength="40"
             android:layout_toEndOf="@+id/ScanNameText"
-            android:layout_toStartOf="@+id/space12"
-            android:text="remove this later" />
+            android:layout_toStartOf="@+id/space12" />
 
         <Space
             android:layout_width="match_parent"
