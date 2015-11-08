@@ -170,4 +170,21 @@ public class databaseManager {
         }
         return mCursor;
     }
+
+    public int getNumberOfBtById(int rowId) throws SQLException  {
+        final SQLiteStatement statement = db.compileStatement("SELECT COUNT(*) FROM BluetoothResults WHERE _id = " + rowId);
+        return (int) statement.simpleQueryForLong();
+    }
+
+    public int getNumberOfWifiById(int rowId) throws SQLException {
+        final SQLiteStatement statement = db.compileStatement("SELECT COUNT(*) FROM WifiResults WHERE _id = "+rowId);
+        return (int) statement.simpleQueryForLong();
+    }
+
+    // This method is accessed by text input
+    public void renameScan(int rowId, String newName) throws SQLException {
+        ContentValues values = new ContentValues();
+        values.put(scans_ScanName, newName);
+        db.update(DATABASE_TABLE_SCANS, values, "_id="+rowId, null);
+    }
 }
