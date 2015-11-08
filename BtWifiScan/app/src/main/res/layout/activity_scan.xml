@@ -57,14 +57,15 @@
         android:layout_toEndOf="@+id/space19" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Error reading scan name"
         android:id="@+id/ScanName"
         android:layout_below="@+id/space16"
         android:layout_toEndOf="@+id/ScanNameText"
-        android:textColor="@color/mainColorCyan" />
+        android:textColor="@color/mainColorCyan"
+        android:singleLine="true" />
 
     <TextView
         android:layout_width="wrap_content"
