@@ -96,4 +96,5 @@ public class previousScansActivity extends Activity implements View.OnClickListe
             return cursorInflater.inflate(R.layout.previousscanrow, parent, false);
         }
     }// Close inner class
+
 }
