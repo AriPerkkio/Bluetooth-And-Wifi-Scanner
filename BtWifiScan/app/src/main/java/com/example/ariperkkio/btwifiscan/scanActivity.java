@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -23,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-public class scanActivity extends Activity implements View.OnClickListener{
+public class scanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener {
 
     // General widgets
     private Button endScan; // 'End scanning' button
@@ -33,6 +35,7 @@ public class scanActivity extends Activity implements View.OnClickListener{
     private TextView scanFoundBt;
     private TextView scanFoundWifi;
     private databaseManager database;
+    private Intent intent;
 
     // Bluetooth scanning objects
     private BluetoothAdapter btAdapter; //btAdapter for accessing bluetooth
@@ -127,6 +130,8 @@ public class scanActivity extends Activity implements View.OnClickListener{
        // scanresults.add(new scanResult("Test Wifi network with very long name ABCDEFG","12:34:56:78:90:AA", "[WPA][AES256]+[WPA-PSK-TKIP]", 2445 , -85));
 
         scanResultList = (ListView) findViewById(R.id.ScanList);
+        scanResultList.setOnItemClickListener(this);
+
         listAdapter = new customAdapter(this, scanresults);
         scanResultList.setAdapter(listAdapter);
     }
@@ -200,6 +205,29 @@ public class scanActivity extends Activity implements View.OnClickListener{
                     scanBt();
             break;
         }
+    }
+
+    public void onItemClick(AdapterView<?> adapterView, View v, int position, long arg)
+    {
+        scanResult selectedObject = (scanResult) (scanResultList.getItemAtPosition(position));
+        intent = new Intent(scanActivity.this, resultDetailsActivity.class);
+
+        // Fill in details of selected scan
+        intent.putExtra("technology", selectedObject.getTechnology());
+        intent.putExtra("btDevName", selectedObject.getBtDevName());
+        intent.putExtra("btDevAddr", selectedObject.getBtDevAddr());
+        intent.putExtra("btDevType", selectedObject.getBtDevType());
+        intent.putExtra("btRSSI", Integer.toString(selectedObject.getBtRSSI())); //resultDetailsActivity handles this as string
+
+        intent.putExtra("technology", selectedObject.getTechnology());
+        intent.putExtra("wifiSSID", selectedObject.getWifiSSID());
+        intent.putExtra("wifiBSSID", selectedObject.getWifiBSSID());
+        intent.putExtra("wifiCapabilities", selectedObject.getWifiCapabilities());
+        intent.putExtra("wifiFrequency", Integer.toString(selectedObject.getWifiFrequency())); //resultDetailsActivity handles this as string
+        intent.putExtra("wifiRSSI", Integer.toString(selectedObject.getWifiRSSI())); //resultDetailsActivity handles this as string
+
+        startActivity(intent); // Start resultDetailsActivity but keep this one alive
+
     }
 
     @Override
