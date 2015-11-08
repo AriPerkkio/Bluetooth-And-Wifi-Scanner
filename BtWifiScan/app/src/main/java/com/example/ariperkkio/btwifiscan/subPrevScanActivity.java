@@ -1,6 +1,7 @@
 package com.example.ariperkkio.btwifiscan;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
@@ -21,14 +23,16 @@ import android.widget.Toast;
 import java.sql.SQLException;
 import java.util.List;
 
-public class subPrevScanActivity extends Activity implements View.OnClickListener{
+public class subPrevScanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener {
 
     private Button back;
     private Button rename;
     private EditText scanNameField;
     private TextView scanDate;
     private TextView btNumber;
+    private int numberOfBtDevices = 0;
     private TextView wifiNumber;
+    private int numberOfWifiNetworks = 0;
     private int scanId;
     private ListView list;
     private databaseManager database;
@@ -36,6 +40,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
     private Cursor btCursor;
     private Cursor wifiCursor;
     private Cursor bothCursors;
+    private Intent intent;
 
 
     @Override
@@ -61,12 +66,15 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         scanId = getIntent().getExtras().getInt("scanId");
 
         list = (ListView) findViewById(R.id.subPrevScanList);
+        list.setOnItemClickListener(this);
 
         try{
             database.open();
             // BtResults and WifiResults have different columns - both need own cursors
             btCursor = database.getBtResultsById(scanId);
             wifiCursor = database.getWifiResultsById(scanId);
+            numberOfBtDevices = database.getNumberOfBtById(scanId);
+            numberOfWifiNetworks = database.getNumberOfWifiById(scanId);
             database.close();
         }catch (SQLException e) {
             Log.e("getBtResultsById: ", e.toString());
@@ -75,6 +83,8 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         bothCursors = new MergeCursor(new Cursor[] {btCursor, wifiCursor});
         listAdapter = new subPrevScanCursorAdapter(this, bothCursors, 0);
         list.setAdapter(listAdapter);
+        btNumber.setText(numberOfBtDevices + "");
+        wifiNumber.setText(numberOfWifiNetworks+"");
     }
 
     public void onClick(View v) {
@@ -84,10 +94,55 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
             break;
 
             case (R.id.subPrevScanRename):
-                // ToDo: sql update to specified row with new name
-                Toast.makeText(this, "rename", Toast.LENGTH_SHORT).show();
+
+                if(scanNameField.getText().toString().equals(""))
+                    Toast.makeText(this, "Scan name can't be empty.", Toast.LENGTH_SHORT).show();
+                else if(scanNameField.getText().toString().equals(getIntent().getExtras().getString("scanName")))
+                    Toast.makeText(this, "Insert new scan name first.", Toast.LENGTH_SHORT).show();
+                else {
+                    try {
+                        database.open();
+                        database.renameScan(scanId, scanNameField.getText().toString());
+                        database.close();
+                    } catch (SQLException e) {
+                        Log.e("getBtResultsById: ", e.toString());
+                    }
+                    Toast.makeText(this, getIntent().getExtras().getString("scanName")+ " renamed to " +scanNameField.getText().toString(), Toast.LENGTH_SHORT).show();
+                    // Temporary work-around: Close this activity and start previous one again to refresh its table
+                    Intent refresh = new Intent(this, previousScansActivity.class);
+                    startActivity(refresh);
+                    this.finish(); //
+                }
             break;
         }
+    }
+
+    public void onItemClick(AdapterView<?> adapterView, View v, int position, long arg)
+    {
+        Cursor selectedObject = (Cursor) (list.getItemAtPosition(position));
+        intent = new Intent(subPrevScanActivity.this, resultDetailsActivity.class);
+
+        // Fill in details of selected scan
+        // Bt has 5 columns, wifi has 6
+        // Using technology to id which attributes to getExtra
+        if(selectedObject.getColumnCount()==5) {
+            intent.putExtra("technology", "Bluetooth");
+            intent.putExtra("btDevName", selectedObject.getString(1));
+            intent.putExtra("btDevAddr", selectedObject.getString(2));
+            intent.putExtra("btDevType", selectedObject.getString(3));
+            intent.putExtra("btRSSI", selectedObject.getString(4));
+        }
+
+        if(selectedObject.getColumnCount()==6) {
+            intent.putExtra("technology", "Wifi");
+            intent.putExtra("wifiSSID", selectedObject.getString(1));
+            intent.putExtra("wifiBSSID", selectedObject.getString(2));
+            intent.putExtra("wifiCapabilities", selectedObject.getString(3));
+            intent.putExtra("wifiFrequency", selectedObject.getString(4));
+            intent.putExtra("wifiRSSI", selectedObject.getString(5));
+        }
+        startActivity(intent); // Start resultDetailsActivity but keep this one alive
+
     }
 
     // Custom Cursor adapter to handle results from database
@@ -115,7 +170,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                 fieldTwo.setText("");
                 fieldThree.setText(cursor.getString(2));
                 fieldFour.setText(cursor.getString(3));
-                fieldFive.setText("Count: " + cursor.getColumnCount());
+                fieldFive.setText("");
                 if (cursor.getString(4).equals("0")) // btRSSI is 0 when user unchecks it from newScanActivity
                     fieldSix.setText("");
                 else
