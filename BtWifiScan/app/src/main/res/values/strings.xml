@@ -4,4 +4,5 @@
     <string name="title_activity_scan">scanActivity</string>
     <string name="title_activity_previous_scans">previousScansActivity</string>
     <string name="title_activity_sub_prev_scan">subPrevScanActivity</string>
+    <string name="title_activity_result_details">resultDetailsActivity</string>
 </resources>
