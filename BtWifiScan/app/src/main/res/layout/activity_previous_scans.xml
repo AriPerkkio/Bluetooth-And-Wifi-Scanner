@@ -30,7 +30,7 @@
         android:layout_centerHorizontal="true"
         android:textColor="@color/mainColorCyan"
         android:textIsSelectable="false"
-        android:textSize="28dp" />
+        android:textSize="32dp" />
 
     <Space
         android:layout_width="match_parent"
