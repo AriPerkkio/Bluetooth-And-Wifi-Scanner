@@ -12,15 +12,17 @@
         android:background="@color/material_blue_grey_900">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Scan name"
             android:id="@+id/prevscanrowName"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
             android:textColor="@color/mainColorCyan"
-            android:textSize="28dp" />
+            android:textSize="28dp"
+            android:textAlignment="center"
+            android:layout_toStartOf="@+id/space48"
+            android:layout_toEndOf="@+id/prevscanrowId" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -53,6 +55,13 @@
             android:layout_alignParentStart="true"
             android:id="@+id/space123"
             android:background="@color/material_blue_grey_950" />
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/space123"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/space48" />
 
     </RelativeLayout>
 
