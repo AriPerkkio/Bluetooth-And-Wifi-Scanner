@@ -66,7 +66,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         startScan.setOnClickListener(this);
         scanName = (EditText) findViewById(R.id.ScanName);
         sampleRate = (NumberPicker) findViewById(R.id.newScanRateNumber);
-        sampleRate.setMinValue(30);
+        sampleRate.setMinValue(15); //Bt discovery timeouts after 12sec
         sampleRate.setMaxValue(900);
 
         // Widgets for Bluetooth
