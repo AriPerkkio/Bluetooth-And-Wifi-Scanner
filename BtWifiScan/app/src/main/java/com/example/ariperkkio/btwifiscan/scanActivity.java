@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
@@ -36,6 +37,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private TextView scanFoundWifi;
     private databaseManager database;
     private Intent intent;
+    private scanWithSampleRate backgroundScanner;
 
     // Bluetooth scanning objects
     private BluetoothAdapter btAdapter; //btAdapter for accessing bluetooth
@@ -126,14 +128,15 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         database = new databaseManager(this);
 
         scanresults = new ArrayList<scanResult>();
-       // scanresults.add(new scanResult("Test Device with long name ABCDEFG", "12:34:56:78:90", 3, -88));
-       // scanresults.add(new scanResult("Test Wifi network with very long name ABCDEFG","12:34:56:78:90:AA", "[WPA][AES256]+[WPA-PSK-TKIP]", 2445 , -85));
 
         scanResultList = (ListView) findViewById(R.id.ScanList);
         scanResultList.setOnItemClickListener(this);
 
         listAdapter = new customAdapter(this, scanresults);
         scanResultList.setAdapter(listAdapter);
+
+        backgroundScanner = new scanWithSampleRate();
+        backgroundScanner.execute(sampleRate);
     }
 
     // BroadcastReceiver to receive data from btDiscrovery
@@ -175,8 +178,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     public void onClick(View v) {
         switch(v.getId()) {
             case (R.id.scanEnd): // End scan button
-                // Todo: Don't finish activity. Hide Button and bring Save / Don't save visible.
-                // Todo  Enable onItemClickListener (may require flag to see if scanning ended)
+                backgroundScanner.cancel(true);
                 save.setVisibility(View.VISIBLE);
                 dontSave.setVisibility(View.VISIBLE);
                 endScan.setVisibility(View.GONE);
@@ -198,11 +200,9 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 finish();
             break;
 
-            case (R.id.newScanManual): //Temp button, will be replaced to be set by timer
-                if(wifiStatus)
-                    scanWifi();
-                if(btStatus)
-                    scanBt();
+            case (R.id.newScanManual): //Temp button, updates UI at the moment.
+                scanFoundWifi.setText(numberOfWifiNetworks + "");
+                listAdapter.notifyDataSetChanged();
             break;
         }
     }
@@ -238,7 +238,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             unregisterReceiver(mReceiver);
     }
 
-    private void scanWifi() {
+    public void scanWifi() {
 
         wifiManager.startScan();
         wifiScanResults = wifiManager.getScanResults();
@@ -268,10 +268,8 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 // Create object and add it to list
                 scanresults.add(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
                 numberOfWifiNetworks++;
-                scanFoundWifi.setText(numberOfWifiNetworks + "");
             }
         }
-        listAdapter.notifyDataSetChanged(); // tell adapter to update itself
     }
 
     private void scanBt() {
@@ -300,7 +298,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     public void saveResults(List<scanResult> resultList) {
 
         database.insertIntoScans(getIntent().getExtras().getString("scanName"));
-        int scanId = database.getHighestId();
+        int scanId = database.getHighestId(); // Get latest scanId
 
         for(int i=0; i < resultList.size(); i++) {
             if (resultList.get(i).getTechnology().equals("Bluetooth"))
@@ -310,8 +308,29 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                     database.insertIntoWifiResults(scanId, resultList.get(i).getWifiSSID(),
                             resultList.get(i).getWifiBSSID(), resultList.get(i).getWifiCapabilities(),
                             resultList.get(i).getWifiFrequency(), resultList.get(i).getWifiRSSI());
-
             }
+        }
+    }
+
+    // ToDo: Work-around for updating UI when wifi scanning
+    // Background scanning
+    private class scanWithSampleRate extends AsyncTask <Integer, Integer, Void> {
+
+        protected Void doInBackground(Integer... integers) {
+            long sampleRate = integers[0]*1000; // Convert samplerate from seconds to ms
+
+            while(!isCancelled()) { // as long as called .cancel(true)
+                if(btStatus)
+                    scanBt();
+                if(wifiStatus)
+                    scanWifi();
+                try {
+                    Thread.sleep(sampleRate); // Wait for samplerate
+                } catch (InterruptedException e) {
+                    Log.e("thread.sleep", e.toString());
+                }
+            }
+            return null;
         }
     }
 }
