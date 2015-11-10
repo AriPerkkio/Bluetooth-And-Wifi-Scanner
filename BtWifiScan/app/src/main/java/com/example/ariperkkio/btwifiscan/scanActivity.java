@@ -104,14 +104,14 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         wifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
 
         // Get options for Bluetooth scanning
-        if(btStatus = getIntent().getExtras().getBoolean("btStatus")) {
+        if (btStatus = getIntent().getExtras().getBoolean("btStatus")) {
             btDevName = getIntent().getExtras().getBoolean("btDevName");
             btDevAddr = getIntent().getExtras().getBoolean("btDevAddr");
             btDevType = getIntent().getExtras().getBoolean("btDevType");
             btRSSI = getIntent().getExtras().getBoolean("btRSSI");
         }
         // Get options for Wifi scanning
-        if(wifiStatus = getIntent().getExtras().getBoolean("wifiStatus")) {
+        if (wifiStatus = getIntent().getExtras().getBoolean("wifiStatus")) {
             wifiSSID = getIntent().getExtras().getBoolean("wifiSSID");
             wifiBSSID = getIntent().getExtras().getBoolean("wifiBSSID");
             wifiCapabilities = getIntent().getExtras().getBoolean("wifiCapabilities");
@@ -130,13 +130,13 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         scanresults = new ArrayList<scanResult>();
 
         scanResultList = (ListView) findViewById(R.id.ScanList);
-        scanResultList.setOnItemClickListener(this);
+        scanResultList.setOnItemClickListener(scanActivity.this);
 
         listAdapter = new customAdapter(this, scanresults);
         scanResultList.setAdapter(listAdapter);
 
         backgroundScanner = new scanWithSampleRate();
-        backgroundScanner.execute(sampleRate);
+        backgroundScanner.execute(sampleRate); // Start scanning in background. New sample every samplerate time
     }
 
     // BroadcastReceiver to receive data from btDiscrovery
@@ -154,20 +154,20 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 int type = 4; // type 4 is initialized as "" in scanResult
 
                 // Check options and get requested attributes. By ignoring one, it keeps its default value initialized above
-                if(btDevName)
+                if (btDevName)
                     deviceName = btDevice.getName();
-                if(btDevAddr)
+                if (btDevAddr)
                     address = btDevice.getAddress();
-                if(btDevType)
+                if (btDevType)
                     type = btDevice.getType();
-                if(!btRSSI) // if not requested attribute, set it to zero. Otherwise keep its value
+                if (!btRSSI) // if not requested attribute, set it to zero. Otherwise keep its value
                     btDeviceRSSI = 0;
 
                 // Check duplicates based on address
-                if(!checkIfScanned(btDevice.getAddress())) {
+                if (!checkIfScanned(btDevice.getAddress())) {
                     // Create new scanResult with correct constructor, add object to List
                     scanresults.add(new scanResult(deviceName, address, type, btDeviceRSSI));
-                    listAdapter.notifyDataSetChanged(); // Tell adapter to refresh itself
+                    listAdapter.notifyDataSetChanged();
                     numberOfBtDevices++; // Increase number of devices
                     scanFoundBt.setText(numberOfBtDevices + ""); // Update text with new number of devices
                 }
@@ -176,39 +176,39 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     }; //End BroadcastReceiver
 
     public void onClick(View v) {
-        switch(v.getId()) {
+        switch (v.getId()) {
             case (R.id.scanEnd): // End scan button
                 backgroundScanner.cancel(true);
                 save.setVisibility(View.VISIBLE);
                 dontSave.setVisibility(View.VISIBLE);
                 endScan.setVisibility(View.GONE);
                 btAdapter.cancelDiscovery(); // This may be temporary solution, fix by threading scan
-            break;
+                break;
 
             case (R.id.scanSave):
                 try {
                     database.open();
                     saveResults(scanresults);
                     database.close();
-                }catch (SQLException e) {
+                } catch (SQLException e) {
                     Log.e("InsertIntoScans", e.toString());
                 }
                 finish();
-            break;
+                break;
 
             case (R.id.scanDontSave):
                 finish();
-            break;
+                break;
 
             case (R.id.newScanManual): //Temp button, updates UI at the moment.
                 scanFoundWifi.setText(numberOfWifiNetworks + "");
+                scanFoundBt.setText(numberOfBtDevices + ""); // Update text with new number of devices
                 listAdapter.notifyDataSetChanged();
-            break;
+                break;
         }
     }
 
-    public void onItemClick(AdapterView<?> adapterView, View v, int position, long arg)
-    {
+    public void onItemClick(AdapterView<?> adapterView, View v, int position, long arg) {
         scanResult selectedObject = (scanResult) (scanResultList.getItemAtPosition(position));
         intent = new Intent(scanActivity.this, resultDetailsActivity.class);
 
@@ -227,17 +227,17 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         intent.putExtra("wifiRSSI", Integer.toString(selectedObject.getWifiRSSI())); //resultDetailsActivity handles this as string
 
         startActivity(intent); // Start resultDetailsActivity but keep this one alive
-
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         // Unregister broadcast receiver from receiving bt discoveries
-        if(mReceiverRegistered)// my work-around for checking if broadcast receiver is registered
+        if (mReceiverRegistered)// my work-around for checking if broadcast receiver is registered
             unregisterReceiver(mReceiver);
     }
 
+    // Todo: remove this one after testing ok
     public void scanWifi() {
 
         wifiManager.startScan();
@@ -253,18 +253,18 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             int RSSI = 0;
 
             // Check options and get requested attributes. By ignoring one, it keeps its default value initialized above
-            if(wifiSSID)
+            if (wifiSSID)
                 SSID = wifiScanResults.get(i).SSID;
-            if(wifiBSSID)
+            if (wifiBSSID)
                 BSSID = wifiScanResults.get(i).BSSID;
-            if(wifiCapabilities)
+            if (wifiCapabilities)
                 capabilities = wifiScanResults.get(i).capabilities;
-            if(wifiFrequency)
+            if (wifiFrequency)
                 frequency = wifiScanResults.get(i).frequency;
-            if(wifiRSSI)
+            if (wifiRSSI)
                 RSSI = wifiScanResults.get(i).level;
             // Check duplicates based on address
-            if(!checkIfScanned(wifiScanResults.get(i).BSSID )) {
+            if (!checkIfScanned(wifiScanResults.get(i).BSSID)) {
                 // Create object and add it to list
                 scanresults.add(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
                 numberOfWifiNetworks++;
@@ -273,7 +273,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     }
 
     private void scanBt() {
-        if(btAdapter.isDiscovering()) //This may not be needed when timer starts scanning
+        if (btAdapter.isDiscovering()) //This may not be needed when timer starts scanning
             btAdapter.cancelDiscovery();
         else {
             btAdapter.startDiscovery();
@@ -284,12 +284,12 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     // Filter out devices which have already been scanned
     // NOTE: Ignoring a device is only based on address. When scanning without address there will be duplicates.
     public boolean checkIfScanned(String address) {
-        for(int i = 0; i<scanresults.size(); i++) {
-            if(scanresults.get(i).getTechnology().equals("Bluetooth"))
-                if(scanresults.get(i).getBtDevAddr().equals(address))
+        for (int i = 0; i < scanresults.size(); i++) {
+            if (scanresults.get(i).getTechnology().equals("Bluetooth"))
+                if (scanresults.get(i).getBtDevAddr().equals(address))
                     return true;
-            if(scanresults.get(i).getTechnology().equals("Wifi"))
-                if(scanresults.get(i).getWifiBSSID().equals(address))
+            if (scanresults.get(i).getTechnology().equals("Wifi"))
+                if (scanresults.get(i).getWifiBSSID().equals(address))
                     return true;
         }
         return false;
@@ -297,33 +297,67 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
     public void saveResults(List<scanResult> resultList) {
 
-        database.insertIntoScans(getIntent().getExtras().getString("scanName"));
+        database.insertIntoScans(getIntent().getExtras().getString("scanName")); // Creates new scan with auto incremented scanId -> highest Id is latest scan
         int scanId = database.getHighestId(); // Get latest scanId
 
-        for(int i=0; i < resultList.size(); i++) {
+        for (int i = 0; i < resultList.size(); i++) {
             if (resultList.get(i).getTechnology().equals("Bluetooth"))
                 database.insertIntoBtResults(scanId, resultList.get(i).getBtDevName(),
                         resultList.get(i).getBtDevAddr(), resultList.get(i).getBtDevType(), resultList.get(i).getBtRSSI());
             if (resultList.get(i).getTechnology().equals("Wifi")) {
-                    database.insertIntoWifiResults(scanId, resultList.get(i).getWifiSSID(),
-                            resultList.get(i).getWifiBSSID(), resultList.get(i).getWifiCapabilities(),
-                            resultList.get(i).getWifiFrequency(), resultList.get(i).getWifiRSSI());
+                database.insertIntoWifiResults(scanId, resultList.get(i).getWifiSSID(),
+                        resultList.get(i).getWifiBSSID(), resultList.get(i).getWifiCapabilities(),
+                        resultList.get(i).getWifiFrequency(), resultList.get(i).getWifiRSSI());
             }
         }
     }
 
-    // ToDo: Work-around for updating UI when wifi scanning
+    // ToDo: Work-around for updating UI when scanning
+    // Working: Wifi scanning in asynctask, when new network found, call publishProgress
+    // Bt scanning started in asynctask, listAdapterUpdate when broadcaster receives action
     // Background scanning
-    private class scanWithSampleRate extends AsyncTask <Integer, Integer, Void> {
+    private class scanWithSampleRate extends AsyncTask<Integer, Integer, Void> {
 
+        // Loop scanning
         protected Void doInBackground(Integer... integers) {
-            long sampleRate = integers[0]*1000; // Convert samplerate from seconds to ms
+            long sampleRate = integers[0] * 1000; // Convert samplerate from seconds to ms
 
-            while(!isCancelled()) { // as long as called .cancel(true)
-                if(btStatus)
+            while (!isCancelled()) { // as long as called .cancel(true)
+                if (btStatus)
                     scanBt();
-                if(wifiStatus)
-                    scanWifi();
+                if (wifiStatus) {
+                    wifiManager.startScan();
+                    wifiScanResults = wifiManager.getScanResults();
+
+                    for (int i = 0; i < wifiScanResults.size(); i++) {
+                        // These attributes are set to default at every for loop
+                        String SSID = "";
+                        String BSSID = "";
+                        String capabilities = "";
+                        int frequency = 0;
+                        int RSSI = 0;
+
+                        // Check options and get requested attributes. By ignoring one, it keeps its default value initialized above
+                        if (wifiSSID)
+                            SSID = wifiScanResults.get(i).SSID;
+                        if (wifiBSSID)
+                            BSSID = wifiScanResults.get(i).BSSID;
+                        if (wifiCapabilities)
+                            capabilities = wifiScanResults.get(i).capabilities;
+                        if (wifiFrequency)
+                            frequency = wifiScanResults.get(i).frequency;
+                        if (wifiRSSI)
+                            RSSI = wifiScanResults.get(i).level;
+                        // Check duplicates based on address
+                        if (!checkIfScanned(wifiScanResults.get(i).BSSID)) {
+                            // Create object and add it to list
+                            numberOfWifiNetworks++;
+                            scanresults.add(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
+                            publishProgress(); //Notify adapter and texField
+                        }
+                    }
+                }
+
                 try {
                     Thread.sleep(sampleRate); // Wait for samplerate
                 } catch (InterruptedException e) {
@@ -332,5 +366,11 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             }
             return null;
         }
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            listAdapter.notifyDataSetChanged();
+            scanFoundWifi.setText(numberOfWifiNetworks + "");
+        }
     }
 }
+
