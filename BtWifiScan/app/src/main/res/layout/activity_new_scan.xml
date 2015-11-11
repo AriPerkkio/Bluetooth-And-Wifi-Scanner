@@ -92,7 +92,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/material_blue_grey_900"
         android:id="@+id/relativeLayout"
         android:layout_above="@+id/space4"
@@ -148,9 +148,9 @@
             android:layout_gravity="right|left"
             android:paddingTop="30dp"
             android:paddingBottom="30dp"
-            android:layout_marginEnd="29dp"
             android:layout_above="@+id/space7"
-            android:layout_alignEnd="@+id/space7" />
+            android:layout_toEndOf="@+id/space10"
+            android:layout_marginStart="40dp" />
 
         <Space
             android:layout_width="match_parent"
@@ -191,7 +191,7 @@
             android:layout_toStartOf="@+id/space10"
             android:background="@color/material_blue_grey_800"
             android:id="@+id/relativeLayout2"
-            android:layout_above="@+id/space15"
+            android:layout_above="@+id/newScanRateNumber"
             android:layout_below="@+id/space9">
 
             <Space
@@ -267,12 +267,6 @@
                 android:layout_below="@+id/newScanDevTypChk"
                 android:layout_alignStart="@+id/newScanDevTypChk" />
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:id="@+id/space8"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true" />
         </RelativeLayout>
 
         <Space
@@ -386,7 +380,10 @@
             android:layout_height="wrap_content"
             android:id="@+id/newScanRateNumber"
             android:layout_above="@+id/space6"
-            android:layout_toEndOf="@+id/newScanRateText"/>
+            android:layout_toEndOf="@+id/newScanRateText"
+            android:layout_alignEnd="@+id/relativeLayout2"
+            android:layout_alignRight="@+id/newScanStartScan"
+            android:layout_toStartOf="@+id/newScanStartScan" />
 
         <Space
             android:layout_width="match_parent"
@@ -397,10 +394,10 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_above="@+id/newScanRateText"
-            android:layout_toStartOf="@+id/space10"
-            android:id="@+id/space15" />
+            android:layout_height="wrap_content"
+            android:id="@+id/space15"
+            android:layout_above="@+id/newScanRateNumber"
+            android:layout_alignParentStart="true" />
 
     </RelativeLayout>
 
