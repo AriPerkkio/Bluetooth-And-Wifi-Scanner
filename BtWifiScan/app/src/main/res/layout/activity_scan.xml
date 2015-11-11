@@ -31,14 +31,6 @@
         android:layout_above="@+id/space17"
         android:layout_centerHorizontal="true" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="temp button"
-        android:id="@+id/newScanManual"
-        android:layout_above="@+id/ScanName"
-        android:layout_alignEnd="@+id/space16" />
-
     <Space
         android:layout_width="fill_parent"
         android:layout_height="20dp"
@@ -95,10 +87,10 @@
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:layout_above="@+id/scanEnd"
+        android:layout_height="70dp"
         android:layout_alignParentStart="true"
-        android:id="@+id/space18" />
+        android:id="@+id/space18"
+        android:layout_above="@+id/space17" />
 
     <Space
         android:layout_width="fill_parent"
@@ -171,4 +163,5 @@
         android:layout_toStartOf="@+id/space21"
         android:textColor="@color/mainColorCyan"
         android:background="@android:color/background_dark" />
+
 </RelativeLayout>
