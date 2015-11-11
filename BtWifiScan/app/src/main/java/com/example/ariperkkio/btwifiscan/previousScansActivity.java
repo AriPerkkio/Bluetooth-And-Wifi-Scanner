@@ -56,7 +56,11 @@ public class previousScansActivity extends Activity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case (R.id.previousScansBack):
-                finish();
+                // If there has been renaming of a scan, it means there is another previousScanBack activity
+                // in background. Solution: Kill all activities when clicking back, open mainActivity.
+                intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
                 break;
         }
     }
