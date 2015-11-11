@@ -1,5 +1,6 @@
 package com.example.ariperkkio.btwifiscan;
 
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -18,6 +19,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +40,8 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private databaseManager database;
     private Intent intent;
     private scanWithSampleRate backgroundScanner;
+    private saveResultsBackground backgroundSaver;
+    private ProgressDialog progressDialog;
 
     // Bluetooth scanning objects
     private BluetoothAdapter btAdapter; //btAdapter for accessing bluetooth
@@ -123,14 +127,21 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
         scanresults = new ArrayList<scanResult>();
 
-        //for(int i=0; i<500;i++)
-            //scanresults.add(new scanResult("SSID", "BSSID "+i, "Capabilities", 10, 100));
+        //for(int i=0; i<3000;i++)
+        //    scanresults.add(new scanResult("SSID", "BSSID "+i, "Capabilities", i*10, 100+i));
 
         scanResultList = (ListView) findViewById(R.id.ScanList);
         scanResultList.setOnItemClickListener(scanActivity.this);
 
         listAdapter = new customAdapter(this, scanresults);
         scanResultList.setAdapter(listAdapter);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Saving results");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setIndeterminate(false); //Set progress updates visible
+
+        backgroundSaver = new saveResultsBackground();
 
         backgroundScanner = new scanWithSampleRate();
         backgroundScanner.execute(sampleRate); // Start scanning in background. New sample every samplerate time
@@ -185,25 +196,17 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 dontSave.setVisibility(View.VISIBLE);
                 endScan.setVisibility(View.GONE);
                 btAdapter.cancelDiscovery(); // This may be temporary solution, fix by threading scan
-                break;
+            break;
 
             case (R.id.scanSave):
-                Toast.makeText(this, "Saving - please wait.", Toast.LENGTH_LONG).show();
-                try {
-                    database.open();
-                    saveResults(scanresults);
-                    database.close();
-                } catch (SQLException e) {
-                    Log.e("InsertIntoScans", e.toString());
-                }
-                finish();
-                break;
+                backgroundSaver.execute(scanresults);
+            break;
 
             case (R.id.scanDontSave):
                 intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
-                break;
+            break;
         }
     }
 
@@ -236,43 +239,9 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             unregisterReceiver(mReceiver);
     }
 
-    // Todo: remove this one after testing ok
-    public void scanWifi() {
-
-        wifiManager.startScan();
-        wifiScanResults = wifiManager.getScanResults();
-
-        for (int i = 0; i < wifiScanResults.size(); i++) {
-
-            // These attributes are set to default at every for loop
-            String SSID = "";
-            String BSSID = "";
-            String capabilities = "";
-            int frequency = 0;
-            int RSSI = 0;
-
-            // Check options and get requested attributes. By ignoring one, it keeps its default value initialized above
-            if (wifiSSID)
-                SSID = wifiScanResults.get(i).SSID;
-            if (wifiBSSID)
-                BSSID = wifiScanResults.get(i).BSSID;
-            if (wifiCapabilities)
-                capabilities = wifiScanResults.get(i).capabilities;
-            if (wifiFrequency)
-                frequency = wifiScanResults.get(i).frequency;
-            if (wifiRSSI)
-                RSSI = wifiScanResults.get(i).level;
-            // Check duplicates based on address
-            if (!checkIfScanned(wifiScanResults.get(i).BSSID)) {
-                // Create object and add it to list
-                scanresults.add(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
-                numberOfWifiNetworks++;
-            }
-        }
-    }
-
+    // This is called from AsyncTask
     private void scanBt() {
-        if (btAdapter.isDiscovering()) //This may not be needed when timer starts scanning
+        if (btAdapter.isDiscovering()) //Should never occur since min sampleRate is over 12 sec
             btAdapter.cancelDiscovery();
         else {
             btAdapter.startDiscovery();
@@ -294,29 +263,11 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         return false;
     }
 
-    public void saveResults(List<scanResult> resultList) {
-
-        database.insertIntoScans(getIntent().getExtras().getString("scanName")); // Creates new scan with auto incremented scanId -> highest Id is latest scan
-        int scanId = database.getHighestId(); // Get latest scanId
-
-        for (int i = 0; i < resultList.size(); i++) {
-            if (resultList.get(i).getTechnology().equals("Bluetooth"))
-                database.insertIntoBtResults(scanId, resultList.get(i).getBtDevName(),
-                        resultList.get(i).getBtDevAddr(), resultList.get(i).getBtDevType(), resultList.get(i).getBtRSSI());
-            if (resultList.get(i).getTechnology().equals("Wifi")) {
-                database.insertIntoWifiResults(scanId, resultList.get(i).getWifiSSID(),
-                        resultList.get(i).getWifiBSSID(), resultList.get(i).getWifiCapabilities(),
-                        resultList.get(i).getWifiFrequency(), resultList.get(i).getWifiRSSI());
-            }
-        }
-    }
-
-    // ToDo: Work-around for updating UI when scanning
-    // Working: Wifi scanning in asynctask, when new network found, call publishProgress
-    // Bt scanning started in asynctask, listAdapterUpdate when broadcaster receives action
-    // 11.11.15: New solution: Increase resultList only from UI thread by passing new scanned wifi
-    // network by publishProgress(scanResult).
     // Background scanning
+    // Wifi scanning runs on AsyncTask, Bt scanning is only started from here
+    // When new wifi is found publishProgress is used to pass scanResult object to UI thread
+    // where it is added to list (and adapter notified).
+    // BtDevice discoveries are still done by broadcast receiver
     private class scanWithSampleRate extends AsyncTask<Integer, scanResult, Void> {
 
         // Loop scanning
@@ -324,14 +275,14 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             long sampleRate = integers[0] * 1000; // Convert samplerate from seconds to ms
 
             while (!isCancelled()) { // as long as called .cancel(true)
-                if (btStatus)
-                    scanBt();
-                if (wifiStatus) {
-                    wifiManager.startScan();
-                    wifiScanResults = wifiManager.getScanResults();
-
+                if (btStatus) // Check if bt option was selected in newSCanActivity
+                    scanBt(); // Starts discovery
+                if (wifiStatus) { // Check if wifi option was selected in newSCanActivity
+                    wifiManager.startScan(); // Scans wifi networks. Scanning is over immediately
+                    wifiScanResults = wifiManager.getScanResults(); // Get results from previous wifi scan
+                    // Loop through all the results
                     for (int i = 0; i < wifiScanResults.size(); i++) {
-                        // These attributes are set to default at every for loop
+                        // These values are set for a scanResult if specific attribute wasn't selected to be scanned
                         String SSID = "";
                         String BSSID = "";
                         String capabilities = "";
@@ -351,34 +302,69 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                             RSSI = wifiScanResults.get(i).level;
                         // Check duplicates based on address
                         if (!checkIfScanned(wifiScanResults.get(i).BSSID)) {
-                            Log.e("BtWifi", "Adding new wifiNetwork");
-                            // Create object and add it to list
                             numberOfWifiNetworks++;
-                            //scanresults.add(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
-                            //publishProgress(); //Notify adapter and texField
+                            // Pass new scanResult wifiNetwork to UI thread
                             publishProgress(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
                         }
                     }
-                }
-
+                } //Scanning done
                 try {
-                    Thread.sleep(sampleRate); // Wait for samplerate
+                    Thread.sleep(sampleRate); // Stand-by for sampleRate (s)
                 } catch (InterruptedException e) {
-                    Log.e("thread.sleep", e.toString());
+                    Log.e("SampleRateSleep: ", e.toString());
                 }
             }
             return null;
         }
-        @Override
+        @Override // Runs on UI thread. All View updates must be done here.
         protected void onProgressUpdate(scanResult... values) {
-            try{
                 scanresults.add(values[0]); //Add object to list in UI thread
-                listAdapter.notifyDataSetChanged();
-                scanFoundWifi.setText(numberOfWifiNetworks + "");
-            } catch (IllegalStateException error){
-                Log.e("scan.onProgressUpdate: ", error.toString());
-            }
+                listAdapter.notifyDataSetChanged(); // Data changed in scanresults - refresh list
+                scanFoundWifi.setText(numberOfWifiNetworks + ""); // Update number of wifiNetworks found
         }
+    } // Scanning AsyncTask close
+
+    // ToDo: When saving, rest of UI should not response to clicks
+    // Background result saving with progress bar
+    private class saveResultsBackground extends AsyncTask<List<scanResult>, Integer, Void> {
+
+        protected void onPreExecute() {
+            progressDialog.setMax(scanresults.size());
+            progressDialog.show();
+        }
+
+        protected void onPostExecute(Void value) {
+            finish();
+        }
+
+        protected Void doInBackground(List<scanResult>... resultList) {
+            try {
+                database.open();
+                database.insertIntoScans(getIntent().getExtras().getString("scanName")); // Creates new scan with auto incremented scanId -> highest Id is latest scan
+                int scanId = database.getHighestId(); // Get latest scanId
+
+                for (int i = 0; i < resultList[0].size(); i++) {
+                    if (resultList[0].get(i).getTechnology().equals("Bluetooth"))
+                        database.insertIntoBtResults(scanId, resultList[0].get(i).getBtDevName(),
+                                resultList[0].get(i).getBtDevAddr(), resultList[0].get(i).getBtDevType(), resultList[0].get(i).getBtRSSI());
+                    if (resultList[0].get(i).getTechnology().equals("Wifi")) {
+                        database.insertIntoWifiResults(scanId, resultList[0].get(i).getWifiSSID(),
+                                resultList[0].get(i).getWifiBSSID(), resultList[0].get(i).getWifiCapabilities(),
+                                resultList[0].get(i).getWifiFrequency(), resultList[0].get(i).getWifiRSSI());
+                    }
+                    publishProgress(i); //Update current progress
+                }
+                database.close();
+            } catch (SQLException e) {
+                Log.e("InsertIntoScans", e.toString());
+            }
+            return null;
+        }
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            progressDialog.setProgress(progress[0]);
+        }
+
     }
 }
 
