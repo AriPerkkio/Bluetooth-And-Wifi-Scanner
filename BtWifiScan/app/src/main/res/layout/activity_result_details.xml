@@ -20,10 +20,11 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
+        android:layout_height="match_parent"
         android:layout_above="@+id/resultDetailsBack"
         android:layout_centerHorizontal="true"
-        android:id="@+id/space39" />
+        android:id="@+id/space39"
+        android:layout_below="@+id/linearLayout5" />
 
     <Space
         android:layout_width="20dp"
