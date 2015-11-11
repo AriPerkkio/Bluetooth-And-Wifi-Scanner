@@ -109,6 +109,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                     }
                     Toast.makeText(this, getIntent().getExtras().getString("scanName")+ " renamed to " +scanNameField.getText().toString(), Toast.LENGTH_SHORT).show();
                     // Temporary work-around: Close this activity and start previous one again to refresh its table
+
                     Intent refresh = new Intent(this, previousScansActivity.class);
                     startActivity(refresh);
                     this.finish(); //
