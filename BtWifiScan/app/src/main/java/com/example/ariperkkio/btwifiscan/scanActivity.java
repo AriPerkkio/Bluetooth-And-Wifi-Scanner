@@ -70,9 +70,6 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private boolean wifiFrequency;
     private boolean wifiRSSI;
 
-    // Button for manual scanning, will be removed later
-    private Button manualButton;
-
     // List items
     private ListView scanResultList;
     private customAdapter listAdapter;
@@ -122,12 +119,12 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         scanName.setText(getIntent().getExtras().getString("scanName"));
         sampleRate = getIntent().getExtras().getInt("sampleRate");
 
-        manualButton = (Button) findViewById(R.id.newScanManual);
-        manualButton.setOnClickListener(this);
-
         database = new databaseManager(this);
 
         scanresults = new ArrayList<scanResult>();
+
+        //for(int i=0; i<500;i++)
+            //scanresults.add(new scanResult("SSID", "BSSID "+i, "Capabilities", 10, 100));
 
         scanResultList = (ListView) findViewById(R.id.ScanList);
         scanResultList.setOnItemClickListener(scanActivity.this);
@@ -165,11 +162,16 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
                 // Check duplicates based on address
                 if (!checkIfScanned(btDevice.getAddress())) {
+                    Log.e("BtADD", "Adding new BtDevice");
                     // Create new scanResult with correct constructor, add object to List
-                    scanresults.add(new scanResult(deviceName, address, type, btDeviceRSSI));
-                    listAdapter.notifyDataSetChanged();
-                    numberOfBtDevices++; // Increase number of devices
-                    scanFoundBt.setText(numberOfBtDevices + ""); // Update text with new number of devices
+                    try{
+                        scanresults.add(new scanResult(deviceName, address, type, btDeviceRSSI));
+                        listAdapter.notifyDataSetChanged();
+                        numberOfBtDevices++; // Increase number of devices
+                        scanFoundBt.setText(numberOfBtDevices + ""); // Update text with new number of devices
+                    } catch (IllegalStateException error){
+                        Log.e("Bluetooth add: ", error.toString());
+                    }
                 }
             }
         }
@@ -186,6 +188,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 break;
 
             case (R.id.scanSave):
+                Toast.makeText(this, "Saving - please wait.", Toast.LENGTH_LONG).show();
                 try {
                     database.open();
                     saveResults(scanresults);
@@ -197,13 +200,9 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 break;
 
             case (R.id.scanDontSave):
-                finish();
-                break;
-
-            case (R.id.newScanManual): //Temp button, updates UI at the moment.
-                scanFoundWifi.setText(numberOfWifiNetworks + "");
-                scanFoundBt.setText(numberOfBtDevices + ""); // Update text with new number of devices
-                listAdapter.notifyDataSetChanged();
+                intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
                 break;
         }
     }
@@ -315,8 +314,10 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     // ToDo: Work-around for updating UI when scanning
     // Working: Wifi scanning in asynctask, when new network found, call publishProgress
     // Bt scanning started in asynctask, listAdapterUpdate when broadcaster receives action
+    // 11.11.15: New solution: Increase resultList only from UI thread by passing new scanned wifi
+    // network by publishProgress(scanResult).
     // Background scanning
-    private class scanWithSampleRate extends AsyncTask<Integer, Integer, Void> {
+    private class scanWithSampleRate extends AsyncTask<Integer, scanResult, Void> {
 
         // Loop scanning
         protected Void doInBackground(Integer... integers) {
@@ -350,10 +351,12 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                             RSSI = wifiScanResults.get(i).level;
                         // Check duplicates based on address
                         if (!checkIfScanned(wifiScanResults.get(i).BSSID)) {
+                            Log.e("BtWifi", "Adding new wifiNetwork");
                             // Create object and add it to list
                             numberOfWifiNetworks++;
-                            scanresults.add(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
-                            publishProgress(); //Notify adapter and texField
+                            //scanresults.add(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
+                            //publishProgress(); //Notify adapter and texField
+                            publishProgress(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
                         }
                     }
                 }
@@ -367,9 +370,14 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             return null;
         }
         @Override
-        protected void onProgressUpdate(Integer... values) {
-            listAdapter.notifyDataSetChanged();
-            scanFoundWifi.setText(numberOfWifiNetworks + "");
+        protected void onProgressUpdate(scanResult... values) {
+            try{
+                scanresults.add(values[0]); //Add object to list in UI thread
+                listAdapter.notifyDataSetChanged();
+                scanFoundWifi.setText(numberOfWifiNetworks + "");
+            } catch (IllegalStateException error){
+                Log.e("scan.onProgressUpdate: ", error.toString());
+            }
         }
     }
 }
