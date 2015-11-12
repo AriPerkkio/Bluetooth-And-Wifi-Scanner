@@ -14,7 +14,7 @@ public class scanResult {
     public String btDevType;
     public int btRSSI;
 
-    // booleans to check options for wifi
+    // Wifi attributes
     public String wifiSSID;
     public String wifiBSSID;
     public String wifiCapabilities;
@@ -60,6 +60,8 @@ public class scanResult {
         this.wifiFrequency = wifiFrequency;
         this.wifiRSSI = wifiRSSI;
     }
+
+    // Getters and setters for each attribute
 
     public String getTechnology() {
         return technology;
