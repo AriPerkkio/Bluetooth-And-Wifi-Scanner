@@ -28,6 +28,8 @@
         android:layout_alignParentStart="true"
         android:id="@+id/space" />
 
+    <!-- Bluetooth icon on main screen is from this link: -->
+    <!-- https://lh4.ggpht.com/9RWhsF-_ZOxoHCKLYktrboN3UAk_UCZW5BqKKxYl2RPEg9Og7yKd5BL4ntNUNDcaoqE=w300 -->
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
