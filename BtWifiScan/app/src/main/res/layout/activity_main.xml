@@ -65,4 +65,76 @@
         android:minHeight="100dp"
         android:padding="20dp" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Total number of Bluetooth devices scanned: "
+        android:id="@+id/mainTextOne"
+        android:layout_marginBottom="54dp"
+        android:textColor="@color/mainColorCyan"
+        android:layout_above="@+id/mainBtnHistory"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Total number of Wifi networks scanned: "
+        android:id="@+id/mainTextTwo"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/mainColorCyan"
+        android:layout_alignTop="@+id/mainTextOne"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0"
+        android:id="@+id/mainBtNumber"
+        android:layout_alignBottom="@+id/mainTextOne"
+        android:layout_toEndOf="@+id/mainTextOne"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0"
+        android:id="@+id/mainWifiNumber"
+        android:layout_alignBottom="@+id/mainTextTwo"
+        android:layout_toEndOf="@+id/mainTextTwo"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Total number of scans: "
+        android:id="@+id/mainTextZero"
+        android:layout_above="@+id/mainTextOne"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0"
+        android:id="@+id/mainScansNumber"
+        android:layout_alignBottom="@+id/mainTextZero"
+        android:layout_toEndOf="@+id/mainTextZero"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Results in database: "
+        android:id="@+id/textView2"
+        android:layout_above="@+id/mainTextZero"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/mainColorCyan" />
+
 </RelativeLayout>
