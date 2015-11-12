@@ -27,19 +27,21 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
 
     private Button back;
     private Button rename;
+
     private EditText scanNameField;
     private TextView scanDate;
     private TextView btNumber;
-    private int numberOfBtDevices = 0;
     private TextView wifiNumber;
+    private int numberOfBtDevices = 0;
     private int numberOfWifiNetworks = 0;
     private int scanId;
+
     private ListView list;
     private databaseManager database;
     private subPrevScanCursorAdapter listAdapter;
     private Cursor btCursor;
     private Cursor wifiCursor;
-    private Cursor bothCursors;
+    private Cursor bothCursors; //Used to combine bt and wifi results for one list
     private Intent intent;
 
 
@@ -61,6 +63,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         wifiNumber = (TextView) findViewById(R.id.subPrevScanWifiNumber);
         database = new databaseManager(this);
 
+        // Set scan details to text fields
         scanNameField.setText(getIntent().getExtras().getString("scanName"));
         scanDate.setText(getIntent().getExtras().getString("scanDate"));
         scanId = getIntent().getExtras().getInt("scanId");
@@ -71,10 +74,10 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         try{
             database.open();
             // BtResults and WifiResults have different columns - both need own cursors
-            btCursor = database.getBtResultsById(scanId);
-            wifiCursor = database.getWifiResultsById(scanId);
-            numberOfBtDevices = database.getNumberOfBtById(scanId);
-            numberOfWifiNetworks = database.getNumberOfWifiById(scanId);
+            btCursor = database.getBtResultsById(scanId); // Get bt results by scan id
+            wifiCursor = database.getWifiResultsById(scanId); // Get wifi results by id
+            numberOfBtDevices = database.getNumberOfBtById(scanId); // Get number of bt devices by id
+            numberOfWifiNetworks = database.getNumberOfWifiById(scanId); // Get number of wifi results by id
             database.close();
         }catch (SQLException e) {
             Log.e("getBtResultsById: ", e.toString());
@@ -83,20 +86,22 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         bothCursors = new MergeCursor(new Cursor[] {btCursor, wifiCursor});
         listAdapter = new subPrevScanCursorAdapter(this, bothCursors, 0);
         list.setAdapter(listAdapter);
-        btNumber.setText(numberOfBtDevices + "");
+        btNumber.setText(numberOfBtDevices + ""); // Setting as int only causes crashing
         wifiNumber.setText(numberOfWifiNetworks+"");
     }
 
     public void onClick(View v) {
         switch(v.getId()){
-            case (R.id.subPrevScanBack):
+
+            case (R.id.subPrevScanBack): // 'Back' button
                 finish();
             break;
 
-            case (R.id.subPrevScanRename):
+            case (R.id.subPrevScanRename): // 'Rename' button
 
-                if(scanNameField.getText().toString().equals(""))
+                if(scanNameField.getText().toString().equals("")) // Check if empty name
                     Toast.makeText(this, "Scan name can't be empty.", Toast.LENGTH_SHORT).show();
+                // Check if rename has been pressed without making changes to scan name
                 else if(scanNameField.getText().toString().equals(getIntent().getExtras().getString("scanName")))
                     Toast.makeText(this, "Insert new scan name first.", Toast.LENGTH_SHORT).show();
                 else {
@@ -108,11 +113,9 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                         Log.e("getBtResultsById: ", e.toString());
                     }
                     Toast.makeText(this, getIntent().getExtras().getString("scanName")+ " renamed to " +scanNameField.getText().toString(), Toast.LENGTH_SHORT).show();
-                    // Temporary work-around: Close this activity and start previous one again to refresh its table
-
                     Intent refresh = new Intent(this, previousScansActivity.class);
-                    startActivity(refresh);
-                    this.finish(); //
+                    startActivity(refresh); // Start previous activity again in order to refresh list
+                    this.finish();
                 }
             break;
         }
@@ -143,7 +146,6 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
             intent.putExtra("wifiRSSI", selectedObject.getString(5));
         }
         startActivity(intent); // Start resultDetailsActivity but keep this one alive
-
     }
 
     // Custom Cursor adapter to handle results from database
@@ -156,6 +158,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         }
 
         public void bindView(View view, Context context, Cursor cursor) {
+            // See XML for clarification about IDs
             ImageView icon = (ImageView) view.findViewById(R.id.scanrowIcon);
             TextView fieldOne = (TextView) view.findViewById(R.id.scanrowOne);
             TextView fieldTwo = (TextView) view.findViewById(R.id.scanrowTwo);
