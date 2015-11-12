@@ -41,7 +41,7 @@ public class customAdapter extends ArrayAdapter<scanResult>  {
 
         if(scanresult != null) {
             if(scanresult.technology.equals("Bluetooth")) {
-                icon.setImageResource(R.drawable.bticon);
+                icon.setImageResource(R.drawable.bticon); // Icon from: http://www.icon2s.com/wp-content/uploads/2012/09/bluetooth_128x128-32.png
                 fieldOne.setText(scanresult.btDevName);
                 fieldTwo.setText("");
                 fieldThree.setText(scanresult.btDevAddr);
@@ -54,7 +54,7 @@ public class customAdapter extends ArrayAdapter<scanResult>  {
             }
 
             if(scanresult.technology.equals("Wifi")) {
-                icon.setImageResource(R.drawable.wifiicon);
+                icon.setImageResource(R.drawable.wifiicon); // Icon from: http://iconbug.com/download/size/512/icon/5294/wireless-silver/
                 fieldOne.setText(scanresult.wifiSSID);
                 fieldTwo.setText(scanresult.wifiBSSID);
                 fieldThree.setText(scanresult.wifiCapabilities);
