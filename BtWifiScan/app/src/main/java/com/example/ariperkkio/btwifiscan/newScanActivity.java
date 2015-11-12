@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.app.Activity;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -16,12 +15,11 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.sql.SQLException;
 
 public class newScanActivity extends Activity implements View.OnClickListener {
 
     private Intent intent;
-    private BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+    private BluetoothAdapter btAdapter;
     int REQUEST_ENABLE_BT;
     private WifiManager wifiManager;
 
@@ -81,6 +79,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         btRSSI = (CheckBox) findViewById(R.id.newScanBtRssiChk);
         btRSSI.setOnClickListener(this);
         btEnabled = (TextView) findViewById(R.id.newScanBtStatus);
+        btAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // Widgets for Wifi
         switchWifi = (Switch) findViewById(R.id.newScanWifiSwitch);
@@ -98,14 +97,13 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         wifiEnabled = (TextView) findViewById(R.id.newScanWifiStatus);
         wifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
 
-
         // Check if device's bluetooth is ON when activity launched
         if (btAdapter.isEnabled())
             btEnabled.setText("Enabled");
         else {
             btEnabled.setText("Disabled");
-            setBtOptionsOFF();
-            switchBluetooth.setChecked(false);
+            setBtOptionsOFF(); // Set bluetooth option checkboxes off
+            switchBluetooth.setChecked(false); // Uncheck bluetooth option switch
         }
         // Check if device's wifi is ON when activity launched
         if (wifiManager.isWifiEnabled())
@@ -117,15 +115,15 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    @Override // Check which option user selected on Bluetooth request
+    @Override // Check which option user selected on 'Enable Bluetooth' request
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_ENABLE_BT){
-            if (resultCode == RESULT_OK){
+            if (resultCode == RESULT_OK){ // User clicked OK
                 switchBluetooth.setChecked(true);
                 setBtOptionsON();
                 btEnabled.setText("Enabled");
             }
-            if(resultCode == RESULT_CANCELED){
+            if(resultCode == RESULT_CANCELED){ // User clicked Cancel
                 switchBluetooth.setChecked(false);
                 setBtOptionsOFF();
                 btEnabled.setText("Disabled");
@@ -136,13 +134,11 @@ public class newScanActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
 
-            // 'Back' button finish activity
-            case (R.id.newScanBack):
+            case (R.id.newScanBack):  // 'Back' button to finish activity
                 finish();
             break;
 
-            // Switch to enable/disable options for bluetooth
-            case (R.id.newScanBtSwitch):
+            case (R.id.newScanBtSwitch): // Switch to enable/disable options for bluetooth
                 // Check if device's bluetooth is enabled/disabled
                 if (!btAdapter.isEnabled()) { //disabled -> prompt user to enable Bt
                     enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -165,7 +161,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     setWifiOptionsON();
                     wifiEnabled.setText("Enabled");
                 }
-                    // Enable/disable check boxes depending on switch state
+                // Enable/disable check boxes depending on switch state
                 if(switchWifi.isChecked() && wifiManager.isWifiEnabled())
                     setWifiOptionsON();
                 else
@@ -173,9 +169,9 @@ public class newScanActivity extends Activity implements View.OnClickListener {
             break;
 
             // 'Start scanning' button to start new activity with chosen options
-            // Scanning requires at least one option checked, scan name and sample rate
+            // Scanning requires at least one option checked and scan name
             case (R.id.newScanStartScan):
-                // Check that either bluetooth or wifi is checked
+                // Check that either bluetooth or wifi switch is checked
                 if(!switchWifi.isChecked() && !switchBluetooth.isChecked()) {
                     Toast.makeText(this, "Please check at least one technology", Toast.LENGTH_SHORT).show();
                     break;
@@ -225,7 +221,6 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                 }
             break;
         }
-
     }
     // Set Bluetooth Options' checkboxes OFF and color grey
     private void setBtOptionsOFF() {
