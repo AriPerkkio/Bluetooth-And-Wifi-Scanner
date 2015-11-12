@@ -36,6 +36,7 @@ public class resultDetailsActivity extends Activity implements View.OnClickListe
         back = (Button) findViewById(R.id.resultDetailsBack);
         back.setOnClickListener(this);
 
+        // See XML for clarification about IDs
         mainOne = (TextView) findViewById(R.id.resultDetailsMainOne);
         fieldOne = (TextView) findViewById(R.id.resultDetailsOne);
         mainTwo = (TextView) findViewById(R.id.resultDetailsMainTwo);
@@ -48,7 +49,7 @@ public class resultDetailsActivity extends Activity implements View.OnClickListe
         fieldFive = (TextView) findViewById(R.id.resultDetailsFive);
         layoutFive = (LinearLayout) findViewById(R.id.linearLayout5);
 
-        // If attribute is null or empty, set it as <attribute not scanned>
+        // If attribute is null or empty, set it as <attribute not scanned>. Otherwise set requested attribute as value.
         // NOTE: Checking for null must be first, otherwise null pointer exception may happen
         if(getIntent().getExtras().getString("technology") != null && getIntent().getExtras().getString("technology").equals("Bluetooth")){
             mainOne.setText("Device name");
