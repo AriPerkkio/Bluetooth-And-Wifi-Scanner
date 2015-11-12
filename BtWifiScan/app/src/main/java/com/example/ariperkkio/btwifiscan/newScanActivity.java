@@ -98,7 +98,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         wifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
 
         // Check if device's bluetooth is ON when activity launched
-        if (btAdapter.isEnabled())
+        if (btAdapter != null && btAdapter.isEnabled())
             btEnabled.setText("Enabled");
         else {
             btEnabled.setText("Disabled");
@@ -140,7 +140,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
 
             case (R.id.newScanBtSwitch): // Switch to enable/disable options for bluetooth
                 // Check if device's bluetooth is enabled/disabled
-                if (!btAdapter.isEnabled()) { //disabled -> prompt user to enable Bt
+                if (btAdapter != null && !btAdapter.isEnabled()) { //disabled -> prompt user to enable Bt
                     enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT); //Result of selection to REQUEST_ENABLE_BT
                 }
