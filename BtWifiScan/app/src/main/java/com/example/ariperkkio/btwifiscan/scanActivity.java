@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -19,31 +18,38 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class scanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener {
 
-    // General widgets
+    // General
     private Button endScan; // 'End scanning' button
     private Button save; // 'Save' button
     private Button dontSave; // 'Don't save' button
     private TextView scanName;
     private TextView scanFoundBt;
     private TextView scanFoundWifi;
-    private databaseManager database;
     private Intent intent;
-    private scanWithSampleRate backgroundScanner;
+    private ListView scanResultList;
+    private customAdapter listAdapter;
+
+    // Database
+    private databaseManager database;
     private saveResultsBackground backgroundSaver;
     private ProgressDialog progressDialog;
 
-    // Bluetooth scanning objects
+    // Scanning
+    private int sampleRate;
+    private scanWithSampleRate backgroundScanner;
+    // Wifi
+    private WifiManager wifiManager;
+    private List<ScanResult> wifiScanResults; //
+    private int numberOfWifiNetworks;
+    // Bluetooth
     private BluetoothAdapter btAdapter; //btAdapter for accessing bluetooth
     private BluetoothDevice btDevice;  //btDevice for getting discovered devices' info
     private int btDeviceRSSI; // btDeviceRSSI for getting RSSI from
@@ -51,32 +57,20 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private ArrayList<scanResult> scanresults; // List for bt and wifi scan results
     private int numberOfBtDevices;
 
-
-    //Wifi scanning objects
-    private WifiManager wifiManager;
-    private List<ScanResult> wifiScanResults; //
-    private int numberOfWifiNetworks;
-
-    private int sampleRate;
-
-    // booleans to check options for bluetooth
+    // Options
+    // Bluetooth
     private boolean btStatus;
     private boolean btDevName;
     private boolean btDevAddr;
     private boolean btDevType;
     private boolean btRSSI;
-
-    // booleans to check options for wifi
+    // Wifi
     private boolean wifiStatus;
     private boolean wifiSSID;
     private boolean wifiBSSID;
     private boolean wifiCapabilities;
     private boolean wifiFrequency;
     private boolean wifiRSSI;
-
-    // List items
-    private ListView scanResultList;
-    private customAdapter listAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,23 +79,23 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //Set full screen
         setContentView(R.layout.activity_scan);
 
+        // Button initializing
         endScan = (Button) findViewById(R.id.scanEnd);
         endScan.setOnClickListener(this);
-
         save = (Button) findViewById(R.id.scanSave);
         save.setOnClickListener(this);
-
         dontSave = (Button) findViewById(R.id.scanDontSave);
         dontSave.setOnClickListener(this);
+        save.setVisibility(View.GONE); //Not visible until scan ended
+        dontSave.setVisibility(View.GONE); //Not visible until scan ended
 
-        save.setVisibility(View.GONE);
-        dontSave.setVisibility(View.GONE);
-
+        // Text Fields
         scanName = (TextView) findViewById(R.id.ScanName);
         scanFoundBt = (TextView) findViewById(R.id.ScanBtFound);
         scanFoundWifi = (TextView) findViewById(R.id.ScanWifiFound);
 
-        btAdapter = BluetoothAdapter.getDefaultAdapter();
+        // Scanning objects
+        btAdapter = BluetoothAdapter.getDefaultAdapter(); // Get local bluetooth adapter
         wifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
 
         // Get options for Bluetooth scanning
@@ -123,26 +117,15 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         scanName.setText(getIntent().getExtras().getString("scanName"));
         sampleRate = getIntent().getExtras().getInt("sampleRate");
 
+        // Database and List objects
         database = new databaseManager(this);
-
         scanresults = new ArrayList<scanResult>();
-
-        //for(int i=0; i<3000;i++)
-        //    scanresults.add(new scanResult("SSID", "BSSID "+i, "Capabilities", i*10, 100+i));
-
         scanResultList = (ListView) findViewById(R.id.ScanList);
         scanResultList.setOnItemClickListener(scanActivity.this);
-
         listAdapter = new customAdapter(this, scanresults);
         scanResultList.setAdapter(listAdapter);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Saving results");
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressDialog.setIndeterminate(false); //Set progress updates visible
-
         backgroundSaver = new saveResultsBackground();
-
         backgroundScanner = new scanWithSampleRate();
         backgroundScanner.execute(sampleRate); // Start scanning in background. New sample every samplerate time
     }
@@ -154,12 +137,11 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             if (BluetoothDevice.ACTION_FOUND.equals(action)) { // This is called every time bluetooth device is discovered
                 btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE); // Get the BluetoothDevice object from the Intent
                 btDeviceRSSI = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);  // Get RSSI value from intent
-                mReceiverRegistered = true; // Broadcast receiver registered
 
                 // These attributes are set to default every time bt device is discovered
                 String deviceName = "";
                 String address = "";
-                int type = 4; // type 4 is initialized as "" in scanResult
+                int type = 4; // type 4 is initialized as "" in scanResult class
 
                 // Check options and get requested attributes. By ignoring one, it keeps its default value initialized above
                 if (btDevName)
@@ -171,13 +153,12 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 if (!btRSSI) // if not requested attribute, set it to zero. Otherwise keep its value
                     btDeviceRSSI = 0;
 
-                // Check duplicates based on address
-                if (!checkIfScanned(btDevice.getAddress())) {
+                if (!checkIfScanned(btDevice.getAddress())) { // Check duplicates based on address
                     Log.e("BtADD", "Adding new BtDevice");
                     // Create new scanResult with correct constructor, add object to List
                     try{
                         scanresults.add(new scanResult(deviceName, address, type, btDeviceRSSI));
-                        listAdapter.notifyDataSetChanged();
+                        listAdapter.notifyDataSetChanged(); // Refresh list
                         numberOfBtDevices++; // Increase number of devices
                         scanFoundBt.setText(numberOfBtDevices + ""); // Update text with new number of devices
                     } catch (IllegalStateException error){
@@ -191,20 +172,21 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     public void onClick(View v) {
         switch (v.getId()) {
             case (R.id.scanEnd): // End scan button
-                backgroundScanner.cancel(true);
-                save.setVisibility(View.VISIBLE);
-                dontSave.setVisibility(View.VISIBLE);
-                endScan.setVisibility(View.GONE);
-                btAdapter.cancelDiscovery(); // This may be temporary solution, fix by threading scan
+                backgroundScanner.cancel(true); // End background scanning
+                save.setVisibility(View.VISIBLE); // Show 'Save' button
+                dontSave.setVisibility(View.VISIBLE); // Show "Don't save" button
+                endScan.setVisibility(View.GONE); // Hide 'End scan' button
+                if(btAdapter.isDiscovering())
+                    btAdapter.cancelDiscovery(); // End bt scanning if its still running
             break;
 
             case (R.id.scanSave):
-                backgroundSaver.execute(scanresults);
+                backgroundSaver.execute(scanresults); // Save results in another thread
             break;
 
-            case (R.id.scanDontSave):
+            case (R.id.scanDontSave): // Go back to mainActivity
                 intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Close previous activities
                 startActivity(intent);
             break;
         }
@@ -221,7 +203,6 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         intent.putExtra("btDevType", selectedObject.getBtDevType());
         intent.putExtra("btRSSI", Integer.toString(selectedObject.getBtRSSI())); //resultDetailsActivity handles this as string
 
-        intent.putExtra("technology", selectedObject.getTechnology());
         intent.putExtra("wifiSSID", selectedObject.getWifiSSID());
         intent.putExtra("wifiBSSID", selectedObject.getWifiBSSID());
         intent.putExtra("wifiCapabilities", selectedObject.getWifiCapabilities());
@@ -244,8 +225,11 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         if (btAdapter.isDiscovering()) //Should never occur since min sampleRate is over 12 sec
             btAdapter.cancelDiscovery();
         else {
-            btAdapter.startDiscovery();
+            btAdapter.startDiscovery(); // Start scanning Bt devices
+            // Register mReceiver to run in UI thread - allows updating Views
+            // Set receiver to be called by broadcast intents matching BtDevice.ACTION_FOUND
             registerReceiver(mReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+            mReceiverRegistered = true; // Broadcast receiver registered
         }
     }
 
@@ -260,7 +244,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 if (scanresults.get(i).getWifiBSSID().equals(address))
                     return true;
         }
-        return false;
+        return false; // No match found
     }
 
     // Background scanning
@@ -324,19 +308,28 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         }
     } // Scanning AsyncTask close
 
-    // ToDo: When saving, rest of UI should not response to clicks
     // Background result saving with progress bar
     private class saveResultsBackground extends AsyncTask<List<scanResult>, Integer, Void> {
 
+        // Before saving show progress dialog
+        // Runs on UI thread - View updating allowed
         protected void onPreExecute() {
+            progressDialog = new ProgressDialog(scanActivity.this);
+            progressDialog.setMessage("Saving results");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.setIndeterminate(false); //Set progress updates visible
             progressDialog.setMax(scanresults.size());
             progressDialog.show();
+            progressDialog.setCanceledOnTouchOutside(false); // Force dialog show (disable click responsive)
         }
-
+        // After saving
         protected void onPostExecute(Void value) {
-            finish();
+            // Refresh result history on mainActivity when finishing this one
+            intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         }
-
+        // Save results and update progress dialog after each insert
         protected Void doInBackground(List<scanResult>... resultList) {
             try {
                 database.open();
@@ -364,7 +357,6 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         protected void onProgressUpdate(Integer... progress) {
             progressDialog.setProgress(progress[0]);
         }
-
     }
 }
 
