@@ -9,12 +9,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by arska on 04/11/15.
  */
 
+// ArrayAdapter can consist of both Bt device and Wifi results
+// Checks technology before setting text fields
 public class customAdapter extends ArrayAdapter<scanResult>  {
     public customAdapter(Context content, ArrayList<scanResult> scanresult) {
         super(content, 0, scanresult); //Use super class's constructor
@@ -29,6 +30,7 @@ public class customAdapter extends ArrayAdapter<scanResult>  {
 
         scanResult scanresult = getItem(position); //Get item form current position
 
+        // See XML for clarification about ids
         ImageView icon = (ImageView) convertView.findViewById(R.id.scanrowIcon);
         TextView fieldOne = (TextView) convertView.findViewById(R.id.scanrowOne);
         TextView fieldTwo = (TextView) convertView.findViewById(R.id.scanrowTwo);
@@ -38,7 +40,6 @@ public class customAdapter extends ArrayAdapter<scanResult>  {
         TextView fieldSix = (TextView) convertView.findViewById(R.id.scanrowSix);
 
         if(scanresult != null) {
-
             if(scanresult.technology.equals("Bluetooth")) {
                 icon.setImageResource(R.drawable.bticon);
                 fieldOne.setText(scanresult.btDevName);
