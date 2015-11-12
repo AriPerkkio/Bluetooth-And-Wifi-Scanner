@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.sql.SQLException;
 
@@ -43,7 +42,7 @@ public class previousScansActivity extends Activity implements View.OnClickListe
 
         try{
             db.open();
-            dataCursor = db.getScans();
+            dataCursor = db.getScans(); // Gets all scans from database to cursor
             db.close();
         }catch (SQLException e) {
             Log.e("db.getScans() : ", e.toString());
@@ -56,20 +55,18 @@ public class previousScansActivity extends Activity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case (R.id.previousScansBack):
-                // If there has been renaming of a scan, it means there is another previousScanBack activity
-                // in background. Solution: Kill all activities when clicking back, open mainActivity.
+                // If there has been renaming of a scan, it means there is another previousScanBack activity with old scan name
+                // in background. Solution: Close all activities when clicking back, open mainActivity.
                 intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
-                break;
+            break;
         }
     }
 
-    public void onItemClick(AdapterView<?> adapterView, View v, int position, long arg)
-    {
+    public void onItemClick(AdapterView<?> adapterView, View v, int position, long arg){
         Cursor selectedObject = (Cursor) (list.getItemAtPosition(position));
-
-        intent = new Intent(previousScansActivity.this, subPrevScanActivity.class); //Create intent for scanActivity
+        intent = new Intent(previousScansActivity.this, subPrevScanActivity.class); //Create intent for subPrevScanActivity
         // Fill in details of selected scan
         intent.putExtra("scanId", selectedObject.getInt(0));
         intent.putExtra("scanName", selectedObject.getString(1));
@@ -77,8 +74,8 @@ public class previousScansActivity extends Activity implements View.OnClickListe
         startActivity(intent); // Start subPrevScanActivity but keep this one alive
     }
 
+    // Cursor adapter for Scans
     private class prevScanCursorAdapter extends CursorAdapter {
-
         private LayoutInflater cursorInflater;
 
         public prevScanCursorAdapter (Context context, Cursor cursor, int flags) {
