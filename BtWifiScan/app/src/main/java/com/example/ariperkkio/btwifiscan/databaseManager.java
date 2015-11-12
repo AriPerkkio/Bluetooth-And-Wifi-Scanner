@@ -13,10 +13,6 @@ import java.sql.SQLException;
  * Created by arska on 05/11/15.
  */
 
-// Tables:
-// Scans: idScans, Name, Time
-// BluetoothResults: idScans, DeviceName, DeviceAddress, DeviceType, RSSI
-// WifiResults: idScans, SSID, BSSID, Capabilities, RSSI, Frequency
 public class databaseManager {
     // Table Scans and its columns
     private static final String DATABASE_TABLE_SCANS = "Scans";
@@ -105,12 +101,6 @@ public class databaseManager {
         DBHelper.close();
     }
 
-    public void startOver(){
-        db.execSQL("DROP TABLE Scans;");
-        db.execSQL("DROP TABLE BluetoothResults;");
-        db.execSQL("DROP TABLE WifiResults;");
-    }
-
     public long insertIntoScans(String scanName) {
         // ScanId is Autoincremented, Time is CURRENT_DATE by default
         ContentValues initialValues = new ContentValues();
@@ -153,6 +143,21 @@ public class databaseManager {
         return (int) statement.simpleQueryForLong();
     }
 
+    public int getNumberOfScans() {
+        final SQLiteStatement statement = db.compileStatement("SELECT count(*) FROM Scans");
+        return (int) statement.simpleQueryForLong();
+    }
+
+    public int getNumberOfBt() {
+        final SQLiteStatement statement = db.compileStatement("SELECT count(*) FROM BluetoothResults");
+        return (int) statement.simpleQueryForLong();
+    }
+
+    public int getNumberOfWifi() {
+        final SQLiteStatement statement = db.compileStatement("SELECT count(*) FROM WifiResults");
+        return (int) statement.simpleQueryForLong();
+    }
+
     public Cursor getBtResultsById(int rowId) throws SQLException {
         Cursor mCursor = db.query(true, DATABASE_TABLE_BTRESULTS, new String[]{
                 btResults_ScanId, btResults_DevName, btResults_DevAddr, btResults_DevType, btResults_RSSI}, btResults_ScanId + "=" + rowId, null, null, null, null, null);
@@ -181,7 +186,7 @@ public class databaseManager {
         return (int) statement.simpleQueryForLong();
     }
 
-    // This method is accessed by text input
+    // String variable is from text input
     public void renameScan(int rowId, String newName) throws SQLException {
         ContentValues values = new ContentValues();
         values.put(scans_ScanName, newName);
