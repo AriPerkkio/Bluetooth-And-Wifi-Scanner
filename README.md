@@ -21,7 +21,7 @@ I've set my default 480dpi to 320dpi. Screen is 1080x1920 5,5".
 ![BtDeviceResult](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/resultDetails.png)
 ![WifiResult](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/resultDetails2.png)
 ![Renaming](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/renaming.png)
-
+![Dublin city center](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/ScanDublinCenter.png)
 Icons used:
 https://lh4.ggpht.com/9RWhsF-_ZOxoHCKLYktrboN3UAk_UCZW5BqKKxYl2RPEg9Og7yKd5BL4ntNUNDcaoqE=w300
 http://iconbug.com/download/size/512/icon/5294/wireless-silver/
