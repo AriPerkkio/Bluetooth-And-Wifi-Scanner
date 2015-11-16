@@ -192,4 +192,11 @@ public class databaseManager {
         values.put(scans_ScanName, newName);
         db.update(DATABASE_TABLE_SCANS, values, "_id="+rowId, null);
     }
+
+    // Delete scan and its results
+    public void deleteScan(int scanId) throws SQLException{
+        db.delete(DATABASE_TABLE_SCANS,"_id="+scanId,null);
+        db.delete(DATABASE_TABLE_BTRESULTS,"_id="+scanId,null);
+        db.delete(DATABASE_TABLE_WIFIRESULTS,"_id="+scanId,null);
+    }
 }
