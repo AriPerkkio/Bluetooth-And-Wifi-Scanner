@@ -1,6 +1,8 @@
 package com.example.ariperkkio.btwifiscan;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -15,10 +17,11 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.sql.SQLException;
 
-public class previousScansActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener {
+public class previousScansActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener, ListView.OnItemLongClickListener {
 
     private Button back;
     private ListView list;
@@ -39,6 +42,7 @@ public class previousScansActivity extends Activity implements View.OnClickListe
 
         list = (ListView) findViewById(R.id.previousscanlist);
         list.setOnItemClickListener(this);
+        list.setOnItemLongClickListener(this);
 
         try{
             db.open();
@@ -74,6 +78,41 @@ public class previousScansActivity extends Activity implements View.OnClickListe
         startActivity(intent); // Start subPrevScanActivity but keep this one alive
     }
 
+    // Listening long clicks on list items
+    public boolean onItemLongClick(AdapterView<?> adapterView, View v, int position, long arg){
+        final Cursor selectedObject = (Cursor) (list.getItemAtPosition(position)); //get clicked item
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this); // Create new builder for alert dialog
+        builder.setMessage("Do you want to remove scan "+selectedObject.getString(1)+"?")
+                .setTitle("Remove scan"); // Add message and title for dialog
+        // Add 'Remove' button for dialog - using anonymous click listener
+        builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                try {
+                    db.open();
+                    db.deleteScan(selectedObject.getInt(0)); // Delete scan from db
+                    db.close();
+                    Toast.makeText(previousScansActivity.this, "Removed "+selectedObject.getString(1), Toast.LENGTH_SHORT).show();
+                } catch (SQLException e) {
+                    Log.e("Delete:", e.toString());
+                }
+                // Start activity again to refresh list
+                Intent refresh = new Intent(previousScansActivity.this, previousScansActivity.class);
+                startActivity(refresh);
+            }
+        });
+        // Add 'Cancel' button for dialog
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel(); // Hide dialog
+            }
+        });
+
+        AlertDialog dialog = builder.create(); // Create dialog from previous attributes
+        dialog.show(); // Show dialog
+        return true;
+    }
+
     // Cursor adapter for Scans
     private class prevScanCursorAdapter extends CursorAdapter {
         private LayoutInflater cursorInflater;
@@ -84,11 +123,9 @@ public class previousScansActivity extends Activity implements View.OnClickListe
         }
 
         public void bindView(View view, Context context, Cursor cursor) {
-            TextView scanId = (TextView) view.findViewById(R.id.prevscanrowId);
             TextView scanName = (TextView) view.findViewById(R.id.prevscanrowName);
             TextView scanDate = (TextView) view.findViewById(R.id.prevscanrowDate);
 
-            scanId.setText(cursor.getString(0));
             scanName.setText(cursor.getString(1));
             scanDate.setText(cursor.getString(2));
         }
