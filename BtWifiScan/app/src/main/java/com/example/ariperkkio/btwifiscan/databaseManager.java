@@ -196,7 +196,14 @@ public class databaseManager {
     // Delete scan and its results
     public void deleteScan(int scanId) throws SQLException{
         db.delete(DATABASE_TABLE_SCANS,"_id="+scanId,null);
-        db.delete(DATABASE_TABLE_BTRESULTS,"_id="+scanId,null);
-        db.delete(DATABASE_TABLE_WIFIRESULTS,"_id="+scanId,null);
+        db.delete(DATABASE_TABLE_BTRESULTS, "_id=" + scanId, null);
+        db.delete(DATABASE_TABLE_WIFIRESULTS, "_id=" + scanId, null);
+    }
+
+    public void deleteResult(int scanId, String technology, String address){
+        if(technology.equals("Bluetooth"))
+            db.delete(DATABASE_TABLE_BTRESULTS,"_id="+scanId+" AND DeviceAddress='"+address+"'" ,null);
+        if(technology.equals("Wifi"))
+            db.delete(DATABASE_TABLE_WIFIRESULTS,"_id="+scanId+" AND BSSID='"+address+"'" ,null);
     }
 }
