@@ -1,6 +1,8 @@
 package com.example.ariperkkio.btwifiscan;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
@@ -23,7 +25,7 @@ import android.widget.Toast;
 import java.sql.SQLException;
 import java.util.List;
 
-public class subPrevScanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener {
+public class subPrevScanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener, ListView.OnItemLongClickListener {
 
     private Button back;
     private Button rename;
@@ -70,6 +72,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
 
         list = (ListView) findViewById(R.id.subPrevScanList);
         list.setOnItemClickListener(this);
+        list.setOnItemLongClickListener(this);
 
         try{
             database.open();
@@ -146,6 +149,54 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
             intent.putExtra("wifiRSSI", selectedObject.getString(5));
         }
         startActivity(intent); // Start resultDetailsActivity but keep this one alive
+    }
+
+
+    // Long click listener for removing results
+    // Once scan result is removed, both cursors have to be reloaded from database
+    // and list adapter refreshed by swap cursor. Numbers of bt and wifi results are also updated
+    public boolean onItemLongClick(AdapterView<?> adapterView, View v, int position, long arg){
+        final Cursor selectedObject = (Cursor) (list.getItemAtPosition(position));
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this); // Create new builder for alert dialog
+        builder.setMessage("Do you want to remove scan result "+selectedObject.getString(1)+" / "+selectedObject.getString(2)+"?")
+                .setTitle("Remove scan result"); // Add message and title for dialog
+        // Add 'Remove' button for dialog - using anonymous click listener
+        builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                String technology = ""; // String to identify which result it is, used in databaseManager class
+                if (selectedObject.getColumnCount() == 5)
+                    technology = "Bluetooth";
+                if (selectedObject.getColumnCount() == 6)
+                    technology = "Wifi";
+                try {
+                    database.open();
+                    database.deleteResult(scanId, technology, selectedObject.getString(2)); // Delete scan result
+                    btCursor = database.getBtResultsById(scanId); // Get bt results by scan id
+                    wifiCursor = database.getWifiResultsById(scanId); // Get wifi results by id
+                    numberOfBtDevices = database.getNumberOfBtById(scanId); // Get number of bt devices by id
+                    numberOfWifiNetworks = database.getNumberOfWifiById(scanId); // Get number of wifi results by id
+                    database.close();
+                } catch (SQLException e) {
+                    Log.e("deleteResult: ", e.toString());
+                }
+                Toast.makeText(subPrevScanActivity.this, "Scan result "+selectedObject.getString(1)+" / "+selectedObject.getString(2)+" deleted.", Toast.LENGTH_LONG).show();
+                bothCursors = new MergeCursor(new Cursor[] {btCursor, wifiCursor}); // Combine cursors
+                listAdapter.swapCursor(bothCursors); // Swap cursor to new one with updated values
+                listAdapter.notifyDataSetChanged(); // Refresh list with new cursor
+                btNumber.setText(numberOfBtDevices + ""); // Setting as int only causes crashing
+                wifiNumber.setText(numberOfWifiNetworks + "");
+            }
+        });
+        // Add 'Cancel' button for dialog
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel(); // Hide dialog
+            }
+        });
+        AlertDialog dialog = builder.create(); // Create dialog from previous attributes
+        dialog.show(); // Show dialog
+        return true;
     }
 
     // Custom Cursor adapter to handle results from database
