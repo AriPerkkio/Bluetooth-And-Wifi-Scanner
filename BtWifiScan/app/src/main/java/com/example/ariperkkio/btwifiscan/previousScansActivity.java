@@ -91,14 +91,14 @@ public class previousScansActivity extends Activity implements View.OnClickListe
                 try {
                     db.open();
                     db.deleteScan(selectedObject.getInt(0)); // Delete scan from db
+                    dataCursor = db.getScans(); // Get all scans
                     db.close();
                     Toast.makeText(previousScansActivity.this, "Removed "+selectedObject.getString(1), Toast.LENGTH_SHORT).show();
                 } catch (SQLException e) {
                     Log.e("Delete:", e.toString());
                 }
-                // Start activity again to refresh list
-                Intent refresh = new Intent(previousScansActivity.this, previousScansActivity.class);
-                startActivity(refresh);
+                customCursorAdapter.swapCursor(dataCursor); // Swap cursor to new one with updated values
+                customCursorAdapter.notifyDataSetChanged(); // Refresh list data
             }
         });
         // Add 'Cancel' button for dialog
