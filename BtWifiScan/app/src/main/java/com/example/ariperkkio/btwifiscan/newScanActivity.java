@@ -145,16 +145,19 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT); //Result of selection to REQUEST_ENABLE_BT
                 }
                 // Enable/disable check boxes depending on switch state
-                if(switchBluetooth.isChecked() && btAdapter.isEnabled())
+                if(btAdapter != null && switchBluetooth.isChecked() && btAdapter.isEnabled())
                     setBtOptionsON();
-                else
+                else {
                     setBtOptionsOFF();
+                    switchBluetooth.setChecked(false);
+                    Toast.makeText(this, "Unable to set Bluetooth on. Please toggle it manually.", Toast.LENGTH_SHORT).show();
+                }
             break;
 
             // Switch to enable/disable options for wifi
             case (R.id.newScanWifiSwitch):
                 // Check if device's wifi is enabled/disabled
-                if(!wifiManager.isWifiEnabled()){
+                if(wifiManager != null && !wifiManager.isWifiEnabled()){
                     wifiManager.setWifiEnabled(true); // Turn wifi ON
                     Toast.makeText(this, "Wifi enabled.", Toast.LENGTH_SHORT).show();
                     switchWifi.setChecked(true);
@@ -164,8 +167,11 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                 // Enable/disable check boxes depending on switch state
                 if(switchWifi.isChecked() && wifiManager.isWifiEnabled())
                     setWifiOptionsON();
-                else
+                else {
                     setWifiOptionsOFF();
+                    switchWifi.setChecked(false);
+                    Toast.makeText(this, "Unable to set Wifi on. Please toggle it manually.", Toast.LENGTH_SHORT).show();
+                }
             break;
 
             // 'Start scanning' button to start new activity with chosen options
