@@ -2,14 +2,18 @@
 
 Welcome to the AndroidSWDev wiki!
 
-School project for module Mobile Software Development. 
+School project for module Mobile Software Development.
 
-Layouts are done for my phone only. It has customized DPI - apks recognize it as large but scaling is different. **These layout will not work properly on stock phones** - tablets should be fine. 
-I've set my default 480dpi to 320dpi. Screen is 1080x1920 5,5". 
+Download link for APK with Nexus 5 Optimised Layouts (Use for education purposes only):
+http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_MarshM.apk
+
+
+Layouts are done for my phone only. It has customized DPI - apks recognize it as large but scaling is different. **These layouts will not work properly on stock phones** - tablets should be fine.
+I've set my default 480dpi to 320dpi. Screen is 1080x1920 5,5".
 
 ![ScanGif](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/BtWifiScan.gif)
 
-![MainActivity](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/MainActivity.png) 
+![MainActivity](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/MainActivity.png)
 ![New Scan](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/NewScanEmpty.png)
 ![New Scan BtRequest](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/NewScanBtRequest.png)
 ![New Scan Details](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/NewScanDetails.png)
