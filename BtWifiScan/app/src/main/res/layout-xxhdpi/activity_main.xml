@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="wrap_content"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
+    android:background="@color/material_blue_grey_950">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Bluetooth and Wifi scanner"
+        android:id="@+id/newScanHeader"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="#66d3fa"
+        android:typeface="monospace"
+        android:textSize="20dp"
+        android:singleLine="true" />
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="20px"
+        android:id="@+id/space"
+        android:layout_marginBottom="164dp"
+        android:layout_above="@+id/textView2"
+        android:layout_alignEnd="@+id/newScanHeader" />
+
+    <!-- Bluetooth icon on main screen is from this link: -->
+    <!-- https://lh4.ggpht.com/9RWhsF-_ZOxoHCKLYktrboN3UAk_UCZW5BqKKxYl2RPEg9Og7yKd5BL4ntNUNDcaoqE=w300 -->
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageIcon"
+        android:src="@drawable/icon"
+        android:layout_above="@+id/space"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/newScanHeader" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Scan"
+        android:id="@+id/mainBtnNewScan"
+        android:textStyle="bold"
+        android:textColor="@color/mainColorCyan"
+        android:background="@android:color/background_dark"
+        android:textSize="@dimen/abc_action_bar_content_inset_material"
+        android:minHeight="80dp"
+        android:padding="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" View history "
+        android:id="@+id/mainBtnHistory"
+        android:layout_alignTop="@+id/mainBtnNewScan"
+        android:layout_alignParentStart="true"
+        android:textStyle="bold"
+        android:textColor="@color/mainColorCyan"
+        android:background="@android:color/background_dark"
+        android:textSize="@dimen/abc_action_bar_content_inset_material"
+        android:minHeight="100dp"
+        android:padding="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Total number of Bluetooth devices scanned: "
+        android:id="@+id/mainTextOne"
+        android:layout_marginBottom="27dp"
+        android:textColor="@color/mainColorCyan"
+        android:layout_above="@+id/mainBtnNewScan"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Total number of Wifi networks scanned: "
+        android:id="@+id/mainTextTwo"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/mainColorCyan"
+        android:layout_alignTop="@+id/mainTextOne"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0"
+        android:id="@+id/mainBtNumber"
+        android:layout_alignBottom="@+id/mainTextOne"
+        android:layout_toEndOf="@+id/mainTextOne"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0"
+        android:id="@+id/mainWifiNumber"
+        android:layout_alignBottom="@+id/mainTextTwo"
+        android:layout_toEndOf="@+id/mainTextTwo"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Total number of scans: "
+        android:id="@+id/mainTextZero"
+        android:layout_above="@+id/mainTextOne"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0"
+        android:id="@+id/mainScansNumber"
+        android:layout_alignBottom="@+id/mainTextZero"
+        android:layout_toEndOf="@+id/mainTextZero"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Results in database: "
+        android:id="@+id/textView2"
+        android:layout_above="@+id/mainTextZero"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/mainColorCyan" />
+
+</RelativeLayout>

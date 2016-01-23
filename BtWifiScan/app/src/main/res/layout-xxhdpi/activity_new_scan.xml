@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.example.ariperkkio.btwifiscan.newScanActivity"
+    android:background="@color/material_blue_grey_950">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Start new scan"
+        android:id="@+id/newScanHeader"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/mainColorCyan"
+        android:textSize="20dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        android:id="@+id/newScanBack"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/mainColorCyan"
+        android:background="@android:color/background_dark" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Bluetooth status: "
+        android:id="@+id/newScanBtStatusText"
+        android:textColor="@color/mainColorCyan"
+        android:layout_below="@+id/space2"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Unable to read status"
+        android:id="@+id/newScanBtStatus"
+        android:textColor="@color/mainColorCyan"
+        android:layout_alignTop="@+id/newScanBtStatusText"
+        android:layout_toEndOf="@+id/newScanBtStatusText" />
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="5dp"
+        android:layout_below="@+id/newScanHeader"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/space2" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Wifi status: "
+        android:id="@+id/newScanWifiStatusText"
+        android:layout_below="@+id/newScanBtStatusText"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Unable to read status"
+        android:id="@+id/newScanWifiStatus"
+        android:layout_below="@+id/newScanBtStatusText"
+        android:layout_toEndOf="@+id/newScanWifiStatusText"
+        android:textColor="@color/mainColorCyan" />
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="10dp"
+        android:layout_above="@+id/newScanBack"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/space4" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/newScanWifiStatusText"
+        android:id="@+id/space5" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/material_blue_grey_900"
+        android:id="@+id/relativeLayout"
+        android:layout_above="@+id/space4"
+        android:layout_alignEnd="@+id/space4"
+        android:layout_below="@+id/space5">
+
+        <Space
+            android:layout_width="fill_parent"
+            android:layout_height="10dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/space3" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Scan name: "
+            android:id="@+id/ScanNameText"
+            android:textColor="@color/mainColorCyan"
+            android:layout_below="@+id/space3"
+            android:layout_toEndOf="@+id/space11"
+            android:textSize="20dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ScanName"
+            android:singleLine="true"
+            android:textColor="@color/mainColorCyan"
+            android:textSize="20dp"
+            android:layout_alignParentTop="true"
+            android:maxLength="40"
+            android:layout_toEndOf="@+id/ScanNameText"
+            android:layout_toStartOf="@+id/space12" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@+id/ScanNameText"
+            android:layout_alignParentStart="true"
+            android:id="@+id/space6" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start scanning"
+            android:id="@+id/newScanStartScan"
+            android:textColor="@color/mainColorCyan"
+            android:background="@android:color/background_dark"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:layout_gravity="right|left"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_alignTop="@+id/space7"
+            android:layout_alignParentEnd="true" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_below="@+id/ScanName"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/space9" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Sample rate (s): "
+            android:id="@+id/newScanRateText"
+            android:textColor="@color/mainColorCyan"
+            android:textSize="15dp"
+            android:layout_alignTop="@+id/space7"
+            android:layout_alignStart="@+id/relativeLayout2" />
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/ScanName"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/space10" />
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/space9"
+            android:layout_alignParentStart="true"
+            android:id="@+id/space11" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/space11"
+            android:layout_toStartOf="@+id/space10"
+            android:background="@color/material_blue_grey_800"
+            android:id="@+id/relativeLayout2"
+            android:layout_below="@+id/space9"
+            android:layout_alignBottom="@+id/relativeLayout3">
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/space13" />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bluetooth "
+                android:id="@+id/newScanBtSwitch"
+                android:layout_below="@+id/space13"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/mainColorCyan"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="20dp"
+                android:enabled="true"
+                android:checked="true" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Device name"
+                android:id="@+id/newScanDevNameChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanBtSwitch"
+                android:layout_alignParentStart="true" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Device address"
+                android:id="@+id/newScanDevAddrChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanDevNameChk"
+                android:layout_alignStart="@+id/newScanDevNameChk" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Device type"
+                android:id="@+id/newScanDevTypChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanDevAddrChk"
+                android:layout_alignStart="@+id/newScanDevAddrChk" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RSSI"
+                android:id="@+id/newScanBtRssiChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanDevTypChk"
+                android:layout_alignStart="@+id/newScanDevTypChk" />
+
+        </RelativeLayout>
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:id="@+id/space12"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/material_blue_grey_800"
+            android:layout_alignEnd="@+id/ScanName"
+            android:layout_toEndOf="@+id/space10"
+            android:layout_below="@+id/space9"
+            android:id="@+id/relativeLayout3"
+            android:scrollIndicators="none"
+            android:layout_alignBottom="@+id/space8">
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SSID"
+                android:id="@+id/newScanWifiSsidChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanWifiSwitch"
+                android:layout_alignStart="@+id/newScanWifiBssidChk" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BSSID"
+                android:id="@+id/newScanWifiBssidChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanWifiSsidChk"
+                android:layout_alignStart="@+id/newScanWifiCapaChk" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Capabilities"
+                android:id="@+id/newScanWifiCapaChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanWifiBssidChk"
+                android:layout_alignStart="@+id/newScanWifiRssiChk" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/space14" />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wifi"
+                android:id="@+id/newScanWifiSwitch"
+                android:textColor="@color/mainColorCyan"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="20dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/space14"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="20dp" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RSSI"
+                android:id="@+id/newScanWifiRssiChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanWifiCapaChk"
+                android:layout_alignStart="@+id/newScanWifiFreqChk" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Frequency"
+                android:id="@+id/newScanWifiFreqChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanWifiRssiChk"
+                android:layout_alignEnd="@+id/newScanWifiSwitch" />
+
+        </RelativeLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:id="@+id/space7"
+            android:layout_above="@+id/space6"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="26dp" />
+
+        <Space
+            android:layout_width="fill_parent"
+            android:layout_height="5dp"
+            android:id="@+id/space8"
+            android:layout_marginBottom="48dp"
+            android:layout_above="@+id/newScanStartScan"
+            android:layout_alignParentStart="true" />
+
+        <NumberPicker
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/newScanRateNumber"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/ScanName"
+            android:layout_below="@+id/relativeLayout2" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
