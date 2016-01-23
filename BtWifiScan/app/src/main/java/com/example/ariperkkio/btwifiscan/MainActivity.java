@@ -1,8 +1,12 @@
 package com.example.ariperkkio.btwifiscan;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -21,6 +25,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private TextView scanNumber;
     private TextView btNumber;
     private TextView wifiNumber;
+    private final int REQ_COARSE_LOCATION = 101; // Required for MM
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +54,28 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Log.e("DB: ", e.toString());
         }
 
+        // Check if device running MM
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_COARSE_LOCATION);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch(requestCode) {
+            case REQ_COARSE_LOCATION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.e("Permission ", "Coarse Location OK");
+                }
+                else {
+                    Toast.makeText(this, "Permission for location is required for scanning in MM", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Please restart application and allow location access", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
     }
 
     public void onClick (View v) {
