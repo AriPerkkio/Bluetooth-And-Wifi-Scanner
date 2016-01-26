@@ -66,7 +66,7 @@
         android:text="Wifi networks found: "
         android:id="@+id/ScanWifiFoundText"
         android:textColor="@color/mainColorCyan"
-        android:layout_below="@+id/ScanNameText"
+        android:layout_below="@+id/ScanLocationText"
         android:layout_toEndOf="@+id/space19" />
 
     <TextView
@@ -128,9 +128,9 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="0"
         android:id="@+id/ScanWifiFound"
-        android:layout_below="@+id/ScanName"
-        android:layout_toEndOf="@+id/ScanWifiFoundText"
-        android:textColor="@color/mainColorCyan" />
+        android:textColor="@color/mainColorCyan"
+        android:layout_below="@+id/ScanLocationText"
+        android:layout_toEndOf="@+id/ScanWifiFoundText" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -163,5 +163,25 @@
         android:layout_toStartOf="@+id/space21"
         android:textColor="@color/mainColorCyan"
         android:background="@android:color/background_dark" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Location: "
+        android:id="@+id/ScanLocationText"
+        android:layout_below="@+id/ScanNameText"
+        android:layout_toEndOf="@+id/space19"
+        android:textColor="@color/mainColorCyan" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="(0.00, 0.00)"
+        android:id="@+id/ScanLocation"
+        android:textColor="@color/mainColorCyan"
+        android:layout_below="@+id/ScanNameText"
+        android:layout_toEndOf="@+id/ScanLocationText" />
 
 </RelativeLayout>

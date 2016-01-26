@@ -24,7 +24,7 @@
         android:layout_above="@+id/resultDetailsBack"
         android:layout_centerHorizontal="true"
         android:id="@+id/space39"
-        android:layout_below="@+id/linearLayout5" />
+        android:layout_below="@+id/linearLayout6" />
 
     <Space
         android:layout_width="20dp"
@@ -42,7 +42,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
+        android:layout_height="10dp"
         android:id="@+id/space36"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
@@ -65,7 +65,7 @@
             android:text="MainOne"
             android:id="@+id/resultDetailsMainOne"
             android:textColor="@color/mainColorCyan"
-            android:textSize="35dp"
+            android:textSize="25dp"
             android:textAlignment="center"
             android:layout_alignStart="@+id/resultDetailsFive"
             android:layout_gravity="center_horizontal" />
@@ -77,7 +77,7 @@
             android:text="FieldOne"
             android:id="@+id/resultDetailsOne"
             android:textColor="@color/mainColorCyan"
-            android:textSize="25dp"
+            android:textSize="20dp"
             android:textAlignment="center"
             android:textIsSelectable="false"
             android:layout_below="@+id/resultDetailsMainOne"
@@ -88,7 +88,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
+        android:layout_height="15dp"
         android:id="@+id/space40"
         android:layout_below="@+id/linearLayout"
         android:layout_alignParentStart="true" />
@@ -111,7 +111,7 @@
             android:text="MainTwo"
             android:id="@+id/resultDetailsMainTwo"
             android:textColor="@color/mainColorCyan"
-            android:textSize="35dp"
+            android:textSize="25dp"
             android:textAlignment="center"
             android:layout_alignTop="@+id/resultDetailsTwo"
             android:layout_alignEnd="@+id/resultDetailsMainFour"
@@ -124,7 +124,7 @@
             android:text="FieldTwo"
             android:id="@+id/resultDetailsTwo"
             android:textColor="@color/mainColorCyan"
-            android:textSize="25dp"
+            android:textSize="20dp"
             android:textAlignment="center"
             android:layout_above="@+id/resultDetailsBack"
             android:layout_alignStart="@+id/resultDetailsFive"
@@ -133,7 +133,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
+        android:layout_height="15dp"
         android:id="@+id/space41"
         android:layout_below="@+id/linearLayout2"
         android:layout_centerHorizontal="true" />
@@ -156,7 +156,7 @@
             android:text="MainThree"
             android:id="@+id/resultDetailsMainThree"
             android:textColor="@color/mainColorCyan"
-            android:textSize="35dp"
+            android:textSize="25dp"
             android:textAlignment="center"
             android:layout_alignTop="@+id/resultDetailsTwo"
             android:layout_toEndOf="@+id/space37"
@@ -169,7 +169,7 @@
             android:text="FieldThree"
             android:id="@+id/resultDetailsThree"
             android:textColor="@color/mainColorCyan"
-            android:textSize="25dp"
+            android:textSize="20dp"
             android:textAlignment="center"
             android:layout_alignBottom="@+id/space39"
             android:layout_toEndOf="@+id/space37"
@@ -179,7 +179,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
+        android:layout_height="15dp"
         android:id="@+id/space42"
         android:layout_below="@+id/linearLayout3"
         android:layout_centerHorizontal="true" />
@@ -202,7 +202,7 @@
             android:text="MainFour"
             android:id="@+id/resultDetailsMainFour"
             android:textColor="@color/mainColorCyan"
-            android:textSize="35dp"
+            android:textSize="25dp"
             android:textAlignment="center"
             android:layout_above="@+id/resultDetailsBack"
             android:layout_alignParentStart="true"
@@ -215,7 +215,7 @@
             android:text="MainFour"
             android:id="@+id/resultDetailsFour"
             android:textColor="@color/mainColorCyan"
-            android:textSize="25dp"
+            android:textSize="20dp"
             android:textAlignment="center"
             android:layout_alignTop="@+id/resultDetailsTwo"
             android:layout_toEndOf="@+id/space37"
@@ -225,7 +225,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
+        android:layout_height="15dp"
         android:id="@+id/space44"
         android:layout_below="@+id/linearLayout4"
         android:layout_centerHorizontal="true" />
@@ -248,7 +248,7 @@
             android:text="MainFive"
             android:id="@+id/resultDetailsMainFive"
             android:textColor="@color/mainColorCyan"
-            android:textSize="35dp"
+            android:textSize="25dp"
             android:textAlignment="center"
             android:layout_above="@+id/resultDetailsMainTwo"
             android:layout_alignParentLeft="true"
@@ -261,12 +261,57 @@
             android:text="FieldFive"
             android:id="@+id/resultDetailsFive"
             android:textColor="@color/mainColorCyan"
-            android:textSize="25dp"
+            android:textSize="20dp"
             android:textAlignment="center"
             android:layout_alignTop="@+id/resultDetailsMainFour"
             android:layout_alignEnd="@+id/resultDetailsFour"
             android:layout_gravity="center_horizontal" />
 
+    </LinearLayout>
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="15dp"
+        android:id="@+id/space43"
+        android:layout_below="@+id/linearLayout5"
+        android:layout_centerHorizontal="true" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/material_blue_grey_900"
+        android:id="@+id/linearLayout6"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_below="@+id/space43"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="MainSix"
+            android:id="@+id/resultDetailsMainSix"
+            android:textColor="@color/mainColorCyan"
+            android:textSize="25dp"
+            android:textAlignment="center"
+            android:layout_above="@+id/resultDetailsMainTwo"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center_horizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="FieldSix"
+            android:id="@+id/resultDetailsSix"
+            android:textColor="@color/mainColorCyan"
+            android:textSize="20dp"
+            android:textAlignment="center"
+            android:layout_alignTop="@+id/resultDetailsMainFour"
+            android:layout_alignEnd="@+id/resultDetailsFour"
+            android:layout_gravity="center_horizontal" />
     </LinearLayout>
 
 </RelativeLayout>
