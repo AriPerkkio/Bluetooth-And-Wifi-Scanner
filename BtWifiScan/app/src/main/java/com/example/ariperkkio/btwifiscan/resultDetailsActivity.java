@@ -7,6 +7,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 // This Activity can be accessed from subPrevScanActivity and scanActivity
 // Both are passing same extras, identified by 'technology' field
@@ -23,7 +24,9 @@ public class resultDetailsActivity extends Activity implements View.OnClickListe
     TextView fieldFour;
     TextView mainFive;
     TextView fieldFive;
-    LinearLayout layoutFive;
+    TextView mainSix;
+    TextView fieldSix;
+    LinearLayout layoutSix;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +50,9 @@ public class resultDetailsActivity extends Activity implements View.OnClickListe
         fieldFour = (TextView) findViewById(R.id.resultDetailsFour);
         mainFive = (TextView) findViewById(R.id.resultDetailsMainFive);
         fieldFive = (TextView) findViewById(R.id.resultDetailsFive);
-        layoutFive = (LinearLayout) findViewById(R.id.linearLayout5);
+        mainSix = (TextView) findViewById(R.id.resultDetailsMainSix);
+        fieldSix = (TextView) findViewById(R.id.resultDetailsSix);
+        layoutSix = (LinearLayout) findViewById(R.id.linearLayout6);
 
         // If attribute is null or empty, set it as <attribute not scanned>. Otherwise set requested attribute as value.
         // NOTE: Checking for null must be first, otherwise null pointer exception may happen
@@ -72,7 +77,17 @@ public class resultDetailsActivity extends Activity implements View.OnClickListe
                 fieldFour.setText("<attribute not scanned>");
             else
                 fieldFour.setText(getIntent().getExtras().getString("btRSSI")+"dBm");
-            layoutFive.setVisibility(View.GONE); // Bluetooth scans have no fifth attribute
+            mainFive.setText("Location");
+            if(getIntent().getExtras().getString("location") == null || getIntent().getExtras().getString("location").equals(""))
+                fieldFive.setText("<Location not scanned>");
+            else
+            {
+                String[] location = getIntent().getExtras().getString("location").split(",");
+                double latitude = Double.parseDouble(location[0]);
+                double longitude = Double.parseDouble(location[1]);
+                fieldFive.setText("Latitude: " +latitude+ "\nLongitude: " +longitude);
+            }
+            layoutSix.setVisibility(View.GONE);
         }
 
         if(getIntent().getExtras().getString("technology") != null && getIntent().getExtras().getString("technology").equals("Wifi")){
@@ -101,6 +116,15 @@ public class resultDetailsActivity extends Activity implements View.OnClickListe
                 fieldFive.setText("<attribute not scanned>");
             else
                 fieldFive.setText(getIntent().getExtras().getString("wifiRSSI") +"dBm");
+            mainSix.setText("Location");
+            if(getIntent().getExtras().getString("location") == null || getIntent().getExtras().getString("location").equals(""))
+                fieldSix.setText("<Location not scanned>");
+            else {
+                String[] location = getIntent().getExtras().getString("location").split(",");
+                double latitude = Double.parseDouble(location[0]);
+                double longitude = Double.parseDouble(location[1]);
+                fieldSix.setText("Latitude: " + latitude + "\nLongitude: " + longitude);
+            }
         }
     }
 

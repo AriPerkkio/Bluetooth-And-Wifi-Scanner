@@ -130,23 +130,25 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         intent = new Intent(subPrevScanActivity.this, resultDetailsActivity.class);
 
         // Fill in details of selected scan
-        // Bt has 5 columns, wifi has 6
+        // Bt has 6 columns, wifi has 7
         // Using technology to id which attributes to getExtra
-        if(selectedObject.getColumnCount()==5) {
+        if(selectedObject.getColumnCount()==6) {
             intent.putExtra("technology", "Bluetooth");
             intent.putExtra("btDevName", selectedObject.getString(1));
             intent.putExtra("btDevAddr", selectedObject.getString(2));
             intent.putExtra("btDevType", selectedObject.getString(3));
             intent.putExtra("btRSSI", selectedObject.getString(4));
+            intent.putExtra("location", selectedObject.getString(5));
         }
 
-        if(selectedObject.getColumnCount()==6) {
+        if(selectedObject.getColumnCount()==7) {
             intent.putExtra("technology", "Wifi");
             intent.putExtra("wifiSSID", selectedObject.getString(1));
             intent.putExtra("wifiBSSID", selectedObject.getString(2));
             intent.putExtra("wifiCapabilities", selectedObject.getString(3));
             intent.putExtra("wifiFrequency", selectedObject.getString(4));
             intent.putExtra("wifiRSSI", selectedObject.getString(5));
+            intent.putExtra("location", selectedObject.getString(6));
         }
         startActivity(intent); // Start resultDetailsActivity but keep this one alive
     }
@@ -218,8 +220,8 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
             TextView fieldFive = (TextView) view.findViewById(R.id.scanrowFive);
             TextView fieldSix = (TextView) view.findViewById(R.id.scanrowSix);
 
-            // Bluetooth rows have 5 columns
-            if (cursor.getColumnCount() == 5) {
+            // Bluetooth rows have 6 columns
+            if (cursor.getColumnCount() == 6) {
                 icon.setImageResource(R.drawable.bticon);
                 fieldOne.setText(cursor.getString(1));
                 fieldTwo.setText("");
@@ -232,8 +234,8 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                     fieldSix.setText("RSSI: " + cursor.getString(4) + " dBm");
             }
 
-            // Wifi results have 6 rows
-            if (cursor.getColumnCount()==6) {
+            // Wifi results have 7 rows
+            if (cursor.getColumnCount()==7) {
                 icon.setImageResource(R.drawable.wifiicon);
                 fieldOne.setText(cursor.getString(1));
                 fieldTwo.setText(cursor.getString(2));

@@ -1,5 +1,6 @@
 package com.example.ariperkkio.btwifiscan;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -7,11 +8,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -19,12 +25,14 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class scanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener {
+public class scanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener, LocationListener {
 
     // General
     private Button endScan; // 'End scanning' button
@@ -33,6 +41,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private TextView scanName;
     private TextView scanFoundBt;
     private TextView scanFoundWifi;
+    private TextView scanLocation;
     private Intent intent;
     private ListView scanResultList;
     private customAdapter listAdapter;
@@ -72,6 +81,12 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private boolean wifiFrequency;
     private boolean wifiRSSI;
 
+    // Location
+    private LocationManager locationManager;
+    private String latitude = "0";
+    private String longitude = "0";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,6 +108,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         scanName = (TextView) findViewById(R.id.ScanName);
         scanFoundBt = (TextView) findViewById(R.id.ScanBtFound);
         scanFoundWifi = (TextView) findViewById(R.id.ScanWifiFound);
+        scanLocation = (TextView) findViewById(R.id.ScanLocation);
 
         // Scanning objects
         btAdapter = BluetoothAdapter.getDefaultAdapter(); // Get local bluetooth adapter
@@ -127,7 +143,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
         backgroundSaver = new saveResultsBackground();
         backgroundScanner = new scanWithSampleRate();
-        backgroundScanner.execute(sampleRate); // Start scanning in background. New sample every samplerate time
+        setUpLocation();
     }
 
     // BroadcastReceiver to receive data from btDiscrovery
@@ -157,7 +173,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                     Log.e("BtADD", "Adding new BtDevice");
                     // Create new scanResult with correct constructor, add object to List
                     try{
-                        scanresults.add(new scanResult(deviceName, address, type, btDeviceRSSI));
+                        scanresults.add(new scanResult(deviceName, address, type, btDeviceRSSI, latitude+" ,"+longitude));
                         listAdapter.notifyDataSetChanged(); // Refresh list
                         numberOfBtDevices++; // Increase number of devices
                         scanFoundBt.setText(numberOfBtDevices + ""); // Update text with new number of devices
@@ -168,6 +184,38 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             }
         }
     }; //End BroadcastReceiver
+
+    private void setUpLocation() {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED)) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, sampleRate*500, 1, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, sampleRate*500, 1, this);
+            progressDialog = new ProgressDialog(scanActivity.this);
+            progressDialog.setMessage("Getting location...");
+            progressDialog.show();
+            progressDialog.setCanceledOnTouchOutside(false); // Force dialog show (disable click responsive)
+        }
+    }
+
+    // LocationListeners methods
+    public void onProviderEnabled(String provider) { }
+    public void onProviderDisabled(String provider) { }
+    public void onStatusChanged(String provider, int status, Bundle extras) { }
+
+    public void onLocationChanged(Location location){
+
+        if (latitude == "0" && longitude == "0") // Initial launch
+        {
+            progressDialog.hide();
+            backgroundScanner.execute(sampleRate); // Start scanning in background. New sample every samplerate time
+        }
+        if (location != null){
+            latitude = "" + location.getLatitude();
+            longitude = "" + location.getLongitude();
+            scanLocation.setText("(" + String.format("%.4f", location.getLatitude()) + ", " + String.format("%.4f", location.getLongitude()) + ")");
+        }
+    }
 
     public void onClick(View v) {
         switch (v.getId()) {
@@ -198,6 +246,8 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
         // Fill in details of selected scan
         intent.putExtra("technology", selectedObject.getTechnology());
+        intent.putExtra("location", selectedObject.getLocation());
+
         intent.putExtra("btDevName", selectedObject.getBtDevName());
         intent.putExtra("btDevAddr", selectedObject.getBtDevAddr());
         intent.putExtra("btDevType", selectedObject.getBtDevType());
@@ -288,7 +338,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                         if (!checkIfScanned(wifiScanResults.get(i).BSSID)) {
                             numberOfWifiNetworks++;
                             // Pass new scanResult wifiNetwork to UI thread
-                            publishProgress(new scanResult(SSID, BSSID, capabilities, frequency, RSSI));
+                            publishProgress(new scanResult(SSID, BSSID, capabilities, frequency, RSSI, latitude+" ,"+longitude));
                         }
                     }
                 } //Scanning done
@@ -339,11 +389,12 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 for (int i = 0; i < resultList[0].size(); i++) {
                     if (resultList[0].get(i).getTechnology().equals("Bluetooth"))
                         database.insertIntoBtResults(scanId, resultList[0].get(i).getBtDevName(),
-                                resultList[0].get(i).getBtDevAddr(), resultList[0].get(i).getBtDevType(), resultList[0].get(i).getBtRSSI());
+                                resultList[0].get(i).getBtDevAddr(), resultList[0].get(i).getBtDevType(),
+                                resultList[0].get(i).getBtRSSI(), resultList[0].get(i).getLocation());
                     if (resultList[0].get(i).getTechnology().equals("Wifi")) {
                         database.insertIntoWifiResults(scanId, resultList[0].get(i).getWifiSSID(),
                                 resultList[0].get(i).getWifiBSSID(), resultList[0].get(i).getWifiCapabilities(),
-                                resultList[0].get(i).getWifiFrequency(), resultList[0].get(i).getWifiRSSI());
+                                resultList[0].get(i).getWifiFrequency(), resultList[0].get(i).getWifiRSSI(), resultList[0].get(i).getLocation());
                     }
                     publishProgress(i); //Update current progress
                 }

@@ -8,6 +8,9 @@ public class scanResult {
     // Specifies if wifi or bt
     public String technology;
 
+    // Location (Latitude, Longitude). Saved as String, then parsed and converted to double
+    public String location;
+
     // Bt attributes
     public String btDevName;
     public String btDevAddr;
@@ -22,11 +25,12 @@ public class scanResult {
     public int wifiRSSI;
 
     // Constructoor for Bt
-    public scanResult(String btDevName, String btDevAddr, int btDevType, int btRSSI) {
+    public scanResult(String btDevName, String btDevAddr, int btDevType, int btRSSI, String location) {
         this.technology = "Bluetooth";
         this.btDevName = btDevName;
         this.btDevAddr = btDevAddr;
         this.btRSSI = btRSSI;
+        this.location = location;
 
         switch(btDevType) { // Convert int getType() into correct string
             case(0):
@@ -52,13 +56,14 @@ public class scanResult {
     }
 
     // Constructoor for Wifi
-    public scanResult(String wifiSSID, String wifiBSSID, String wifiCapabilities, int wifiFrequency, int wifiRSSI) {
+    public scanResult(String wifiSSID, String wifiBSSID, String wifiCapabilities, int wifiFrequency, int wifiRSSI, String location) {
         this.technology = "Wifi";
         this.wifiSSID = wifiSSID;
         this.wifiBSSID = wifiBSSID;
         this.wifiCapabilities = wifiCapabilities;
         this.wifiFrequency = wifiFrequency;
         this.wifiRSSI = wifiRSSI;
+        this.location = location;
     }
 
     // Getters and setters for each attribute
@@ -102,4 +107,6 @@ public class scanResult {
     public int getWifiRSSI() {
         return wifiRSSI;
     }
+
+    public String getLocation() { return location; }
 }
