@@ -25,7 +25,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private TextView scanNumber;
     private TextView btNumber;
     private TextView wifiNumber;
-    private final int REQ_COARSE_LOCATION = 101; // Required for MM
+    private final int REQ_FINE_LOCATION = 102;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +56,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         // Check if device running MM
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+            if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_COARSE_LOCATION);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQ_FINE_LOCATION);
             }
         }
     }
@@ -66,15 +66,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch(requestCode) {
-            case REQ_COARSE_LOCATION:
+            case REQ_FINE_LOCATION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.e("Permission ", "Coarse Location OK");
+                    Log.e("Permission ", "FINE Location OK");
                 }
                 else {
-                    Toast.makeText(this, "Permission for location is required for scanning in MM", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Permission for fine location is required for all features", Toast.LENGTH_LONG).show();
                     Toast.makeText(this, "Please restart application and allow location access", Toast.LENGTH_SHORT).show();
                 }
-                break;
+            break;
         }
     }
 
