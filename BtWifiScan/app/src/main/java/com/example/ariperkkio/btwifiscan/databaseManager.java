@@ -27,6 +27,7 @@ public class databaseManager {
     public static final String btResults_DevAddr = "DeviceAddress";
     public static final String btResults_DevType = "DeviceType";
     public static final String btResults_RSSI = "RSSI";
+    public static final String btResults_Location = "Location";
 
     // Table WifiResults and its rows
     private static final String DATABASE_TABLE_WIFIRESULTS = "WifiResults";
@@ -36,8 +37,9 @@ public class databaseManager {
     public static final String wifiResults_Capabilities = "Capabilities";
     public static final String wifiResults_RSSI = "RSSI";
     public static final String wifiResults_Frequency = "Frequency";
+    public static final String wifiResults_Location = "Location";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private static final String CREATE_TABLE_SCANS =
             "CREATE TABLE Scans(_id INTEGER PRIMARY KEY AUTOINCREMENT, "+
@@ -49,6 +51,7 @@ public class databaseManager {
                                             "DeviceAddress TEXT, "+
                                             "DeviceType TEXT, "+
                                             "RSSI INTEGER, " +
+                                            "Location TEXT, "+
                                             "FOREIGN KEY (_id) REFERENCES Scans(_id))";
     private static final String CREATE_TABLE_WIFIRESULTS =
             "CREATE TABLE WifiResults(_id integer, "+
@@ -57,6 +60,7 @@ public class databaseManager {
                                         "Capabilities TEXT, "+
                                         "RSSI INTEGER, " +
                                         "Frequency INTEGER, "+
+                                        "Location TEXT, "+
                                         "FOREIGN KEY (_id) REFERENCES Scans(_id))";
 
     private final Context context;
@@ -102,23 +106,24 @@ public class databaseManager {
     }
 
     public long insertIntoScans(String scanName) {
-        // ScanId is Autoincremented, Time is CURRENT_DATE by default
+        // ScanId is Auto incremented, Time is CURRENT_DATE by default
         ContentValues initialValues = new ContentValues();
         initialValues.put(scans_ScanName, scanName);
         return db.insert(DATABASE_TABLE_SCANS, null, initialValues);
     }
 
-    public long insertIntoBtResults(int idScans, String DeviceName, String DeviceAddres, String DeviceType, int RSSI){
+    public long insertIntoBtResults(int idScans, String DeviceName, String DeviceAddres, String DeviceType, int RSSI, String Location){
         ContentValues initialValues = new ContentValues();
         initialValues.put(btResults_ScanId, idScans);
         initialValues.put(btResults_DevName, DeviceName);
         initialValues.put(btResults_DevAddr, DeviceAddres);
         initialValues.put(btResults_DevType, DeviceType);
         initialValues.put(btResults_RSSI, RSSI);
+        initialValues.put(btResults_Location, Location);
         return db.insert(DATABASE_TABLE_BTRESULTS, null, initialValues);
     }
 
-    public long insertIntoWifiResults(int idScans, String SSID, String BSSID, String Capabilities, int Frequency, int RSSI){
+    public long insertIntoWifiResults(int idScans, String SSID, String BSSID, String Capabilities, int Frequency, int RSSI, String Location){
         ContentValues initialValues = new ContentValues();
         initialValues.put(wifiResults_ScanId, idScans);
         initialValues.put(wifiResults_SSID, SSID);
@@ -126,6 +131,7 @@ public class databaseManager {
         initialValues.put(wifiResults_Capabilities, Capabilities);
         initialValues.put(wifiResults_Frequency, Frequency);
         initialValues.put(wifiResults_RSSI, RSSI);
+        initialValues.put(wifiResults_Location, Location);
         return db.insert(DATABASE_TABLE_WIFIRESULTS, null, initialValues);
     }
 
@@ -160,7 +166,7 @@ public class databaseManager {
 
     public Cursor getBtResultsById(int rowId) throws SQLException {
         Cursor mCursor = db.query(true, DATABASE_TABLE_BTRESULTS, new String[]{
-                btResults_ScanId, btResults_DevName, btResults_DevAddr, btResults_DevType, btResults_RSSI}, btResults_ScanId + "=" + rowId, null, null, null, null, null);
+                btResults_ScanId, btResults_DevName, btResults_DevAddr, btResults_DevType, btResults_RSSI, btResults_Location}, btResults_ScanId + "=" + rowId, null, null, null, null, null);
         if(mCursor!=null) {
             mCursor.moveToFirst();
         }
@@ -169,7 +175,7 @@ public class databaseManager {
 
     public Cursor getWifiResultsById(int rowId) throws SQLException {
         Cursor mCursor = db.query(true, DATABASE_TABLE_WIFIRESULTS, new String[] {
-                wifiResults_ScanId, wifiResults_SSID, wifiResults_BSSID, wifiResults_Capabilities, wifiResults_Frequency, wifiResults_RSSI}, wifiResults_ScanId + "=" + rowId, null, null, null, null, null);
+                wifiResults_ScanId, wifiResults_SSID, wifiResults_BSSID, wifiResults_Capabilities, wifiResults_Frequency, wifiResults_RSSI, wifiResults_Location}, wifiResults_ScanId + "=" + rowId, null, null, null, null, null);
         if(mCursor!=null) {
             mCursor.moveToFirst();
         }
@@ -200,6 +206,7 @@ public class databaseManager {
         db.delete(DATABASE_TABLE_WIFIRESULTS, "_id=" + scanId, null);
     }
 
+    // TODO: Add location as parameter when deleting result
     public void deleteResult(int scanId, String technology, String address){
         if(technology.equals("Bluetooth"))
             db.delete(DATABASE_TABLE_BTRESULTS,"_id="+scanId+" AND DeviceAddress='"+address+"'" ,null);
