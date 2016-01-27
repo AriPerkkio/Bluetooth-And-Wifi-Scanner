@@ -157,4 +157,16 @@
         android:layout_above="@+id/space34"
         android:layout_toEndOf="@+id/space32"
         android:layout_toStartOf="@+id/space35" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Map"
+        android:id="@+id/subPrevScanMap"
+        android:textColor="@color/mainColorCyan"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:background="@android:color/background_dark"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

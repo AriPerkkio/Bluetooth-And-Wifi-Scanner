@@ -184,4 +184,14 @@
         android:layout_below="@+id/ScanNameText"
         android:layout_toEndOf="@+id/ScanLocationText" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Map"
+        android:id="@+id/ScanMap"
+        android:textColor="@color/mainColorCyan"
+        android:background="@android:color/background_dark"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>

@@ -1,8 +1,9 @@
 <resources>
-    <string name="app_name">BtWifiScan</string>
+    <string name="app_name">Bluetooth and Wifi Scanner</string>
     <string name="title_activity_new_scan">newScanActivity</string>
     <string name="title_activity_scan">scanActivity</string>
     <string name="title_activity_previous_scans">previousScansActivity</string>
     <string name="title_activity_sub_prev_scan">subPrevScanActivity</string>
     <string name="title_activity_result_details">resultDetailsActivity</string>
+    <string name="title_activity_scan_map">Map</string>
 </resources>
