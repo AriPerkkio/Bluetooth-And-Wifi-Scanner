@@ -38,6 +38,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private Button endScan; // 'End scanning' button
     private Button save; // 'Save' button
     private Button dontSave; // 'Don't save' button
+    private Button map;
     private TextView scanName;
     private TextView scanFoundBt;
     private TextView scanFoundWifi;
@@ -103,6 +104,8 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         dontSave.setOnClickListener(this);
         save.setVisibility(View.GONE); //Not visible until scan ended
         dontSave.setVisibility(View.GONE); //Not visible until scan ended
+        map = (Button) findViewById(R.id.ScanMap);
+        map.setOnClickListener(this);
 
         // Text Fields
         scanName = (TextView) findViewById(R.id.ScanName);
@@ -205,7 +208,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
     public void onLocationChanged(Location location){
 
-        if (latitude == "0" && longitude == "0") // Initial launch
+        if (latitude.equals("0") && longitude.equals("0")) // Initial launch
         {
             progressDialog.hide();
             backgroundScanner.execute(sampleRate); // Start scanning in background. New sample every samplerate time
@@ -236,6 +239,16 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Close previous activities
                 startActivity(intent);
+            break;
+
+            case (R.id.ScanMap):
+                // TODO: Use Parcelable
+                intent = new Intent(getApplicationContext(), scanMap.class);
+                intent.putExtra("Count", scanresults.size());
+                for(int i = 0;i<scanresults.size();i++)
+                    intent.putExtra("location "+i, scanresults.get(i).getLocation());
+                startActivity(intent);
+
             break;
         }
     }
