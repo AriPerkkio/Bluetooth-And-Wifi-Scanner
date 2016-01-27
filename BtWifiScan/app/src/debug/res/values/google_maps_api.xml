@@ -1,0 +1,21 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=90:5F:06:00:D0:A5:FC:43:C6:76:D2:47:C9:0E:EB:BB:0D:0F:EB:22%3Bcom.example.ariperkkio.btwifiscan
+
+    You can also add your credentials to an existing key, using this line:
+    90:5F:06:00:D0:A5:FC:43:C6:76:D2:47:C9:0E:EB:BB:0D:0F:EB:22;com.example.ariperkkio.btwifiscan
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
+        AIzaSyCh_mYuUumCAAE6mVhboxEVZ3GtWk2lVV8
+    </string>
+</resources>
