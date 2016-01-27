@@ -1,20 +1,34 @@
 package com.example.ariperkkio.btwifiscan;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class scanMap extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private int count;
-    private String location;
+    private int btCount, wifiCount;
     private double latitude, longitude;
 
     @Override
@@ -26,33 +40,88 @@ public class scanMap extends FragmentActivity implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        count = getIntent().getExtras().getInt("Count");
+        btCount = getIntent().getExtras().getInt("BtCount");
+        wifiCount = getIntent().getExtras().getInt("WifiCount");
+
+        if(getIntent().getExtras().getString("Caller") != null && getIntent().getExtras().getString("Caller").equals("class com.example.ariperkkio.btwifiscan.subPrevScanActivity"))
+            subPrevScanActivity.mapsProgressDialog.hide();
+        if(getIntent().getExtras().getString("Caller") != null && getIntent().getExtras().getString("Caller").equals("class com.example.ariperkkio.btwifiscan.scanActivity"))
+            scanActivity.mapsProgressDialog.hide();
 
     }
 
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        // TODO: Use Parcelable
-        for(int i = 0; i<count;i++){
-            String[] location = getIntent().getExtras().getString("location "+i).split(",");
-            latitude = Double.parseDouble(location[0]);
-            longitude = Double.parseDouble(location[1]);
-            mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title("Marker "+i));
+        for(int i = 0; i<wifiCount;i++){
+            String wifiNetwork = getIntent().getExtras().getString("wifi "+i);
+            if(wifiNetwork!=null) {
+                String[] attributes = wifiNetwork.split("\n");
+                String[] location = attributes[5].split(",");
 
+                latitude = Double.parseDouble(location[0]);
+                longitude = Double.parseDouble(location[1]);
+                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+                        .title("SSID: "+attributes[0])
+                        .snippet("BSSID: "+attributes[1] + "\n" +
+                                "Capabilities: "+attributes[2] + "\n" +
+                                "Frequency: "+attributes[3] + "MHz\n" +
+                                "RSSI: "+attributes[4] + "dbm")
+                        .icon((BitmapDescriptorFactory.fromResource(R.mipmap.wifiicon))));
+            }
         }
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude)));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 10));
 
+        for(int i = 0; i<btCount;i++){
+            String btDevice = getIntent().getExtras().getString("bluetooth "+i);
+            if(btDevice != null) {
+                String[] attributes = btDevice.split("\n");
+                String[] location = attributes[4].split(",");
+
+                latitude = Double.parseDouble(location[0]);
+                longitude = Double.parseDouble(location[1]);
+                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+                        .title("Name: "+attributes[0])
+                        .snippet("Address: "+attributes[1] + "\n" +
+                                "Type: "+attributes[2] + "\n" +
+                                "RSSI: "+attributes[3] + "dBm")
+                        .icon((BitmapDescriptorFactory.fromResource(R.mipmap.bticon))));
+            }
+        }
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude)));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 13));
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+
+                Context context = getApplicationContext(); //or getActivity(), YourActivity.this, etc.
+
+                LinearLayout info = new LinearLayout(context);
+                info.setOrientation(LinearLayout.VERTICAL);
+
+                TextView title = new TextView(context);
+                title.setTextColor(Color.BLACK);
+                title.setGravity(Gravity.CENTER);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setText(marker.getTitle());
+
+                TextView snippet = new TextView(context);
+                snippet.setTextColor(Color.GRAY);
+                snippet.setText(marker.getSnippet());
+
+                info.addView(title);
+                info.addView(snippet);
+
+                return info;
+            }
+        });
     }
+
+
 }

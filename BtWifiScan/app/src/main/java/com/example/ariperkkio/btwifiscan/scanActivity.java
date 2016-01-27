@@ -86,6 +86,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private LocationManager locationManager;
     private String latitude = "0";
     private String longitude = "0";
+    public static ProgressDialog mapsProgressDialog;
 
 
     @Override
@@ -116,6 +117,11 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         // Scanning objects
         btAdapter = BluetoothAdapter.getDefaultAdapter(); // Get local bluetooth adapter
         wifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
+
+        // Location
+        mapsProgressDialog = new ProgressDialog(scanActivity.this);
+        mapsProgressDialog.setMessage("Setting up maps... ");
+        mapsProgressDialog.hide();
 
         // Get options for Bluetooth scanning
         if (btStatus = getIntent().getExtras().getBoolean("btStatus")) {
@@ -242,11 +248,37 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             break;
 
             case (R.id.ScanMap):
-                // TODO: Use Parcelable
+                mapsProgressDialog.show();
+                mapsProgressDialog.setCanceledOnTouchOutside(false); // Force dialog show (disable click responsive)
                 intent = new Intent(getApplicationContext(), scanMap.class);
-                intent.putExtra("Count", scanresults.size());
-                for(int i = 0;i<scanresults.size();i++)
-                    intent.putExtra("location "+i, scanresults.get(i).getLocation());
+                intent.putExtra("Caller",this.getClass().toString());
+                intent.putExtra("BtCount", Integer.parseInt(scanFoundBt.getText().toString()));
+                intent.putExtra("WifiCount", Integer.parseInt(scanFoundWifi.getText().toString()));
+                int wifiCounter = 0;
+                int btCounter = 0;
+
+                for (int i = 0; i < scanresults.size(); i++){
+                    if(scanresults.get(i).getTechnology().equals("Wifi")){
+                        intent.putExtra("wifi " + wifiCounter,
+                                        scanresults.get(i).getWifiSSID() + "\n" +
+                                        scanresults.get(i).getWifiBSSID() + "\n" +
+                                        scanresults.get(i).getWifiCapabilities() + "\n" +
+                                        scanresults.get(i).getWifiFrequency() + "\n" +
+                                        scanresults.get(i).getWifiRSSI() + "\n" +
+                                        scanresults.get(i).getLocation());
+                        wifiCounter++;
+                    }
+                    else{
+                        intent.putExtra("bluetooth " + btCounter,
+                                        scanresults.get(i).getBtDevName() + "\n" +
+                                        scanresults.get(i).getBtDevAddr() + "\n" +
+                                        scanresults.get(i).getBtDevType() + "\n" +
+                                        scanresults.get(i).getBtRSSI() + "\n" +
+                                        scanresults.get(i).getLocation());
+                        btCounter++;
+
+                    }
+                }
                 startActivity(intent);
 
             break;

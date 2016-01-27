@@ -1,6 +1,7 @@
 package com.example.ariperkkio.btwifiscan;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,6 +39,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
     private int numberOfBtDevices = 0;
     private int numberOfWifiNetworks = 0;
     private int scanId;
+    public static ProgressDialog mapsProgressDialog;
 
     private ListView list;
     private databaseManager database;
@@ -93,22 +95,26 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         listAdapter = new subPrevScanCursorAdapter(this, bothCursors, 0);
         list.setAdapter(listAdapter);
         btNumber.setText(numberOfBtDevices + ""); // Setting as int only causes crashing
-        wifiNumber.setText(numberOfWifiNetworks+"");
+        wifiNumber.setText(numberOfWifiNetworks + "");
+
+        mapsProgressDialog = new ProgressDialog(subPrevScanActivity.this);
+        mapsProgressDialog.setMessage("Setting up maps... ");
+        mapsProgressDialog.hide();
     }
 
     public void onClick(View v) {
-        switch(v.getId()){
+        switch(v.getId()) {
 
             case (R.id.subPrevScanBack): // 'Back' button
                 finish();
-            break;
+                break;
 
             case (R.id.subPrevScanRename): // 'Rename' button
 
-                if(scanNameField.getText().toString().equals("")) // Check if empty name
+                if (scanNameField.getText().toString().equals("")) // Check if empty name
                     Toast.makeText(this, "Scan name can't be empty.", Toast.LENGTH_SHORT).show();
-                // Check if rename has been pressed without making changes to scan name
-                else if(scanNameField.getText().toString().equals(getIntent().getExtras().getString("scanName")))
+                    // Check if rename has been pressed without making changes to scan name
+                else if (scanNameField.getText().toString().equals(getIntent().getExtras().getString("scanName")))
                     Toast.makeText(this, "Insert new scan name first.", Toast.LENGTH_SHORT).show();
                 else {
                     try {
@@ -118,27 +124,48 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                     } catch (SQLException e) {
                         Log.e("getBtResultsById: ", e.toString());
                     }
-                    Toast.makeText(this, getIntent().getExtras().getString("scanName")+ " renamed to " +scanNameField.getText().toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getIntent().getExtras().getString("scanName") + " renamed to " + scanNameField.getText().toString(), Toast.LENGTH_SHORT).show();
                     Intent refresh = new Intent(this, previousScansActivity.class);
                     startActivity(refresh); // Start previous activity again in order to refresh list
                     this.finish();
                 }
-            break;
+                break;
 
             case (R.id.subPrevScanMap):
-                // TODO: Use Parcelable
+                mapsProgressDialog.show();
+                mapsProgressDialog.setCanceledOnTouchOutside(false); // Force dialog show (disable click responsive)
                 intent = new Intent(getApplicationContext(), scanMap.class);
-                intent.putExtra("Count", bothCursors.getCount());
+                intent.putExtra("Caller",this.getClass().toString());
+                intent.putExtra("BtCount", btCursor.getCount());
+                intent.putExtra("WifiCount", wifiCursor.getCount());
                 bothCursors.moveToFirst();
-                for(int i = 0;i<bothCursors.getCount();i++) {
-                    if(bothCursors.getColumnCount() == 6)
-                        intent.putExtra("location " + i, bothCursors.getString(5));
-                    else
-                        intent.putExtra("location " + i, bothCursors.getString(6));
-                    bothCursors.moveToNext();
-                }
-                startActivity(intent);
+                btCursor.moveToFirst();
+                wifiCursor.moveToFirst();
 
+                for (int i = 0; i < btCursor.getCount(); i++){
+                    intent.putExtra("bluetooth " + Integer.toString(i),
+                                    btCursor.getString(1) + "\n" +
+                                    btCursor.getString(2) + "\n" +
+                                    btCursor.getString(3) + "\n" +
+                                    btCursor.getString(4) + "\n" +
+                                    btCursor.getString(5));
+                    btCursor.moveToNext();
+                }
+
+                for (int i = 0; i < wifiCursor.getCount(); i++) {
+                    intent.putExtra("wifi " + i,
+                                    wifiCursor.getString(1) + "\n" +
+                                    wifiCursor.getString(2) + "\n" +
+                                    wifiCursor.getString(3) + "\n" +
+                                    wifiCursor.getString(4) + "\n" +
+                                    wifiCursor.getString(5) + "\n" +
+                                    wifiCursor.getString(6));
+                    wifiCursor.moveToNext();
+                }
+                bothCursors.moveToFirst();
+                btCursor.moveToFirst();
+                wifiCursor.moveToFirst();
+                startActivity(intent);
             break;
         }
     }
