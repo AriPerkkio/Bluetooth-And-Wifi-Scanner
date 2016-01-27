@@ -192,6 +192,8 @@
         android:textColor="@color/mainColorCyan"
         android:background="@android:color/background_dark"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentRight="true" />
 
 </RelativeLayout>
