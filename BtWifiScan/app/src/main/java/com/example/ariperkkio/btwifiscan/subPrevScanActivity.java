@@ -29,6 +29,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
 
     private Button back;
     private Button rename;
+    private Button map;
 
     private EditText scanNameField;
     private TextView scanDate;
@@ -59,6 +60,8 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         back.setOnClickListener(this);
         rename = (Button) findViewById(R.id.subPrevScanRename);
         rename.setOnClickListener(this);
+        map = (Button) findViewById(R.id.subPrevScanMap);
+        map.setOnClickListener(this);
         scanNameField = (EditText) findViewById(R.id.subPrevScanName);
         scanDate = (TextView) findViewById(R.id.subPrevScanDate);
         btNumber = (TextView) findViewById(R.id.subPrevScanBtNumber);
@@ -120,6 +123,22 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                     startActivity(refresh); // Start previous activity again in order to refresh list
                     this.finish();
                 }
+            break;
+
+            case (R.id.subPrevScanMap):
+                // TODO: Use Parcelable
+                intent = new Intent(getApplicationContext(), scanMap.class);
+                intent.putExtra("Count", bothCursors.getCount());
+                bothCursors.moveToFirst();
+                for(int i = 0;i<bothCursors.getCount();i++) {
+                    if(bothCursors.getColumnCount() == 6)
+                        intent.putExtra("location " + i, bothCursors.getString(5));
+                    else
+                        intent.putExtra("location " + i, bothCursors.getString(6));
+                    bothCursors.moveToNext();
+                }
+                startActivity(intent);
+
             break;
         }
     }
