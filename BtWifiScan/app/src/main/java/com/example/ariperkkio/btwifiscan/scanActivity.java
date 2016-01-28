@@ -198,8 +198,10 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED)) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, sampleRate*500, 1, this);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, sampleRate*500, 1, this);
+            if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, sampleRate*500, 1, this);
+            if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, sampleRate*500, 1, this);
             progressDialog = new ProgressDialog(scanActivity.this);
             progressDialog.setMessage("Getting location...");
             progressDialog.show();
@@ -233,7 +235,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 save.setVisibility(View.VISIBLE); // Show 'Save' button
                 dontSave.setVisibility(View.VISIBLE); // Show "Don't save" button
                 endScan.setVisibility(View.GONE); // Hide 'End scan' button
-                if(btAdapter.isDiscovering())
+                if(btAdapter != null && btAdapter.isDiscovering())
                     btAdapter.cancelDiscovery(); // End bt scanning if its still running
             break;
 
