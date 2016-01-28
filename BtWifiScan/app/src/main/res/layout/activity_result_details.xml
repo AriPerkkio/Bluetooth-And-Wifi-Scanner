@@ -42,7 +42,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="10dp"
+        android:layout_height="1dp"
         android:id="@+id/space36"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
@@ -88,7 +88,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="15dp"
+        android:layout_height="10dp"
         android:id="@+id/space40"
         android:layout_below="@+id/linearLayout"
         android:layout_alignParentStart="true" />
@@ -133,7 +133,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="15dp"
+        android:layout_height="10dp"
         android:id="@+id/space41"
         android:layout_below="@+id/linearLayout2"
         android:layout_centerHorizontal="true" />
@@ -179,7 +179,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="15dp"
+        android:layout_height="10dp"
         android:id="@+id/space42"
         android:layout_below="@+id/linearLayout3"
         android:layout_centerHorizontal="true" />
@@ -225,7 +225,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="15dp"
+        android:layout_height="10dp"
         android:id="@+id/space44"
         android:layout_below="@+id/linearLayout4"
         android:layout_centerHorizontal="true" />
@@ -271,7 +271,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="15dp"
+        android:layout_height="10dp"
         android:id="@+id/space43"
         android:layout_below="@+id/linearLayout5"
         android:layout_centerHorizontal="true" />
@@ -304,7 +304,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="FieldSix"
+            android:text="FieldSix\nFieldSixSecond"
             android:id="@+id/resultDetailsSix"
             android:textColor="@color/mainColorCyan"
             android:textSize="20dp"

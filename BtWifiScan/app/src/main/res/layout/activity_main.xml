@@ -18,15 +18,16 @@
         android:layout_centerHorizontal="true"
         android:textColor="#66d3fa"
         android:typeface="monospace"
-        android:textSize="28dp"
+        android:textSize="20dp"
         android:singleLine="true" />
 
     <Space
         android:layout_width="fill_parent"
         android:layout_height="20px"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/space" />
+        android:id="@+id/space"
+        android:layout_marginBottom="164dp"
+        android:layout_above="@+id/textView2"
+        android:layout_alignEnd="@+id/newScanHeader" />
 
     <!-- Bluetooth icon on main screen is from this link: -->
     <!-- https://lh4.ggpht.com/9RWhsF-_ZOxoHCKLYktrboN3UAk_UCZW5BqKKxYl2RPEg9Og7yKd5BL4ntNUNDcaoqE=w300 -->
@@ -36,8 +37,8 @@
         android:id="@+id/imageIcon"
         android:src="@drawable/icon"
         android:layout_above="@+id/space"
-        android:layout_below="@+id/newScanHeader"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/newScanHeader" />
 
     <Button
         android:layout_width="wrap_content"
@@ -48,7 +49,7 @@
         android:textColor="@color/mainColorCyan"
         android:background="@android:color/background_dark"
         android:textSize="@dimen/abc_action_bar_content_inset_material"
-        android:minHeight="100dp"
+        android:minHeight="80dp"
         android:padding="20dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true" />
@@ -73,9 +74,9 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Total number of Bluetooth devices scanned: "
         android:id="@+id/mainTextOne"
-        android:layout_marginBottom="54dp"
+        android:layout_marginBottom="27dp"
         android:textColor="@color/mainColorCyan"
-        android:layout_above="@+id/mainBtnHistory"
+        android:layout_above="@+id/mainBtnNewScan"
         android:layout_alignParentStart="true" />
 
     <TextView

@@ -16,7 +16,8 @@
             android:id="@+id/scanrowIcon"
             android:src="@mipmap/ic_launcher"
             android:layout_weight="0.03"
-            android:layout_alignBottom="@+id/scanrowThree" />
+            android:layout_alignBottom="@+id/scanrowThree"
+            android:paddingTop="2dp" />
 
         <TextView
             android:layout_width="match_parent"
@@ -30,7 +31,8 @@
             android:layout_alignParentTop="true"
             android:layout_toStartOf="@+id/scanrowFour"
             android:layout_toEndOf="@+id/scanrowIcon"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:textSize="15dp" />
 
         <TextView
             android:layout_width="match_parent"
@@ -42,7 +44,8 @@
             android:layout_alignStart="@+id/scanrowOne"
             android:textColor="@color/mainColorCyan"
             android:layout_alignEnd="@+id/scanrowOne"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:textSize="15dp" />
 
         <TextView
             android:layout_width="match_parent"
@@ -54,7 +57,8 @@
             android:layout_alignStart="@+id/scanrowTwo"
             android:textColor="@color/mainColorCyan"
             android:singleLine="true"
-            android:layout_toStartOf="@+id/scanrowSix" />
+            android:layout_toStartOf="@+id/scanrowSix"
+            android:textSize="15dp" />
 
         <Space
             android:layout_width="20dp"
@@ -88,7 +92,8 @@
             android:textColor="@color/mainColorCyan"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:textSize="15dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -99,7 +104,8 @@
             android:textColor="@color/mainColorCyan"
             android:layout_below="@+id/scanrowFour"
             android:layout_alignParentEnd="true"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:textSize="15dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -110,11 +116,12 @@
             android:textColor="@color/mainColorCyan"
             android:layout_alignTop="@+id/space24"
             android:layout_alignParentEnd="true"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:textSize="15dp" />
 
         <Space
             android:layout_width="fill_parent"
-            android:layout_height="10dp"
+            android:layout_height="2dp"
             android:layout_below="@+id/scanrowIcon"
             android:layout_alignParentStart="true"
             android:id="@+id/space25"

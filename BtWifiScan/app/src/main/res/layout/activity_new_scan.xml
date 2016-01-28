@@ -17,7 +17,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:textColor="@color/mainColorCyan"
-        android:textSize="28dp" />
+        android:textSize="20dp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -51,7 +51,7 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="20dp"
+        android:layout_height="5dp"
         android:layout_below="@+id/newScanHeader"
         android:layout_centerHorizontal="true"
         android:id="@+id/space2" />
@@ -78,14 +78,14 @@
 
     <Space
         android:layout_width="fill_parent"
-        android:layout_height="20dp"
+        android:layout_height="10dp"
         android:layout_above="@+id/newScanBack"
         android:layout_alignParentEnd="true"
         android:id="@+id/space4" />
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="20dp"
+        android:layout_height="5dp"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/newScanWifiStatusText"
         android:id="@+id/space5" />
@@ -114,7 +114,8 @@
             android:id="@+id/ScanNameText"
             android:textColor="@color/mainColorCyan"
             android:layout_below="@+id/space3"
-            android:layout_toEndOf="@+id/space11" />
+            android:layout_toEndOf="@+id/space11"
+            android:textSize="20dp" />
 
         <EditText
             android:layout_width="match_parent"
@@ -130,7 +131,7 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="20dp"
+            android:layout_height="24dp"
             android:layout_alignParentBottom="true"
             android:layout_toEndOf="@+id/ScanNameText"
             android:layout_alignParentStart="true"
@@ -143,18 +144,17 @@
             android:id="@+id/newScanStartScan"
             android:textColor="@color/mainColorCyan"
             android:background="@android:color/background_dark"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
             android:layout_gravity="right|left"
-            android:paddingTop="30dp"
-            android:paddingBottom="30dp"
-            android:layout_above="@+id/space7"
-            android:layout_toEndOf="@+id/space10"
-            android:layout_marginStart="40dp" />
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_above="@+id/space6"
+            android:layout_toStartOf="@+id/space12" />
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="20dp"
+            android:layout_height="10dp"
             android:layout_below="@+id/ScanName"
             android:layout_alignParentEnd="true"
             android:id="@+id/space9" />
@@ -166,9 +166,10 @@
             android:text="Sample rate (s): "
             android:id="@+id/newScanRateText"
             android:textColor="@color/mainColorCyan"
-            android:layout_marginBottom="74dp"
-            android:layout_alignBottom="@+id/newScanRateNumber"
-            android:layout_toEndOf="@+id/space11" />
+            android:textSize="15dp"
+            android:layout_alignBaseline="@+id/newScanStartScan"
+            android:layout_alignBottom="@+id/newScanStartScan"
+            android:layout_toStartOf="@+id/newScanRateNumber" />
 
         <Space
             android:layout_width="20dp"
@@ -180,9 +181,9 @@
         <Space
             android:layout_width="20dp"
             android:layout_height="match_parent"
-            android:layout_below="@+id/space9"
-            android:layout_alignParentStart="true"
-            android:id="@+id/space11" />
+            android:id="@+id/space11"
+            android:layout_alignBottom="@+id/relativeLayout4"
+            android:layout_alignParentStart="true" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -191,12 +192,12 @@
             android:layout_toStartOf="@+id/space10"
             android:background="@color/material_blue_grey_800"
             android:id="@+id/relativeLayout2"
-            android:layout_above="@+id/newScanRateNumber"
-            android:layout_below="@+id/space9">
+            android:layout_below="@+id/space9"
+            android:layout_above="@+id/space7">
 
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="10dp"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/space13" />
@@ -210,7 +211,7 @@
                 android:layout_centerHorizontal="true"
                 android:textColor="@color/mainColorCyan"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="@dimen/abc_text_size_display_1_material"
+                android:textSize="20dp"
                 android:enabled="true"
                 android:checked="true" />
 
@@ -219,14 +220,13 @@
                 android:layout_height="wrap_content"
                 android:text="Device name"
                 android:id="@+id/newScanDevNameChk"
-                android:layout_below="@+id/newScanBtSwitch"
-                android:layout_alignStart="@+id/newScanBtSwitch"
-                android:layout_marginTop="20dp"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textSize="15dp"
                 android:enabled="true"
-                android:checked="true" />
+                android:checked="true"
+                android:layout_below="@+id/newScanBtSwitch"
+                android:layout_alignParentStart="true" />
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -235,7 +235,7 @@
                 android:id="@+id/newScanDevAddrChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textSize="15dp"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanDevNameChk"
@@ -248,7 +248,7 @@
                 android:id="@+id/newScanDevTypChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textSize="15dp"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanDevAddrChk"
@@ -261,7 +261,7 @@
                 android:id="@+id/newScanBtRssiChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textSize="15dp"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanDevTypChk"
@@ -283,9 +283,9 @@
             android:layout_alignEnd="@+id/ScanName"
             android:layout_toEndOf="@+id/space10"
             android:layout_below="@+id/space9"
-            android:layout_alignBottom="@+id/relativeLayout2"
             android:id="@+id/relativeLayout3"
-            android:scrollIndicators="none">
+            android:scrollIndicators="none"
+            android:layout_alignBottom="@+id/space8">
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -294,10 +294,9 @@
                 android:id="@+id/newScanWifiSsidChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textSize="15dp"
                 android:enabled="true"
                 android:checked="true"
-                android:layout_marginTop="20dp"
                 android:layout_below="@+id/newScanWifiSwitch"
                 android:layout_alignStart="@+id/newScanWifiBssidChk" />
 
@@ -308,7 +307,7 @@
                 android:id="@+id/newScanWifiBssidChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textSize="15dp"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanWifiSsidChk"
@@ -321,7 +320,7 @@
                 android:id="@+id/newScanWifiCapaChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textSize="15dp"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanWifiBssidChk"
@@ -329,7 +328,7 @@
 
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="10dp"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/space14" />
@@ -341,7 +340,7 @@
                 android:id="@+id/newScanWifiSwitch"
                 android:textColor="@color/mainColorCyan"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="@dimen/abc_text_size_display_1_material"
+                android:textSize="20dp"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/space14"
@@ -355,7 +354,7 @@
                 android:id="@+id/newScanWifiRssiChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textSize="15dp"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanWifiCapaChk"
@@ -368,36 +367,95 @@
                 android:id="@+id/newScanWifiFreqChk"
                 android:textColor="@color/mainColorCyan"
                 android:buttonTint="@android:color/background_dark"
-                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textSize="15dp"
                 android:enabled="true"
                 android:checked="true"
                 android:layout_below="@+id/newScanWifiRssiChk"
                 android:layout_alignEnd="@+id/newScanWifiSwitch" />
+
         </RelativeLayout>
+
+        <Space
+            android:layout_width="fill_parent"
+            android:layout_height="5dp"
+            android:id="@+id/space8"
+            android:layout_marginBottom="20dp"
+            android:layout_above="@+id/newScanStartScan"
+            android:layout_alignParentStart="true" />
 
         <NumberPicker
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/newScanRateNumber"
-            android:layout_above="@+id/space6"
-            android:layout_toEndOf="@+id/newScanRateText"
-            android:layout_alignEnd="@+id/relativeLayout2"
-            android:layout_alignRight="@+id/newScanStartScan"
-            android:layout_toStartOf="@+id/newScanStartScan" />
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/ScanName"
+            android:layout_below="@+id/relativeLayout3"
+            android:layout_toStartOf="@+id/relativeLayout3" />
 
         <Space
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_alignEnd="@+id/relativeLayout3"
+            android:layout_width="fill_parent"
+            android:layout_height="5dp"
             android:id="@+id/space7"
-            android:layout_above="@+id/space6" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/space15"
-            android:layout_above="@+id/newScanRateNumber"
+            android:layout_marginBottom="83dp"
+            android:layout_above="@+id/space8"
             android:layout_alignParentStart="true" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/material_blue_grey_800"
+            android:id="@+id/relativeLayout4"
+            android:layout_above="@+id/newScanRateNumber"
+            android:layout_toStartOf="@+id/space10"
+            android:layout_toEndOf="@+id/space11">
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GPS"
+                android:id="@+id/newScanGpsChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanLocSwitch"
+                android:layout_alignStart="@+id/newScanNetChk" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Network"
+                android:id="@+id/newScanNetChk"
+                android:textColor="@color/mainColorCyan"
+                android:buttonTint="@android:color/background_dark"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:layout_below="@+id/newScanGpsChk" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/space15" />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location"
+                android:id="@+id/newScanLocSwitch"
+                android:textColor="@color/mainColorCyan"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="20dp"
+                android:enabled="true"
+                android:checked="true"
+                android:singleLine="true"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 
