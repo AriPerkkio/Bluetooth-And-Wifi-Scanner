@@ -145,13 +145,14 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT); //Result of selection to REQUEST_ENABLE_BT
                 }
                 // Enable/disable check boxes depending on switch state
-                if(btAdapter != null && switchBluetooth.isChecked() && btAdapter.isEnabled())
+                if(switchBluetooth.isChecked() && btAdapter != null &&  btAdapter.isEnabled())
                     setBtOptionsON();
                 else {
                     setBtOptionsOFF();
                     switchBluetooth.setChecked(false);
-                    Toast.makeText(this, "Unable to set Bluetooth on. Please toggle it manually.", Toast.LENGTH_SHORT).show();
                 }
+                if(btAdapter == null)
+                    Toast.makeText(this, "Unable to enable bluetooth. Please enable it manually.", Toast.LENGTH_SHORT).show();
             break;
 
             // Switch to enable/disable options for wifi
@@ -165,13 +166,14 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     wifiEnabled.setText("Enabled");
                 }
                 // Enable/disable check boxes depending on switch state
-                if(switchWifi.isChecked() && wifiManager.isWifiEnabled())
+                if(switchWifi.isChecked() && wifiManager != null && wifiManager.isWifiEnabled())
                     setWifiOptionsON();
                 else {
                     setWifiOptionsOFF();
                     switchWifi.setChecked(false);
-                    Toast.makeText(this, "Unable to set Wifi on. Please toggle it manually.", Toast.LENGTH_SHORT).show();
                 }
+                if(wifiManager==null)
+                    Toast.makeText(this, "Unable to enable wifi. Please enable it manually.", Toast.LENGTH_SHORT).show();
             break;
 
             // 'Start scanning' button to start new activity with chosen options
@@ -201,6 +203,8 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                 else { // OK, gather options
                     intent = new Intent(newScanActivity.this, scanActivity.class); //Create intent for scanActivity
 
+                    // TODO: Option for check/uncheck location
+                    // TODO: Option for NETWORK/GPS provider
                     // Fill in Sample Rate and Scan Name
                     intent.putExtra("sampleRate", sampleRate.getValue());
                     intent.putExtra("scanName", scanName.getText().toString());
