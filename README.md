@@ -4,12 +4,13 @@ Welcome to the AndroidSWDev wiki!
 
 School project for module Mobile Software Development.
 
-Download link for APK with Nexus 5 Optimised Layouts (Use for education purposes only):
+Download links for APKs with Nexus 5 Optimised Layouts (Use for education purposes only):
+NO GPS/Network location:
 http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_MarshM.apk
 
+GPS+Network location, googlemaps:
+http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_Location.apk
 
-Layouts are done for my phone only. It has customized DPI - apks recognize it as large but scaling is different. **These layouts will not work properly on stock phones** - tablets should be fine.
-I've set my default 480dpi to 320dpi. Screen is 1080x1920 5,5".
 
 ![ScanGif](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/BtWifiScan.gif)
 
