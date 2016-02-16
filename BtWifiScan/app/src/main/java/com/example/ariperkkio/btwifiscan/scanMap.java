@@ -61,7 +61,8 @@ public class scanMap extends FragmentActivity implements OnMapReadyCallback {
 
                 latitude = Double.parseDouble(location[0]);
                 longitude = Double.parseDouble(location[1]);
-                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+                if(latitude != 0.0 && longitude != 0.0)
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
                         .title("SSID: "+attributes[0])
                         .snippet("BSSID: "+attributes[1] + "\n" +
                                 "Capabilities: "+attributes[2] + "\n" +
@@ -79,7 +80,8 @@ public class scanMap extends FragmentActivity implements OnMapReadyCallback {
 
                 latitude = Double.parseDouble(location[0]);
                 longitude = Double.parseDouble(location[1]);
-                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+                if(latitude != 0.0 && longitude != 0.0)
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
                         .title("Name: "+attributes[0])
                         .snippet("Address: "+attributes[1] + "\n" +
                                 "Type: "+attributes[2] + "\n" +
@@ -100,7 +102,7 @@ public class scanMap extends FragmentActivity implements OnMapReadyCallback {
             @Override
             public View getInfoContents(Marker marker) {
 
-                Context context = getApplicationContext(); //or getActivity(), YourActivity.this, etc.
+                Context context = getApplicationContext();
 
                 LinearLayout info = new LinearLayout(context);
                 info.setOrientation(LinearLayout.VERTICAL);
