@@ -11,6 +11,8 @@ http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_MarshM.apk
 GPS+Network location, googlemaps:
 http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_Location.apk
 
+![MapsResult](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/MapsResult.png)
+![NewScanLocation](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/NewScanLocation.png)
 
 ![ScanGif](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/BtWifiScan.gif)
 
