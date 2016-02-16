@@ -66,6 +66,11 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private boolean mReceiverRegistered = false; // my work-around for checking if broadcast receiver is registered
     private ArrayList<scanResult> scanresults; // List for bt and wifi scan results
     private int numberOfBtDevices;
+    // Location
+    private LocationManager locationManager;
+    private String latitude = "0";
+    private String longitude = "0";
+    public static ProgressDialog mapsProgressDialog;
 
     // Options
     // Bluetooth
@@ -81,13 +86,10 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private boolean wifiCapabilities;
     private boolean wifiFrequency;
     private boolean wifiRSSI;
-
     // Location
-    private LocationManager locationManager;
-    private String latitude = "0";
-    private String longitude = "0";
-    public static ProgressDialog mapsProgressDialog;
-
+    private boolean locStatus;
+    private boolean locGps;
+    private boolean locNet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +140,12 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             wifiFrequency = getIntent().getExtras().getBoolean("wifiFrequency");
             wifiRSSI = getIntent().getExtras().getBoolean("wifiRSSI");
         }
+        // Get option for Location
+        if (locStatus = getIntent().getExtras().getBoolean("locationStatus")){
+            locGps = getIntent().getExtras().getBoolean("locationGps");
+            locNet = getIntent().getExtras().getBoolean("locationNet");
+        }
+        Log.e("Bt opts", btStatus +" "+ btDevName);
         // Get scan name and sample rate
         scanName.setText(getIntent().getExtras().getString("scanName"));
         sampleRate = getIntent().getExtras().getInt("sampleRate");
@@ -152,7 +160,14 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
         backgroundSaver = new saveResultsBackground();
         backgroundScanner = new scanWithSampleRate();
-        setUpLocation();
+
+        if (locStatus)
+            setUpLocation();
+        else {
+            backgroundScanner.execute(sampleRate);
+            map.setVisibility(View.GONE);
+            scanLocation.setText("<Location not scanned>");
+        }
     }
 
     // BroadcastReceiver to receive data from btDiscrovery
@@ -198,9 +213,9 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED)) {
-            if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+            if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) && locNet)
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, sampleRate*500, 1, this);
-            if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+            if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locGps)
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, sampleRate*500, 1, this);
             progressDialog = new ProgressDialog(scanActivity.this);
             progressDialog.setMessage("Getting location...");
