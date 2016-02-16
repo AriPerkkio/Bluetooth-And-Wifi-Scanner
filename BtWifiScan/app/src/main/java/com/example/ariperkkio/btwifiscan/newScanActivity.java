@@ -1,7 +1,9 @@
 package com.example.ariperkkio.btwifiscan;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.app.Activity;
@@ -22,6 +24,7 @@ public class newScanActivity extends Activity implements View.OnClickListener {
     private BluetoothAdapter btAdapter;
     int REQUEST_ENABLE_BT;
     private WifiManager wifiManager;
+    private LocationManager locationManager;
 
 
     //General widgets
@@ -47,6 +50,11 @@ public class newScanActivity extends Activity implements View.OnClickListener {
     private CheckBox wifiRSSI;
     private CheckBox wifiFrequency;
     private TextView wifiEnabled;
+
+    //Widgets for Location options
+    private Switch switchLocation;
+    private CheckBox locGps;
+    private CheckBox locNetwork;
 
 
     @Override
@@ -97,6 +105,15 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         wifiEnabled = (TextView) findViewById(R.id.newScanWifiStatus);
         wifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
 
+        // Widgets for Location
+        switchLocation = (Switch) findViewById(R.id.newScanLocSwitch);
+        switchLocation.setOnClickListener(this);
+        locGps = (CheckBox) findViewById(R.id.newScanGpsChk);
+        locGps.setOnClickListener(this);
+        locNetwork = (CheckBox) findViewById(R.id.newScanNetChk);
+        locNetwork.setOnClickListener(this);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
         // Check if device's bluetooth is ON when activity launched
         if (btAdapter != null && btAdapter.isEnabled())
             btEnabled.setText("Enabled");
@@ -112,6 +129,16 @@ public class newScanActivity extends Activity implements View.OnClickListener {
             wifiEnabled.setText("Disabled");
             setWifiOptionsOFF();
             switchWifi.setChecked(false);
+        }
+        // Check if device's location is available when activity launched
+        if(locationManager != null) {
+            switchLocation.setChecked(true);
+            setLocationOptionsOFF(); // First set all OFF, then check if available and check ON
+            setLocationOptionsON();
+        }
+        else {
+            switchLocation.setChecked(false);
+            setLocationOptionsOFF();
         }
     }
 
@@ -176,6 +203,21 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     Toast.makeText(this, "Unable to enable wifi. Please enable it manually.", Toast.LENGTH_SHORT).show();
             break;
 
+            case (R.id.newScanLocSwitch):
+                if (locationManager == null) {
+                    Toast.makeText(this, "Unable to use location", Toast.LENGTH_SHORT).show();
+                    switchLocation.setChecked(false);
+                    setLocationOptionsOFF();
+                }
+                if(switchLocation.isChecked() && locationManager != null)
+                    setLocationOptionsON();
+                else {
+                    setLocationOptionsOFF();
+                    switchLocation.setChecked(false);
+                }
+
+            break;
+
             // 'Start scanning' button to start new activity with chosen options
             // Scanning requires at least one option checked and scan name
             case (R.id.newScanStartScan):
@@ -203,8 +245,6 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                 else { // OK, gather options
                     intent = new Intent(newScanActivity.this, scanActivity.class); //Create intent for scanActivity
 
-                    // TODO: Option for check/uncheck location
-                    // TODO: Option for NETWORK/GPS provider
                     // Fill in Sample Rate and Scan Name
                     intent.putExtra("sampleRate", sampleRate.getValue());
                     intent.putExtra("scanName", scanName.getText().toString());
@@ -225,6 +265,13 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                         intent.putExtra("wifiCapabilities", wifiCapabilities.isChecked());
                         intent.putExtra("wifiFrequency", wifiFrequency.isChecked());
                         intent.putExtra("wifiRSSI", wifiRSSI.isChecked());
+                    }
+
+                    // Fill in option for location
+                    if(switchLocation.isChecked()){
+                        intent.putExtra("locationStatus", switchLocation.isChecked());
+                        intent.putExtra("locationGps", locGps.isChecked());
+                        intent.putExtra("locationNet", locNetwork.isChecked());
                     }
                     finish(); //Finish this activity and start new scan
                     startActivity(intent);
@@ -253,6 +300,10 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         btDevAddr.setEnabled(true);
         btDevType.setEnabled(true);
         btRSSI.setEnabled(true);
+        btDevName.setChecked(true);
+        btDevAddr.setChecked(true);
+        btDevType.setChecked(true);
+        btRSSI.setChecked(true);
         btDevName.setTextColor(getResources().getColor(R.color.mainColorCyan));
         btDevAddr.setTextColor(getResources().getColor(R.color.mainColorCyan));
         btDevType.setTextColor(getResources().getColor(R.color.mainColorCyan));
@@ -265,6 +316,11 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         wifiCapabilities.setEnabled(true);
         wifiFrequency.setEnabled(true);
         wifiRSSI.setEnabled(true);
+        wifiSSID.setChecked(true);
+        wifiBSSID.setChecked(true);
+        wifiCapabilities.setChecked(true);
+        wifiFrequency.setChecked(true);
+        wifiRSSI.setChecked(true);
         wifiSSID.setTextColor(getResources().getColor(R.color.mainColorCyan));
         wifiBSSID.setTextColor(getResources().getColor(R.color.mainColorCyan));
         wifiCapabilities.setTextColor(getResources().getColor(R.color.mainColorCyan));
@@ -288,5 +344,35 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         wifiCapabilities.setTextColor(getResources().getColor(R.color.material_grey_600));
         wifiFrequency.setTextColor(getResources().getColor(R.color.material_grey_600));
         wifiRSSI.setTextColor(getResources().getColor(R.color.material_grey_600));
+    }
+
+    // Set Location Options' checkboxes OFF and color grey
+    private void setLocationOptionsOFF() {
+        locGps.setEnabled(false);
+        locNetwork.setEnabled(false);
+        locGps.setChecked(false);
+        locNetwork.setChecked(false);
+        locGps.setTextColor(getResources().getColor(R.color.material_grey_600));
+        locNetwork.setTextColor(getResources().getColor(R.color.material_grey_600));
+    }
+
+    private void setLocationOptionsON() {
+        if(locationManager != null &&
+                !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) &&
+                !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            switchLocation.setChecked(false);
+            Toast.makeText(this, "Unable to use GPS or network for location", Toast.LENGTH_SHORT).show();
+        }
+
+        if(locationManager != null && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            locGps.setChecked(true);
+            locGps.setEnabled(true);
+            locGps.setTextColor(getResources().getColor(R.color.mainColorCyan));
+        }
+        if(locationManager != null && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            locNetwork.setChecked(true);
+            locNetwork.setEnabled(true);
+            locNetwork.setTextColor(getResources().getColor(R.color.mainColorCyan));
+        }
     }
 }
