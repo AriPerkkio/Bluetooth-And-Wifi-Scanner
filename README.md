@@ -12,7 +12,7 @@ GPS+Network location, googlemaps:
 http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_Location.apk
 
 ![MapsResult](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/MapsResult.png)
-![NewScanLocation](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/NewScanLocation.png)
+
 
 ![ScanGif](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/BtWifiScan.gif)
 
@@ -28,7 +28,7 @@ http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_Location.apk
 ![BtDeviceResult](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/resultDetails.png)
 ![WifiResult](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/resultDetails2.png)
 ![Renaming](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/renaming.png)
-![Dublin city center](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/ScanDublinCenter.png)
+
 Icons used:
 https://lh4.ggpht.com/9RWhsF-_ZOxoHCKLYktrboN3UAk_UCZW5BqKKxYl2RPEg9Og7yKd5BL4ntNUNDcaoqE=w300
 http://iconbug.com/download/size/512/icon/5294/wireless-silver/
