@@ -1,7 +1,3 @@
-# AndroidSWDev
-
-Welcome to the AndroidSWDev wiki!
-
 School project for module Mobile Software Development.
 
 Download links for APKs with Nexus 5 Optimised Layouts (Use for education purposes only):
