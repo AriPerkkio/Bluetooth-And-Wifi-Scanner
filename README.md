@@ -1,10 +1,7 @@
 School project for module Mobile Software Development.
 
-Download links for APKs with Nexus 5 Optimised Layouts (Use for education purposes only):
-NO GPS/Network location:
-http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_MarshM.apk
 
-GPS+Network location, googlemaps:
+APK Download: 
 http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_Location.apk
 
 ![MapsResult](https://github.com/AriPerkkio/AndroidSWDev/blob/master/ImagesForWiki/MapsResult.png)
