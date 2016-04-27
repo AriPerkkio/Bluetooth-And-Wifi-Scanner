@@ -1,0 +1,25 @@
+/*
+ * Btresult.h
+ *
+ *  Created on: 27.4.2016
+ *      Author: arska
+ */
+
+#ifndef BTRESULT_H_
+#define BTRESULT_H_
+#include <iostream> // for std
+using namespace std;
+
+class Btresult {
+	string name;
+	string address;
+	string type;
+	string rssi;
+	string location;
+public:
+	Btresult(string, string, string, string, string);
+	virtual ~Btresult();
+	void printInfo();
+};
+
+#endif /* BTRESULT_H_ */

@@ -1,0 +1,6 @@
+{"btscans":[
+{"devName":"Bt Device One", "devAddr":"AA:BB:CC:DD:EE:01", "devType":"Classic", "devRssi":"-101dBm", "location":"53.3373797,-6.0"},
+{"devName":"Bt Device Two", "devAddr":"AA:BB:CC:DD:EE:02", "devType":"Low Energy", "devRssi":"-102dBm", "location":"53.3373797,-6.1"},
+{"devName":"Bt Device Three", "devAddr":"AA:BB:CC:DD:EE:03", "devType":"Dual Mode", "devRssi":"-103dBm", "location":"53.3373797,-6.2"}
+]}
+{"wifiscans":[]}

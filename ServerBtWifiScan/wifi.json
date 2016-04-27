@@ -1,0 +1,7 @@
+{"btscans":[{}]}
+{"wifiscans":[
+{"ssid":"Wifi Network One", "bssid":"11:22:33:44:55:0A", "capabilities":"WPA2-PSK", "rssi":"-111dBm","freq":"2400MHz", "location":"51.3373797,-6.0"},
+{"ssid":"Wifi Network Two", "bssid":"11:22:33:44:55:0B", "capabilities":"WPA-PSK", "rssi":"-112dBm","freq":"2500MHz", "location":"52.3373797,-6.1"},
+{"ssid":"Wifi Network Three", "bssid":"11:22:33:44:55:0C", "capabilities":"ESS", "rssi":"-113dBm", "freq":"2600MHz","location":"53.3373797,-6.2"}
+]}
+
