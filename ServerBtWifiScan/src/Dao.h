@@ -12,7 +12,11 @@
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
 #include <iostream>
+#include <vector>
+#include "Btresult.h"
+#include "Wifiresult.h"
 using namespace std;
 class Dao {
 	// SQL Connection
@@ -20,32 +24,37 @@ class Dao {
 	sql::Connection *conn;
 	sql::Statement *stmt;
 	sql::ResultSet *res;
+	sql::PreparedStatement *prep_stmt;
 	// Okeanos DB credentials
-	std::string okeanosUrl;
-	std::string okeanosUser;
-	std::string okeanosPass;
-	std::string okeanosSchema;
+	string okeanosUrl;
+	string okeanosUser;
+	string okeanosPass;
+	string okeanosSchema;
 	// Azure DB credentials
-	std::string azureUrl;
-	std::string azureUser;
-	std::string azurePass;
-	std::string azureSchema;
+	string azureUrl;
+	string azureUser;
+	string azurePass;
+	string azureSchema;
 	// DigitalOcean DB credentials
-	std::string digioceanUrl;
-	std::string digioceanUser;
-	std::string digioceanPass;
-	std::string digioceanSchema;
+	string digioceanUrl;
+	string digioceanUser;
+	string digioceanPass;
+	string digioceanSchema;
 	// Ping query
-	std::string pingQuery;
+	string pingQuery;
 	bool pingDb(string, string, string, string);
 	void readCredentials();
-
+	void setConnection(string, string, string, string);
+	bool checkExistingResult(Btresult);
+	bool checkExistingResult(Wifiresult);
 public:
 	Dao();
 	virtual ~Dao();
 	bool pingAzure();
 	bool pingOkeanos();
 	bool pingDigiocean();
+	int insertBtResults(vector<Btresult>);
+	int insertWifiResults(vector<Wifiresult>);
 };
 
 #endif /* DAO_H_ */

@@ -51,13 +51,23 @@ bool Dao::pingDb(string _url, string _user, string _pass, string _schema){
 		if(res->getInt(1)==1){
 			delete res;
 			return true;
-	}
+		}
 	delete res;
 	}catch (sql::SQLException &e) {
 		std::cout << " (MySQL error code: " << e.getErrorCode();
 		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
 	}
 	return false;
+}
+
+void Dao::setConnection(string _url, string _user, string _pass, string _schema){
+	try {
+		conn = driver->connect(_url, _user, _pass);
+		conn->setSchema(_schema);
+	}catch (sql::SQLException &e) {
+		std::cout << " (MySQL error code: " << e.getErrorCode();
+		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+	}
 }
 
 // Read database credentials from file into variables
@@ -79,7 +89,6 @@ void Dao::readCredentials(){
 		istringstream fileContent(fileBuff);
 		string oneLine;
 		while (std::getline(fileContent, oneLine)) {
-			printf("\nScanf: %s", oneLine.c_str());
 			char urlBuff[64], userBuff[64], passBuff[64], schemaBuff[64];
 			if(sscanf(oneLine.c_str(), "Okeanos: {\"URL\":\"%[^\"]\", \"USER\":\"%[^\"]\", \"PASS\":\"%[^\"]\", \"SCHEMA\":\"%[^\"]\"}", urlBuff, userBuff, passBuff, schemaBuff)==4){
 				okeanosUrl = urlBuff; okeanosUser = userBuff; okeanosPass = passBuff; okeanosSchema = schemaBuff;
@@ -87,9 +96,111 @@ void Dao::readCredentials(){
 			if(sscanf(oneLine.c_str(), "Azure: {\"URL\":\"%[^\"]\", \"USER\":\"%[^\"]\", \"PASS\":\"%[^\"]\", \"SCHEMA\":\"%[^\"]\"}", urlBuff, userBuff, passBuff, schemaBuff)==4){
 				azureUrl = urlBuff; azureUser = userBuff; azurePass = passBuff; azureSchema = schemaBuff;
 			}
+			if(sscanf(oneLine.c_str(), "DigiOcean: {\"URL\":\"%[^\"]\", \"USER\":\"%[^\"]\", \"PASS\":\"%[^\"]\", \"SCHEMA\":\"%[^\"]\"}", urlBuff, userBuff, passBuff, schemaBuff)==4){
+				digioceanUrl = urlBuff; digioceanUser = userBuff; digioceanPass = passBuff; digioceanSchema = schemaBuff;
+			}
 		}
 	}
 	memset(fileBuff, 0, sizeof(fileBuff)); //Empty filedata buffer
+}
+
+bool Dao::checkExistingResult(Btresult _btDevice){
+	try{
+		prep_stmt = conn->prepareStatement("SELECT COUNT(*) FROM BluetoothResults WHERE DeviceAddress = ?");
+		prep_stmt->setString(1, _btDevice.getAddress());
+		res = prep_stmt->executeQuery();
+		res->next();
+		delete prep_stmt;
+		if(res->getInt(1)!=0){
+			delete res;
+			return true;
+		}
+	}catch (sql::SQLException &e) {
+		std::cout << " (MySQL error code: " << e.getErrorCode();
+		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+	}
+	delete res;
+	return false;
+}
+
+int Dao::insertBtResults(vector<Btresult> _list){
+	int newDevices = 0;
+	for(int i=0;i<3;i++){ // Three databases
+		for(unsigned int ii=0;ii<_list.size();ii++){ // All results
+			try{
+				if(i==0) setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
+				if(i==1) setConnection(azureUrl, azureUser, azurePass, azureSchema);
+				if(i==2) setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
+				if(!checkExistingResult(_list.at(ii))){
+					printf("\nInserting, i: %d, ii: %u", i, ii);
+					prep_stmt = conn->prepareStatement("INSERT INTO BluetoothResults(DeviceName, DeviceAddress, DeviceType, RSSI, Location) VALUES(?, ?, ?, ?,?)");
+					prep_stmt->setString(1, _list.at(ii).getName());
+					prep_stmt->setString(2, _list.at(ii).getAddress());
+					prep_stmt->setString(3, _list.at(ii).getType());
+					prep_stmt->setString(4, _list.at(ii).getRssi());
+					prep_stmt->setString(5, _list.at(ii).getLoc());
+					prep_stmt->executeQuery();
+					delete prep_stmt;
+					newDevices++;
+				}
+				delete conn;
+			}catch (sql::SQLException &e) {
+				std::cout << " (MySQL error code: " << e.getErrorCode();
+				std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+			}
+		}
+	}
+	return newDevices;
+}
+
+bool Dao::checkExistingResult(Wifiresult _wifiNetwork){
+	try{
+		prep_stmt = conn->prepareStatement("SELECT COUNT(*) FROM WifiResults WHERE BSSID = ?");
+		prep_stmt->setString(1, _wifiNetwork.getBssid());
+		res = prep_stmt->executeQuery();
+		res->next();
+		delete prep_stmt;
+		if(res->getInt(1)!=0){
+			delete res;
+			return true;
+		}
+	}catch (sql::SQLException &e) {
+		std::cout << " (MySQL error code: " << e.getErrorCode();
+		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+	}
+	delete res;
+	return false;
+}
+
+int Dao::insertWifiResults(vector<Wifiresult> _list){
+	int newNetworks = 0;
+	for(int i=0;i<3;i++){ // Three databases
+		for(unsigned int ii=0;ii<_list.size();ii++){ // All results
+			try{
+				if(i==0) setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
+				if(i==1) setConnection(azureUrl, azureUser, azurePass, azureSchema);
+				if(i==2) setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
+				if(!checkExistingResult(_list.at(ii))){
+					printf("\nInserting, i: %d, ii: %u", i, ii);
+					prep_stmt = conn->prepareStatement("INSERT INTO WifiResults(SSID, BSSID, Capabilities, RSSI, Frequency, Location) VALUES(?, ?, ?, ?, ?,?)");
+					prep_stmt->setString(1, _list.at(ii).getSsid());
+					prep_stmt->setString(2, _list.at(ii).getBssid());
+					prep_stmt->setString(3, _list.at(ii).getCap());
+					prep_stmt->setString(4, _list.at(ii).getRssi());
+					prep_stmt->setString(5, _list.at(ii).getFreq());
+					prep_stmt->setString(6, _list.at(ii).getLoc());
+					prep_stmt->executeQuery();
+					delete prep_stmt;
+					newNetworks++;
+				}
+				delete conn;
+			}catch (sql::SQLException &e) {
+				std::cout << " (MySQL error code: " << e.getErrorCode();
+				std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+			}
+		}
+	}
+	return newNetworks;
 }
 
 Dao::~Dao() {
