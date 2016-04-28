@@ -23,11 +23,16 @@
 #include "JsonParser.h"
 
 // Switch case definitions - values don't matter
+// CMD
 #define GET 101
 #define POST 102
+// PATH
 #define PINGAZURE 201
 #define PINGOKEANOS 202
 #define PINGDIGIOCEAN 203
+#define COUNTWIFI 204
+#define COUNTBT 205
+// CONTENT-TYPE
 #define JSONCONTENT 301
 #define XMLCONTENT 302
 
@@ -37,28 +42,23 @@ void error(const char *msg) {
 }
 
 int processCmd(char _cmd[]){
-	if(strcmp(_cmd, "GET") == 0)
-		return GET;
-	if(strcmp(_cmd, "POST") == 0)
-			return POST;
+	if(strcmp(_cmd, "GET") == 0) return GET;
+	if(strcmp(_cmd, "POST") == 0) return POST;
 	return 0;
 }
 
 int processPath(char _path[]){
-	if(strcmp(_path, "/pingAzure") == 0)
-		return PINGAZURE;
-	if(strcmp(_path, "/pingOkeanos") == 0)
-			return PINGOKEANOS;
-	if(strcmp(_path, "/pingDigiOcean") == 0)
-			return PINGDIGIOCEAN;
+	if(strcmp(_path, "/pingAzure") == 0) return PINGAZURE;
+	if(strcmp(_path, "/pingOkeanos") == 0) return PINGOKEANOS;
+	if(strcmp(_path, "/pingDigiOcean") == 0) return PINGDIGIOCEAN;
+	if(strcmp(_path, "/countBt") == 0) return COUNTBT;
+	if(strcmp(_path, "/countWifi") == 0) return COUNTWIFI;
 	return 0;
 }
 
 int processContentType(char _type[]){
-	if(strcmp(_type, "application/json") == 0)
-		return JSONCONTENT;
-	if(strcmp(_type, "application/xml") == 0) // Not tested
-			return XMLCONTENT;
+	if(strcmp(_type, "application/json") == 0) return JSONCONTENT;
+	if(strcmp(_type, "application/xml") == 0) return XMLCONTENT; // Not tested, XML features not implemented
 	return 0;
 }
 
@@ -116,23 +116,32 @@ int main(int argc, char **argv) {
 		while (std::getline(req, header))
 			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
 
+		int newBt = 0, newWifi = 0;
 		printf("\n\nRequest details \nCommand: %s\nContent-Type: %s\n", cmd, type);
 		switch(processCmd(cmd)){
 			case GET:
 				switch(processPath(path)){
 					case PINGAZURE:
-						if(dao.pingAzure()) printf("Ping OK");
-						else printf("Ping FAIL");
+						if(dao.pingAzure()) snprintf(outBuff, sizeof(outBuff), "Azure-DB ping OK\n");
+						else snprintf(outBuff, sizeof(outBuff), "Azure-DB ping FAIL\n");
 					break;
 
 					case PINGOKEANOS:
-						if(dao.pingOkeanos()) printf("Ping OK");
-						else printf("Ping FAIL");
+						if(dao.pingOkeanos()) snprintf(outBuff, sizeof(outBuff), "Okeanos-DB ping OK\n");
+						else snprintf(outBuff, sizeof(outBuff), "Okeanos-DB ping FAIL\n");
 					break;
 
 					case PINGDIGIOCEAN:
-						if(dao.pingDigiocean()) printf("Ping OK");
-						else printf("Ping FAIL");
+						if(dao.pingDigiocean()) snprintf(outBuff, sizeof(outBuff), "DigitalOcean-DB ping OK\n");
+						else snprintf(outBuff, sizeof(outBuff), "DigitalOcean-DB ping FAIL\n");
+					break;
+
+					case COUNTBT:
+						// TODO: dao.getBtCount();
+					break;
+
+					case COUNTWIFI:
+						// TODO: dao.getBtCount();
 					break;
 				}
 			break;
@@ -142,31 +151,27 @@ int main(int argc, char **argv) {
 					case JSONCONTENT:
 						listBtDevices = jsonParser.parseBtJson(inBuff);
 						listWifiNetworks = jsonParser.parseWifiJson(inBuff);
+						newBt = dao.insertBtResults(listBtDevices);
+						newWifi = dao.insertWifiResults(listWifiNetworks);
 					break;
 
 					case XMLCONTENT:
 						printf("Content XML");
+						snprintf(outBuff, sizeof(outBuff), "XML Not supported\n");
 					break;
 				}
-
-				for(unsigned int i=0;i<listBtDevices.size();i++)
-					listBtDevices.at(i).printInfo();
-
-				for(unsigned int i=0;i<listWifiNetworks.size();i++)
-					listWifiNetworks.at(i).printInfo();
-
-				printf("\nControl: Number of BT: %lu", listBtDevices.size());
-				printf("\nControl: Number of Wifi: %lu", listWifiNetworks.size());
+				snprintf(outBuff, sizeof(outBuff), "%d/%lu Bluetooth devices and %d/%lu Wifi networks inserted.\n"
+						,newBt ,listBtDevices.size()-newBt, newWifi, listWifiNetworks.size()-newWifi);
 				break;
 		}
 
-		snprintf(logBuff, 256, "echo \"Command: %s\nContent-Type: %s\" >> Log.txt",cmd, type);
-		system(logBuff); // Append log
-
 		if (n < 0)  // Error with data reading
 			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
-		else
-			snprintf(outBuff, sizeof(outBuff), "Successfully read request\n");
+		if(outBuff[0]==0)
+			snprintf(outBuff, sizeof(outBuff), "Successfully read unknown request\n");
+
+		snprintf(logBuff, 256, "echo \"Command: %s\nContent-Type: %s\nReply: %s\n\" >> Log.txt",cmd, type, outBuff);
+		system(logBuff); // Append log
 
 		printf("\nSending: %s\n", outBuff ); // Print out-going data to server
 		write(connfd, outBuff, strlen(outBuff)); //wire data to the client
