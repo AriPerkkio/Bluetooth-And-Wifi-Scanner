@@ -1,5 +1,10 @@
-/* A simple server in the internet domain using TCP
-   The port number is passed as an argument */
+/*
+ * Controller.cpp
+ *
+ *  Created on: 27.4.2016
+ *      Author: AriPerkkio
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,10 +19,46 @@
 
 #include "Btresult.h"
 #include "Wifiresult.h"
+#include "Dao.h"
+
+// Switch case definitions - values don't matter
+#define GET 101
+#define POST 102
+#define PINGAZURE 201
+#define PINGOKEANOS 202
+#define PINGDIGIOCEAN 203
+#define JSONCONTENT 301
+#define XMLCONTENT 302
 
 void error(const char *msg) {
     perror(msg);
     exit(1);
+}
+
+int processCmd(char _cmd[]){
+	if(strcmp(_cmd, "GET") == 0)
+		return GET;
+	if(strcmp(_cmd, "POST") == 0)
+			return POST;
+	return 0;
+}
+
+int processPath(char _path[]){
+	if(strcmp(_path, "/pingAzure") == 0)
+		return PINGAZURE;
+	if(strcmp(_path, "/pingOkeanos") == 0)
+			return PINGOKEANOS;
+	if(strcmp(_path, "/pingDigiOcean") == 0)
+			return PINGDIGIOCEAN;
+	return 0;
+}
+
+int processContentType(char _type[]){
+	if(strcmp(_type, "application/json") == 0)
+		return JSONCONTENT;
+	if(strcmp(_type, "application/xml") == 0) // Not tested
+			return XMLCONTENT;
+	return 0;
 }
 
 int main(int argc, char **argv) {
@@ -30,7 +71,7 @@ int main(int argc, char **argv) {
 	socklen_t 	len; // Client address info
 
 	// HTTP Request
-	char		cmd[16], type[64]; // HTTP-request details
+	char		cmd[16], path[64], type[64]; // HTTP-request details
 	std::string header; // HTTP-header
 
 	// JSON parsing
@@ -39,10 +80,14 @@ int main(int argc, char **argv) {
 	char		wifiJsonParse[] = "\"ssid\":\"%[^\"]\", \"bssid\":\"%[^\"]\", \"capabilities\":\"%[^\"]\", \"rssi\":\"%[^\"]\", \"freq\":\"%[^\"]\", \"location\":\"%[^\"]\"";
 	char		btjson[2048], btdevjson[1024], devName[64], devAddr[64], devType[64], devRssi[64], btloc[64];
 	char		wifijson[2048], wifinetjson[1024], ssid[64], bssid[64], capabilities[64], wifiRssi[64], freq[64], wifiloc[64];
+	int 		offset = 0, pos;
 
 	// Results
 	std::vector<Btresult> listBtDevices; // Bluetooth results
 	std::vector<Wifiresult> listWifiNetworks; // Wifi results
+
+	// Database
+	Dao	dao;
 
 	if (argc != 3) // Verify number of args
 	   error("usage: <Program Name> <IP Addr>  <Port No.>");
@@ -66,47 +111,90 @@ int main(int argc, char **argv) {
 		system(logBuff); // Append log
 
 		while( (n = read(connfd, inBuff, sizeof(inBuff))) > 0 ) {
-			sscanf(inBuff, "%s", cmd); // Parse HTTP request's command
+			sscanf(inBuff, "%s %s", cmd, path); // Parse HTTP request's command and path
 			inBuff[n] = 0; //Null terminate
 			if(strstr(inBuff, "\r\n\r\n")) break; // End of HTTP-request
 		}
 
-		// Parse HTTP headers
+		// Parse Content Type
 		std::istringstream req(inBuff);
 		while (std::getline(req, header)) {
-			int readChars = 0;
 			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
-			sscanf(header.c_str(), btInitialJsonParse, btjson, &readChars); // JSON for all bt results
-			sscanf(header.c_str()+readChars+2, wifiInitialJsonParse, wifijson); // JSON for all wifi results
 		}
-		// Parse btJson into bt results
-		int offset = 0, pos;
-		while(sscanf(btjson+offset, "{%[^}]%n", btdevjson, &pos)!=0) {
-			if(btdevjson[0]==0) break; // TODO: Better way for checking empty
-			offset += pos+2;
-			if(sscanf(btdevjson, btJsonParse, devName, devAddr, devType, devRssi, btloc) == 5) // All five successful
-				listBtDevices.push_back(Btresult(devName, devAddr, devType, devRssi, btloc)); // Add new bt result
-			memset(&btdevjson[0], 0, sizeof(btdevjson));
-		}
-		// Parse WifiJson into wifi results
-		offset = 0;
-		while(sscanf(wifijson+offset, "{%[^}]%n", wifinetjson, &pos)!=0){
-			if(wifinetjson[0]==0) break; // TODO: Better way for checking empty
-			offset += pos+2;
-			if(sscanf(wifinetjson, wifiJsonParse, ssid, bssid, capabilities, wifiRssi, freq, wifiloc) == 6) // All six successful
-				listWifiNetworks.push_back(Wifiresult(ssid, bssid, capabilities, wifiRssi, freq, wifiloc)); // Add wifi result
-			memset(&wifinetjson[0], 0, sizeof(wifinetjson));
-		}
+		req.clear(); // Reset stringsteam for reusing
+		req.seekg(0,ios::beg);
 
 		printf("\n\nRequest details \nCommand: %s\nContent-Type: %s\n", cmd, type);
+		int readChars = 0; // TODO: Inside loop
+		switch(processCmd(cmd)){
+			case GET:
+				switch(processPath(path)){
+					case PINGAZURE:
+						if(dao.pingAzure()) printf("Ping OK");
+						else printf("Ping FAIL");
+					break;
+
+					case PINGOKEANOS:
+						if(dao.pingOkeanos()) printf("Ping OK");
+						else printf("Ping FAIL");
+					break;
+
+					case PINGDIGIOCEAN:
+						if(dao.pingDigiocean()) printf("Ping OK");
+						else printf("Ping FAIL");
+					break;
+				}
+			break;
+
+			case POST:
+				switch(processContentType(type)){
+					case JSONCONTENT:
+						while (std::getline(req, header)) {
+							readChars = 0;
+							sscanf(header.c_str(), btInitialJsonParse, btjson, &readChars); // JSON for all bt results
+							sscanf(header.c_str()+readChars+2, wifiInitialJsonParse, wifijson); // JSON for all wifi results
+						}
+						offset = 0;
+						// Parse btJson into bt results
+						while(sscanf(btjson+offset, "{%[^}]%n", btdevjson, &pos)!=0) {
+							if(btdevjson[0]==0) break; // TODO: Better way for checking empty
+							offset += pos+2;
+							if(sscanf(btdevjson, btJsonParse, devName, devAddr, devType, devRssi, btloc) == 5) // All five successful
+								listBtDevices.push_back(Btresult(devName, devAddr, devType, devRssi, btloc)); // Add new bt result
+							memset(&btdevjson[0], 0, sizeof(btdevjson));
+						}
+						// Parse WifiJson into wifi results
+						offset = 0;
+						while(sscanf(wifijson+offset, "{%[^}]%n", wifinetjson, &pos)!=0){
+							if(wifinetjson[0]==0) break; // TODO: Better way for checking empty
+							offset += pos+2;
+							if(sscanf(wifinetjson, wifiJsonParse, ssid, bssid, capabilities, wifiRssi, freq, wifiloc) == 6) // All six successful
+								listWifiNetworks.push_back(Wifiresult(ssid, bssid, capabilities, wifiRssi, freq, wifiloc)); // Add wifi result
+							memset(&wifinetjson[0], 0, sizeof(wifinetjson));
+						}
+					break;
+
+					case XMLCONTENT:
+						printf("Content XML");
+					break;
+				}
+
+				// Process to lists to dao
+				for(unsigned int i=0;i<listBtDevices.size();i++)
+					listBtDevices.at(i).printInfo();
+
+				for(unsigned int i=0;i<listWifiNetworks.size();i++)
+					listWifiNetworks.at(i).printInfo();
+
+				printf("\nNumber of BT: %d", listBtDevices.size());
+				printf("\nNumber of Wifi: %d", listWifiNetworks.size());
+
+
+				break;
+		}
+
 		snprintf(logBuff, 256, "echo \"Command: %s\nContent-Type: %s\" >> Log.txt",cmd, type);
 		system(logBuff); // Append log
-
-		for(unsigned int i=0;i<listBtDevices.size();i++)
-			listBtDevices.at(i).printInfo();
-
-		for(unsigned int i=0;i<listWifiNetworks.size();i++)
-			listWifiNetworks.at(i).printInfo();
 
 		if (n < 0)  // Error with data reading
 			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
@@ -118,6 +206,8 @@ int main(int argc, char **argv) {
 		close(connfd); //Close current connection, loop back to polling connection
 
 		// Clear everything
+		memset(&cmd[0], 0, sizeof(cmd));
+		memset(&path[0], 0, sizeof(path));
 		memset(&type[0], 0, sizeof(type));
 		memset(&btjson[0], 0, sizeof(btjson));
 		memset(&btdevjson[0], 0, sizeof(btdevjson));
@@ -127,11 +217,12 @@ int main(int argc, char **argv) {
 		memset(&outBuff[0], 0, sizeof(outBuff));
 		listBtDevices.clear();
 		listWifiNetworks.clear();
+		req.clear();
 	}
 }
 
 /**
 curl -H "Content-Type: application/json" -X POST -d @file.json http://localhost:8888
-curl -H "Content-Type: application/json" -X POST -d '{"username":"xyz"}\n{"password":"xyz"}' http://localhost:8888
-curl -H "Content-Type: application/json" -X POST -d '{"username":"xyz","password":"xyz"}' http://localhost:8888
+curl -X GET localhost:8888/pingAzure
+curl -X GET localhost:8888/pingOkeanos
  **/
