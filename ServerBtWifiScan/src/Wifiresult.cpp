@@ -28,6 +28,14 @@ void Wifiresult::printInfo(){
 		 << endl;
 }
 
+string Wifiresult::getSsid(){ return this->ssid; }
+string Wifiresult::getBssid(){ return this->bssid; }
+string Wifiresult::getCap(){ return this->capabilities; }
+string Wifiresult::getRssi(){ return this->rssi; }
+string Wifiresult::getFreq(){ return this->frequency; }
+string Wifiresult::getLoc(){ return this->location; }
+
+
 Wifiresult::~Wifiresult() {
 	// TODO Auto-generated destructor stub
 }

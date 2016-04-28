@@ -28,6 +28,12 @@ void Btresult::printInfo(){
 		 << endl;
 }
 
+string Btresult::getName(){	return this->name; }
+string Btresult::getAddress(){	return this->address; }
+string Btresult::getType() { return this->type; }
+string Btresult::getRssi() { return this->rssi; }
+string Btresult::getLoc() { return this->location; }
+
 Btresult::~Btresult() {
 	// TODO Auto-generated destructor stub
 }

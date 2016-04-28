@@ -21,6 +21,12 @@ public:
 	Wifiresult(string, string, string, string, string, string);
 	virtual ~Wifiresult();
 	void printInfo();
+	string getSsid();
+	string getBssid();
+	string getCap();
+	string getRssi();
+	string getFreq();
+	string getLoc();
 };
 
 #endif /* WIFIRESULT_H_ */

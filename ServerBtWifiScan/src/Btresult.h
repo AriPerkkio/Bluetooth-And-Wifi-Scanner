@@ -20,6 +20,11 @@ public:
 	Btresult(string, string, string, string, string);
 	virtual ~Btresult();
 	void printInfo();
+	string getName();
+	string getAddress();
+	string getType();
+	string getRssi();
+	string getLoc();
 };
 
 #endif /* BTRESULT_H_ */
