@@ -2,7 +2,7 @@
  * Btresult.h
  *
  *  Created on: 27.4.2016
- *      Author: arska
+ *      Author: AriPerkkio
  */
 
 #ifndef BTRESULT_H_

@@ -2,7 +2,7 @@
  * Btresult.cpp
  *
  *  Created on: 27.4.2016
- *      Author: arska
+ *      Author: AriPerkkio
  */
 
 #include "Btresult.h"

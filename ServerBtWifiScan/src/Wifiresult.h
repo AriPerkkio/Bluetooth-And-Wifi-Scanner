@@ -2,7 +2,7 @@
  * Wifiresult.h
  *
  *  Created on: 27.4.2016
- *      Author: arska
+ *      Author: AriPerkkio
  */
 
 #ifndef WIFIRESULT_H_
