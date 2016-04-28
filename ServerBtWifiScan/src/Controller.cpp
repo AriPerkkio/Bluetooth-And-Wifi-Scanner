@@ -20,6 +20,7 @@
 #include "Btresult.h"
 #include "Wifiresult.h"
 #include "Dao.h"
+#include "JsonParser.h"
 
 // Switch case definitions - values don't matter
 #define GET 101
@@ -75,19 +76,14 @@ int main(int argc, char **argv) {
 	std::string header; // HTTP-header
 
 	// JSON parsing
-	char		btInitialJsonParse[] = "{\"btscans\":[%[^]]%n", wifiInitialJsonParse[] = "{\"wifiscans\":[%[^]]";
-	char		btJsonParse[] = "\"devName\":\"%[^\"]\", \"devAddr\":\"%[^\"]\", \"devType\":\"%[^\"]\", \"devRssi\":\"%[^\"]\", \"location\":\"%[^\"]\"";
-	char		wifiJsonParse[] = "\"ssid\":\"%[^\"]\", \"bssid\":\"%[^\"]\", \"capabilities\":\"%[^\"]\", \"rssi\":\"%[^\"]\", \"freq\":\"%[^\"]\", \"location\":\"%[^\"]\"";
-	char		btjson[2048], btdevjson[1024], devName[64], devAddr[64], devType[64], devRssi[64], btloc[64];
-	char		wifijson[2048], wifinetjson[1024], ssid[64], bssid[64], capabilities[64], wifiRssi[64], freq[64], wifiloc[64];
-	int 		offset = 0, pos;
+	JsonParser jsonParser;
+
+	// Database
+	Dao	dao;
 
 	// Results
 	std::vector<Btresult> listBtDevices; // Bluetooth results
 	std::vector<Wifiresult> listWifiNetworks; // Wifi results
-
-	// Database
-	Dao	dao;
 
 	if (argc != 3) // Verify number of args
 	   error("usage: <Program Name> <IP Addr>  <Port No.>");
@@ -103,7 +99,6 @@ int main(int argc, char **argv) {
 	listen(listenfd, 5); // Socket to passive listening
 
 	for ( ; ; ) {
-
 		len = sizeof(cliaddr); // Set len to correct sizeof cliaddr struct.
 		connfd = accept(listenfd, (struct sockaddr *) &cliaddr, &len); //Accept connection, save clients address to variable
 		// Convert clients address from binary to text form. Save it to clientBuff. Convert clients port from network byte order to host byte order
@@ -118,14 +113,10 @@ int main(int argc, char **argv) {
 
 		// Parse Content Type
 		std::istringstream req(inBuff);
-		while (std::getline(req, header)) {
+		while (std::getline(req, header))
 			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
-		}
-		req.clear(); // Reset stringsteam for reusing
-		req.seekg(0,ios::beg);
 
 		printf("\n\nRequest details \nCommand: %s\nContent-Type: %s\n", cmd, type);
-		int readChars = 0; // TODO: Inside loop
 		switch(processCmd(cmd)){
 			case GET:
 				switch(processPath(path)){
@@ -149,29 +140,8 @@ int main(int argc, char **argv) {
 			case POST:
 				switch(processContentType(type)){
 					case JSONCONTENT:
-						while (std::getline(req, header)) {
-							readChars = 0;
-							sscanf(header.c_str(), btInitialJsonParse, btjson, &readChars); // JSON for all bt results
-							sscanf(header.c_str()+readChars+2, wifiInitialJsonParse, wifijson); // JSON for all wifi results
-						}
-						offset = 0;
-						// Parse btJson into bt results
-						while(sscanf(btjson+offset, "{%[^}]%n", btdevjson, &pos)!=0) {
-							if(btdevjson[0]==0) break; // TODO: Better way for checking empty
-							offset += pos+2;
-							if(sscanf(btdevjson, btJsonParse, devName, devAddr, devType, devRssi, btloc) == 5) // All five successful
-								listBtDevices.push_back(Btresult(devName, devAddr, devType, devRssi, btloc)); // Add new bt result
-							memset(&btdevjson[0], 0, sizeof(btdevjson));
-						}
-						// Parse WifiJson into wifi results
-						offset = 0;
-						while(sscanf(wifijson+offset, "{%[^}]%n", wifinetjson, &pos)!=0){
-							if(wifinetjson[0]==0) break; // TODO: Better way for checking empty
-							offset += pos+2;
-							if(sscanf(wifinetjson, wifiJsonParse, ssid, bssid, capabilities, wifiRssi, freq, wifiloc) == 6) // All six successful
-								listWifiNetworks.push_back(Wifiresult(ssid, bssid, capabilities, wifiRssi, freq, wifiloc)); // Add wifi result
-							memset(&wifinetjson[0], 0, sizeof(wifinetjson));
-						}
+						listBtDevices = jsonParser.parseBtJson(inBuff);
+						listWifiNetworks = jsonParser.parseWifiJson(inBuff);
 					break;
 
 					case XMLCONTENT:
@@ -179,17 +149,14 @@ int main(int argc, char **argv) {
 					break;
 				}
 
-				// Process to lists to dao
 				for(unsigned int i=0;i<listBtDevices.size();i++)
 					listBtDevices.at(i).printInfo();
 
 				for(unsigned int i=0;i<listWifiNetworks.size();i++)
 					listWifiNetworks.at(i).printInfo();
 
-				printf("\nNumber of BT: %d", listBtDevices.size());
-				printf("\nNumber of Wifi: %d", listWifiNetworks.size());
-
-
+				printf("\nControl: Number of BT: %lu", listBtDevices.size());
+				printf("\nControl: Number of Wifi: %lu", listWifiNetworks.size());
 				break;
 		}
 
@@ -209,10 +176,6 @@ int main(int argc, char **argv) {
 		memset(&cmd[0], 0, sizeof(cmd));
 		memset(&path[0], 0, sizeof(path));
 		memset(&type[0], 0, sizeof(type));
-		memset(&btjson[0], 0, sizeof(btjson));
-		memset(&btdevjson[0], 0, sizeof(btdevjson));
-		memset(&wifijson[0], 0, sizeof(wifijson));
-		memset(&wifinetjson[0], 0, sizeof(wifinetjson));
 		memset(&inBuff[0], 0, sizeof(inBuff));
 		memset(&outBuff[0], 0, sizeof(outBuff));
 		listBtDevices.clear();
