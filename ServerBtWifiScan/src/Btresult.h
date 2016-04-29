@@ -25,6 +25,7 @@ public:
 	string getType();
 	string getRssi();
 	string getLoc();
+	string toString();
 };
 
 #endif /* BTRESULT_H_ */

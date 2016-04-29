@@ -34,6 +34,9 @@ string Btresult::getType() { return this->type; }
 string Btresult::getRssi() { return this->rssi; }
 string Btresult::getLoc() { return this->location; }
 
+string Btresult::toString(){
+	return string(this->name+", "+this->address+", "+this->type+", "+this->rssi+", "+this->location+"\n");
+}
 Btresult::~Btresult() {
 	// TODO Auto-generated destructor stub
 }
