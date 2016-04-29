@@ -45,11 +45,13 @@ class Dao {
 	string btCountQuery;
 	string wifiCountQuery;
 	string btGetAllQuery;
+	string wifiGetAllQuery;
 	bool pingDb(string, string, string, string);
 	void readCredentials();
 	void setConnection(string, string, string, string);
 	bool checkExistingResult(Btresult);
 	bool checkExistingResult(Wifiresult);
+	void priorityConnect();
 public:
 	Dao();
 	virtual ~Dao();
@@ -62,6 +64,7 @@ public:
 	int getWifiCount();
 	void tempClearDb(); // TODO: Delete
 	vector<Btresult> getAllBtResults();
+	vector<Wifiresult> getAllWifiResults();
 };
 
 #endif /* DAO_H_ */

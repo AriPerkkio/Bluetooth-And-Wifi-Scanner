@@ -24,6 +24,7 @@ Dao::Dao() {
 	btCountQuery = "SELECT COUNT(*) FROM BluetoothResults";
 	wifiCountQuery = "SELECT COUNT(*) FROM WifiResults";
 	btGetAllQuery = "SELECT * FROM BluetoothResults";
+	wifiGetAllQuery = "SELECT * FROM WifiResults";
 	readCredentials();
 }
 
@@ -73,6 +74,16 @@ void Dao::setConnection(string _url, string _user, string _pass, string _schema)
 		std::cout << " (MySQL error code: " << e.getErrorCode();
 		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
 	}
+}
+
+// If one of the DB is down move to next one
+void Dao::priorityConnect(){
+	if(pingOkeanos())
+		setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
+	else if(pingDigiocean())
+		setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
+	else
+		setConnection(azureUrl, azureUser, azurePass, azureSchema);
 }
 
 // Read database credentials from file into variables
@@ -207,12 +218,7 @@ int Dao::insertWifiResults(vector<Wifiresult> _list){
 int Dao::getBtCount(){
 	int btCount = 0;
 	try {
-		if(pingOkeanos())
-			setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
-		else if(pingDigiocean())
-			setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
-		else
-			setConnection(azureUrl, azureUser, azurePass, azureSchema);
+		priorityConnect();
 		stmt = conn->createStatement();
 		res = stmt->executeQuery(btCountQuery);
 		res->next();
@@ -230,12 +236,7 @@ int Dao::getBtCount(){
 int Dao::getWifiCount(){
 	int wifiCount = 0;
 	try {
-		if(pingOkeanos())
-			setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
-		else if(pingDigiocean())
-			setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
-		else
-			setConnection(azureUrl, azureUser, azurePass, azureSchema);
+		priorityConnect();
 		stmt = conn->createStatement();
 		res = stmt->executeQuery(wifiCountQuery);
 		res->next();
@@ -254,21 +255,36 @@ vector<Btresult> Dao::getAllBtResults(){
 	vector<Btresult> returnList;
 	returnList.clear(); // TODO: Test uncommenting
 	try {
-		if(pingOkeanos())
-			setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
-		else if(pingDigiocean())
-			setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
-		else
-			setConnection(azureUrl, azureUser, azurePass, azureSchema);
+		priorityConnect();
 		stmt = conn->createStatement();
 		res = stmt->executeQuery(btGetAllQuery);
 		while(res->next())
 			returnList.push_back(Btresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5))));
 
-		}catch (sql::SQLException &e) {
-			std::cout << " (MySQL error code: " << e.getErrorCode();
-			std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-		}
+	}catch (sql::SQLException &e) {
+		std::cout << " (MySQL error code: " << e.getErrorCode();
+		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+	}
+	delete stmt;
+	delete conn;
+	delete res;
+	return returnList;
+}
+
+vector<Wifiresult> Dao::getAllWifiResults(){
+	vector<Wifiresult> returnList;
+	returnList.clear(); // TODO: Test uncommenting
+	try {
+		priorityConnect();
+		stmt = conn->createStatement();
+		res = stmt->executeQuery(wifiGetAllQuery);
+		while(res->next())
+			returnList.push_back(Wifiresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5)), string(res->getString(6))));
+
+	}catch (sql::SQLException &e) {
+		std::cout << " (MySQL error code: " << e.getErrorCode();
+		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+	}
 	delete stmt;
 	delete conn;
 	delete res;
