@@ -32,6 +32,8 @@
 #define PINGDIGIOCEAN 203
 #define COUNTWIFI 204
 #define COUNTBT 205
+#define GETALLBT 206
+#define CLEARALL 299 // TODO: Delete
 // CONTENT-TYPE
 #define JSONCONTENT 301
 #define XMLCONTENT 302
@@ -53,6 +55,8 @@ int processPath(char _path[]){
 	if(strcmp(_path, "/pingDigiOcean") == 0) return PINGDIGIOCEAN;
 	if(strcmp(_path, "/countBt") == 0) return COUNTBT;
 	if(strcmp(_path, "/countWifi") == 0) return COUNTWIFI;
+	if(strcmp(_path, "/getAllBt") == 0) return GETALLBT;
+	if(strcmp(_path, "/clearAll") == 0) return CLEARALL;
 	return 0;
 }
 
@@ -117,7 +121,8 @@ int main(int argc, char **argv) {
 			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
 
 		int newBt = 0, newWifi = 0;
-		printf("\n\nRequest details \nCommand: %s\nContent-Type: %s\n", cmd, type);
+		string returnString;
+		cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type;
 		switch(processCmd(cmd)){
 			case GET:
 				switch(processPath(path)){
@@ -137,13 +142,25 @@ int main(int argc, char **argv) {
 					break;
 
 					case COUNTBT:
-						// TODO: dao.getBtCount();
+						snprintf(outBuff, sizeof(outBuff), "Count of Bluetooth Devices: %d\n", dao.getBtCount());
 					break;
 
 					case COUNTWIFI:
-						// TODO: dao.getBtCount();
+						snprintf(outBuff, sizeof(outBuff), "Count of Wifi Networks: %d\n", dao.getWifiCount());
 					break;
-				}
+
+					case GETALLBT:
+						listBtDevices = dao.getAllBtResults();
+						for(unsigned long int i = 0; i<listBtDevices.size();i++)
+							returnString.append(listBtDevices.at(i).toString());
+						snprintf(outBuff, sizeof(outBuff), "Get all BT tester\n%s", returnString.c_str());
+					break;
+
+					case CLEARALL:
+						dao.tempClearDb();
+						snprintf(outBuff, sizeof(outBuff), "DB Cleared.\nCount of Bluetooth Devices: %d\nCount of Wifi Networks: %d\n", dao.getBtCount(), dao.getWifiCount());
+					break;
+				} // Path
 			break;
 
 			case POST:
@@ -153,17 +170,17 @@ int main(int argc, char **argv) {
 						listWifiNetworks = jsonParser.parseWifiJson(inBuff);
 						newBt = dao.insertBtResults(listBtDevices);
 						newWifi = dao.insertWifiResults(listWifiNetworks);
+						snprintf(outBuff, sizeof(outBuff), "%d/%lu Bluetooth devices and %d/%lu Wifi networks inserted.\n"
+												,newBt ,listBtDevices.size(), newWifi, listWifiNetworks.size());
 					break;
 
 					case XMLCONTENT:
 						printf("Content XML");
 						snprintf(outBuff, sizeof(outBuff), "XML Not supported\n");
 					break;
-				}
-				snprintf(outBuff, sizeof(outBuff), "%d/%lu Bluetooth devices and %d/%lu Wifi networks inserted.\n"
-						,newBt ,listBtDevices.size()-newBt, newWifi, listWifiNetworks.size()-newWifi);
-				break;
-		}
+				} // Type
+			break;
+		}// CMD
 
 		if (n < 0)  // Error with data reading
 			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
@@ -173,7 +190,7 @@ int main(int argc, char **argv) {
 		snprintf(logBuff, 256, "echo \"Command: %s\nContent-Type: %s\nReply: %s\n\" >> Log.txt",cmd, type, outBuff);
 		system(logBuff); // Append log
 
-		printf("\nSending: %s\n", outBuff ); // Print out-going data to server
+		std::cout << "\nSending: " << outBuff << std::endl; // Print out-going data to server
 		write(connfd, outBuff, strlen(outBuff)); //wire data to the client
 		close(connfd); //Close current connection, loop back to polling connection
 
