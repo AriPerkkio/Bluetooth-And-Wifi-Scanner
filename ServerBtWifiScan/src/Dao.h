@@ -40,8 +40,11 @@ class Dao {
 	string digioceanUser;
 	string digioceanPass;
 	string digioceanSchema;
-	// Ping query
+	// Queries
 	string pingQuery;
+	string btCountQuery;
+	string wifiCountQuery;
+	string btGetAllQuery;
 	bool pingDb(string, string, string, string);
 	void readCredentials();
 	void setConnection(string, string, string, string);
@@ -55,6 +58,10 @@ public:
 	bool pingDigiocean();
 	int insertBtResults(vector<Btresult>);
 	int insertWifiResults(vector<Wifiresult>);
+	int getBtCount();
+	int getWifiCount();
+	void tempClearDb(); // TODO: Delete
+	vector<Btresult> getAllBtResults();
 };
 
 #endif /* DAO_H_ */
