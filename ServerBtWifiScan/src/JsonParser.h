@@ -18,6 +18,8 @@ public:
 	virtual ~JsonParser();
 	vector<Btresult> parseBtJson(char[]);
 	vector<Wifiresult> parseWifiJson(char[]);
+	std::string btResultsToJson(vector<Btresult>);
+	std::string wifiResultsToJson(vector<Wifiresult>);
 };
 
 #endif /* JSONPARSER_H_ */

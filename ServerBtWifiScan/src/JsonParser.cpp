@@ -70,6 +70,35 @@ vector<Wifiresult> JsonParser::parseWifiJson(char _buff[]){
 	return _listWifiNetworks;
 }
 
+std::string JsonParser::btResultsToJson(vector<Btresult> _list){
+	std::string returnJson = "{\"btscans\":[\n";
+	char devRow[1024];
+	for(unsigned long int i = 0;i<_list.size();i++){
+		snprintf(devRow, sizeof(devRow), "{\"devName\":\"%s\", \"devAddr\":\"%s\", \"devType\":\"%s\", \"devRssi\":\"%s\", \"location\":\"%s\"}",
+				_list.at(i).getName().c_str(), _list.at(i).getAddress().c_str(), _list.at(i).getType().c_str(), _list.at(i).getRssi().c_str(), _list.at(i).getLoc().c_str());
+		returnJson.append(devRow);
+		if(i+1!=_list.size()) returnJson.append(",\n"); // Not last row
+		memset(devRow, 0, sizeof(devRow));
+	}
+	returnJson.append("\n]}\n");
+	return returnJson;
+}
+
+std::string JsonParser::wifiResultsToJson(vector<Wifiresult> _list){
+	std::string returnJson = "{\"wifiscans\":[\n";
+	char netRow[1024];
+	for(unsigned long int i = 0;i<_list.size();i++){
+		snprintf(netRow, sizeof(netRow),
+				"{\"ssid\":\"%s\", \"bssid\":\"%s\", \"capabilities\":\"%s\", \"rssi\":\"%s\", \"freq\":\"%s\", \"location\":\"%s\"}",
+				_list.at(i).getSsid().c_str(), _list.at(i).getBssid().c_str(), _list.at(i).getCap().c_str(), _list.at(i).getRssi().c_str(), _list.at(i).getFreq().c_str(), _list.at(i).getLoc().c_str());
+		returnJson.append(netRow);
+		if(i+1!=_list.size()) returnJson.append(",\n"); // Not last row
+		memset(netRow, 0, sizeof(netRow));
+	}
+	returnJson.append("\n]}\n");
+	return returnJson;
+}
+
 JsonParser::~JsonParser() {
 	// TODO Auto-generated destructor stub
 }
