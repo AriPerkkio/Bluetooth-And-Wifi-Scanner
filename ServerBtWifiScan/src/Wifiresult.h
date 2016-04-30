@@ -27,6 +27,7 @@ public:
 	string getRssi();
 	string getFreq();
 	string getLoc();
+	bool operator==(const Wifiresult &first) const;
 };
 
 #endif /* WIFIRESULT_H_ */
