@@ -65,6 +65,8 @@ public:
 	void tempClearDb(); // TODO: Delete
 	vector<Btresult> getAllBtResults();
 	vector<Wifiresult> getAllWifiResults();
+	vector<Btresult> syncBtResults(vector<Btresult>);
+	vector<Wifiresult> syncWifiResults(vector<Wifiresult>);
 };
 
 #endif /* DAO_H_ */

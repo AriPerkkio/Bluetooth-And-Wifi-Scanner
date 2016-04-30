@@ -34,6 +34,7 @@
 #define COUNTBT 205
 #define GETALLBT 206
 #define GETALLWIFI 207
+#define SYNCBT 208
 #define CLEARALL 299 // TODO: Delete
 // CONTENT-TYPE
 #define JSONCONTENT 301
@@ -59,6 +60,7 @@ int processPath(char _path[]){
 	if(strcmp(_path, "/getAllBt") == 0) return GETALLBT;
 	if(strcmp(_path, "/getAllWifi") == 0) return GETALLWIFI;
 	if(strcmp(_path, "/clearAll") == 0) return CLEARALL;
+	if(strcmp(_path, "/syncBt") == 0) return SYNCBT;
 	return 0;
 }
 
@@ -159,6 +161,12 @@ int main(int argc, char **argv) {
 					case GETALLWIFI:
 						listWifiNetworks = dao.getAllWifiResults();
 						snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.wifiResultsToJson(listWifiNetworks).c_str());
+					break;
+
+					case SYNCBT:
+						listBtDevices = jsonParser.parseBtJson(inBuff);
+						listBtDevices = dao.syncBtResults(listBtDevices);
+						snprintf(outBuff, sizeof(outBuff), "Sync complete. \n%s\n", jsonParser.btResultsToJson(listBtDevices).c_str());
 					break;
 
 					case CLEARALL:

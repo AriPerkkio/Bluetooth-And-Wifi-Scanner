@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 Dao::Dao() {
@@ -253,7 +254,7 @@ int Dao::getWifiCount(){
 
 vector<Btresult> Dao::getAllBtResults(){
 	vector<Btresult> returnList;
-	returnList.clear(); // TODO: Test uncommenting
+	returnList.clear(); // TODO: Test removing
 	try {
 		priorityConnect();
 		stmt = conn->createStatement();
@@ -273,7 +274,7 @@ vector<Btresult> Dao::getAllBtResults(){
 
 vector<Wifiresult> Dao::getAllWifiResults(){
 	vector<Wifiresult> returnList;
-	returnList.clear(); // TODO: Test uncommenting
+	returnList.clear(); // TODO: Test removing
 	try {
 		priorityConnect();
 		stmt = conn->createStatement();
@@ -289,6 +290,32 @@ vector<Wifiresult> Dao::getAllWifiResults(){
 	delete conn;
 	delete res;
 	return returnList;
+}
+
+// Synchronize device DB with remote DB.
+// 1. Add new devices
+// 2. Get all results
+vector<Btresult> Dao::syncBtResults(vector<Btresult> _list){
+	vector<Btresult> returnList;
+	returnList.clear(); // TODO: Test removing
+	insertBtResults(_list); // Add all new devices
+	try {
+		priorityConnect();
+		stmt = conn->createStatement();
+		res = stmt->executeQuery(btGetAllQuery);
+		while(res->next()){
+			Btresult newBtDev = Btresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5)));
+			if(find(_list.begin(), _list.end(), newBtDev) == _list.end()) // List doesn't contain newDev
+				_list.push_back(newBtDev);
+		}
+	}catch (sql::SQLException &e) {
+		std::cout << " (MySQL error code: " << e.getErrorCode();
+		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+	}
+	delete stmt;
+	delete conn;
+	delete res;
+	return _list;
 }
 
 // TODO: Remove
