@@ -35,6 +35,8 @@
 #define GETALLBT 206
 #define GETALLWIFI 207
 #define SYNCBT 208
+#define SYNCWIFI 209
+#define UPLOAD 210
 #define CLEARALL 299 // TODO: Delete
 // CONTENT-TYPE
 #define JSONCONTENT 301
@@ -61,6 +63,8 @@ int processPath(char _path[]){
 	if(strcmp(_path, "/getAllWifi") == 0) return GETALLWIFI;
 	if(strcmp(_path, "/clearAll") == 0) return CLEARALL;
 	if(strcmp(_path, "/syncBt") == 0) return SYNCBT;
+	if(strcmp(_path, "/syncWifi") == 0) return SYNCWIFI;
+	if(strcmp(_path, "/upload") == 0) return UPLOAD;
 	return 0;
 }
 
@@ -113,7 +117,7 @@ int main(int argc, char **argv) {
 		snprintf(logBuff, 256, "echo \"\nConnection from: %s : %d \" >> Log.txt", inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port));
 		system(logBuff); // Append log
 
-		while( (n = read(connfd, inBuff, sizeof(inBuff))) > 0 ) {
+		while((n = read(connfd, inBuff, sizeof(inBuff))) > 0 ) {
 			sscanf(inBuff, "%s %s", cmd, path); // Parse HTTP request's command and path
 			inBuff[n] = 0; //Null terminate
 			if(strstr(inBuff, "\r\n\r\n")) break; // End of HTTP-request
@@ -125,7 +129,6 @@ int main(int argc, char **argv) {
 			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
 
 		int newBt = 0, newWifi = 0;
-		string returnString;
 		cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type;
 		switch(processCmd(cmd)){
 			case GET:
@@ -163,12 +166,6 @@ int main(int argc, char **argv) {
 						snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.wifiResultsToJson(listWifiNetworks).c_str());
 					break;
 
-					case SYNCBT:
-						listBtDevices = jsonParser.parseBtJson(inBuff);
-						listBtDevices = dao.syncBtResults(listBtDevices);
-						snprintf(outBuff, sizeof(outBuff), "Sync complete. \n%s\n", jsonParser.btResultsToJson(listBtDevices).c_str());
-					break;
-
 					case CLEARALL:
 						dao.tempClearDb();
 						snprintf(outBuff, sizeof(outBuff), "DB Cleared.\nCount of Bluetooth Devices: %d\nCount of Wifi Networks: %d\n", dao.getBtCount(), dao.getWifiCount());
@@ -177,21 +174,36 @@ int main(int argc, char **argv) {
 			break;
 
 			case POST:
-				switch(processContentType(type)){
-					case JSONCONTENT:
-						listBtDevices = jsonParser.parseBtJson(inBuff);
-						listWifiNetworks = jsonParser.parseWifiJson(inBuff);
-						newBt = dao.insertBtResults(listBtDevices);
-						newWifi = dao.insertWifiResults(listWifiNetworks);
-						snprintf(outBuff, sizeof(outBuff), "%d/%lu Bluetooth devices and %d/%lu Wifi networks inserted.\n"
-												,newBt ,listBtDevices.size(), newWifi, listWifiNetworks.size());
+				switch(processPath(path)){
+					case UPLOAD:
+						switch(processContentType(type)){
+							case JSONCONTENT:
+								listBtDevices = jsonParser.parseBtJson(inBuff);
+								listWifiNetworks = jsonParser.parseWifiJson(inBuff);
+								newBt = dao.insertBtResults(listBtDevices);
+								newWifi = dao.insertWifiResults(listWifiNetworks);
+								snprintf(outBuff, sizeof(outBuff), "%d/%lu Bluetooth devices and %d/%lu Wifi networks inserted.\n"
+														,newBt ,listBtDevices.size(), newWifi, listWifiNetworks.size());
+							break;
+
+							case XMLCONTENT:
+								snprintf(outBuff, sizeof(outBuff), "XML Not supported\n");
+							break;
+						} // Type
 					break;
 
-					case XMLCONTENT:
-						printf("Content XML");
-						snprintf(outBuff, sizeof(outBuff), "XML Not supported\n");
+					case SYNCBT:
+						listBtDevices = jsonParser.parseBtJson(inBuff);
+						dao.syncBtResults(listBtDevices);
+						snprintf(outBuff, sizeof(outBuff), "Sync complete. \n%s\n", jsonParser.btResultsToJson(listBtDevices).c_str());
 					break;
-				} // Type
+
+					case SYNCWIFI:
+						listWifiNetworks = jsonParser.parseWifiJson(inBuff);
+						dao.syncWifiResults(listWifiNetworks);
+						snprintf(outBuff, sizeof(outBuff), "Sync complete. \n%s\n", jsonParser.wifiResultsToJson(listWifiNetworks).c_str());
+					break;
+				} // Path
 			break;
 		}// CMD
 
@@ -204,7 +216,7 @@ int main(int argc, char **argv) {
 		system(logBuff); // Append log
 
 		std::cout << "\nSending: " << outBuff << std::endl; // Print out-going data to server
-		write(connfd, outBuff, strlen(outBuff)); //wire data to the client
+		write(connfd, outBuff, strlen(outBuff)); // Send data
 		close(connfd); //Close current connection, loop back to polling connection
 
 		// Clear everything
@@ -218,9 +230,3 @@ int main(int argc, char **argv) {
 		req.clear();
 	}
 }
-
-/**
-curl -H "Content-Type: application/json" -X POST -d @file.json http://localhost:8888
-curl -X GET localhost:8888/pingAzure
-curl -X GET localhost:8888/pingOkeanos
- **/
