@@ -26,6 +26,7 @@ public:
 	string getRssi();
 	string getLoc();
 	string toString();
+	bool operator==(const Btresult &first) const;
 };
 
 #endif /* BTRESULT_H_ */

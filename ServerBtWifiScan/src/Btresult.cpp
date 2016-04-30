@@ -7,6 +7,7 @@
 
 #include "Btresult.h"
 #include <iostream> // for std
+#include <string>
 using namespace std;
 
 
@@ -37,6 +38,11 @@ string Btresult::getLoc() { return this->location; }
 string Btresult::toString(){
 	return string(this->name+", "+this->address+", "+this->type+", "+this->rssi+", "+this->location+"\n");
 }
+// Address should always be unique
+bool Btresult::operator==(const Btresult &first) const{
+	return this->address.compare(first.address)==0;
+}
+
 Btresult::~Btresult() {
 	// TODO Auto-generated destructor stub
 }
