@@ -295,9 +295,7 @@ vector<Wifiresult> Dao::getAllWifiResults(){
 // Synchronize device DB with remote DB.
 // 1. Add new devices
 // 2. Get all results
-vector<Btresult> Dao::syncBtResults(vector<Btresult> _list){
-	vector<Btresult> returnList;
-	returnList.clear(); // TODO: Test removing
+void Dao::syncBtResults(vector<Btresult>& _list){
 	insertBtResults(_list); // Add all new devices
 	try {
 		priorityConnect();
@@ -315,7 +313,26 @@ vector<Btresult> Dao::syncBtResults(vector<Btresult> _list){
 	delete stmt;
 	delete conn;
 	delete res;
-	return _list;
+}
+
+void Dao::syncWifiResults(vector<Wifiresult>& _list){
+	insertWifiResults(_list); // Add all new networks
+	try {
+		priorityConnect();
+		stmt = conn->createStatement();
+		res = stmt->executeQuery(wifiGetAllQuery);
+		while(res->next()){
+			Wifiresult newWifiNetwork = Wifiresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5)), string(res->getString(6)));
+			if(find(_list.begin(), _list.end(), newWifiNetwork) == _list.end()) // List doesn't contain newWifiNetwork
+				_list.push_back(newWifiNetwork);
+		}
+	}catch (sql::SQLException &e) {
+		std::cout << " (MySQL error code: " << e.getErrorCode();
+		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+	}
+	delete stmt;
+	delete conn;
+	delete res;
 }
 
 // TODO: Remove
