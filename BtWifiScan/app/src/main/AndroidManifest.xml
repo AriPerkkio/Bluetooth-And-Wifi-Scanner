@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Icon source: https://www.iconfinder.com/icons/51891/airport_wifi_wireless_icon#size=128 -->
     <application
@@ -25,19 +27,19 @@
         </activity>
         <activity
             android:name=".newScanActivity"
-            android:label="@string/title_activity_new_scan"></activity>
+            android:label="@string/title_activity_new_scan" />
         <activity
             android:name=".scanActivity"
-            android:label="@string/title_activity_scan"></activity>
+            android:label="@string/title_activity_scan" />
         <activity
             android:name=".previousScansActivity"
-            android:label="@string/title_activity_previous_scans"></activity>
+            android:label="@string/title_activity_previous_scans" />
         <activity
             android:name=".subPrevScanActivity"
-            android:label="@string/title_activity_sub_prev_scan"></activity>
+            android:label="@string/title_activity_sub_prev_scan" />
         <activity
             android:name=".resultDetailsActivity"
-            android:label="@string/title_activity_result_details"></activity>
+            android:label="@string/title_activity_result_details" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -52,7 +54,8 @@
 
         <activity
             android:name=".scanMap"
-            android:label="@string/title_activity_scan_map"></activity>
+            android:label="@string/title_activity_scan_map" />
+        <activity android:name=".GlobalActivity"></activity>
     </application>
 
 </manifest>
