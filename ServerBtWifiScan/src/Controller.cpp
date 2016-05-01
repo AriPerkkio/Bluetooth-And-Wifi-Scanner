@@ -37,10 +37,35 @@
 #define SYNCBT 208
 #define SYNCWIFI 209
 #define UPLOAD 210
-#define CLEARALL 299 // TODO: Delete
+#define CLEARALL 299
 // CONTENT-TYPE
 #define JSONCONTENT 301
 #define XMLCONTENT 302
+
+// Connection constants
+#define BUFFER 2048
+#define RESULTRESP 10 // Number of results sent in one HTTP response
+
+// Connection
+	int 		listenfd, connfd, n; // Socket IDs; Listening socket and connected socket. n for indexing loops
+	struct 		sockaddr_in servaddr, cliaddr; // Address structure to hold server's and client's address
+	char 		inBuff[BUFFER], outBuff[BUFFER], logBuff[BUFFER]; // Data buffers for input and output + logs
+	char 		clientBuff[256]; // To hold converted client address
+	socklen_t 	len; // Client address info
+
+	// HTTP Request
+	char		cmd[16], path[64], type[64]; // HTTP-request details
+	std::string header; // HTTP-header
+
+	// JSON parsing
+	JsonParser jsonParser;
+
+	// Database
+	Dao	dao;
+
+	// Results
+	std::vector<Btresult> listBtDevices; // Bluetooth results
+	std::vector<Wifiresult> listWifiNetworks; // Wifi results
 
 void error(const char *msg) {
     perror(msg);
@@ -75,28 +100,39 @@ int processContentType(char _type[]){
 	return 0;
 }
 
+// Send all results in multiple HTTP responses, each containing amount of RESULTRESP results in JSON
+// I.e. 35 results, RESULTRESP 8. Send 5 HTTP responses, with results of 8, 8, 8, 8, 3
+void sendResults(vector<Btresult>& _list){
+	while(_list.size()!=0){
+		vector<Btresult> sendList;
+		for(int i=0;i<RESULTRESP;i++){
+			if(_list.size()==0) break;
+			sendList.push_back(_list.at(0));
+			_list.erase(remove(_list.begin(), _list.end(), _list.at(0)), _list.end()); // Remove picked result
+		}
+		snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.btResultsToJson(sendList).c_str());
+		write(connfd, outBuff, strlen(outBuff)); // Send data
+		memset(outBuff, sizeof(outBuff), 0);
+		sendList.clear();
+	}
+}
+
+void sendResults(vector<Wifiresult>& _list){
+	while(_list.size()!=0){
+		vector<Wifiresult> sendList;
+		for(int i=0;i<RESULTRESP;i++){
+			if(_list.size()==0) break;
+			sendList.push_back(_list.at(0));
+			_list.erase(remove(_list.begin(), _list.end(), _list.at(0)), _list.end());
+		}
+		snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.wifiResultsToJson(sendList).c_str());
+		write(connfd, outBuff, strlen(outBuff));
+		memset(outBuff, sizeof(outBuff), 0);
+		sendList.clear();
+	}
+}
+
 int main(int argc, char **argv) {
-
-	// Connection
-	int 		listenfd, connfd, n; // Socket IDs; Listening socket and connected socket. n for indexing loops
-	struct 		sockaddr_in servaddr, cliaddr; // Address structure to hold server's and client's address
-	char 		inBuff[2048], outBuff[2048], logBuff[2048]; // Data buffers for input and output + logs
-	char 		clientBuff[256]; // To hold converted client address
-	socklen_t 	len; // Client address info
-
-	// HTTP Request
-	char		cmd[16], path[64], type[64]; // HTTP-request details
-	std::string header; // HTTP-header
-
-	// JSON parsing
-	JsonParser jsonParser;
-
-	// Database
-	Dao	dao;
-
-	// Results
-	std::vector<Btresult> listBtDevices; // Bluetooth results
-	std::vector<Wifiresult> listWifiNetworks; // Wifi results
 
 	if (argc != 3) // Verify number of args
 	   error("usage: <Program Name> <IP Addr>  <Port No.>");
@@ -129,8 +165,7 @@ int main(int argc, char **argv) {
 		while (std::getline(req, header))
 			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
 
-		int newBt = 0, newWifi = 0;
-		cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type;
+		cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type << "\nPath: " << path;
 		switch(processCmd(cmd)){
 			case GET:
 				switch(processPath(path)){
@@ -159,25 +194,14 @@ int main(int argc, char **argv) {
 
 					case GETALLBT:
 						listBtDevices = dao.getAllBtResults();
-						// Send results in blocks of 10 devices - avoid buffer overflow
-						while(listBtDevices.size()!=0){
-							vector<Btresult> listBtDevicesTwo;
-							for(int i=0;i<10;i++){ // 10 at once
-								if(listBtDevices.size()==0) break;
-								listBtDevicesTwo.push_back(listBtDevices.at(0));
-								listBtDevices.erase(remove(listBtDevices.begin(), listBtDevices.end(), listBtDevices.at(0)), listBtDevices.end()); // Remove picked result
-							}
-							snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.btResultsToJson(listBtDevicesTwo).c_str());
-							write(connfd, outBuff, strlen(outBuff)); // Send data
-							memset(outBuff, sizeof(outBuff), 0);
-							listBtDevicesTwo.clear();
-						}
-						snprintf(outBuff, sizeof(outBuff), " "); // Empty message, avoid unknown request detection
+						sendResults(listBtDevices);
+						snprintf(outBuff, sizeof(outBuff), "Read BT complete\n");
 					break;
 
 					case GETALLWIFI:
 						listWifiNetworks = dao.getAllWifiResults();
-						snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.wifiResultsToJson(listWifiNetworks).c_str());
+						sendResults(listWifiNetworks);
+						snprintf(outBuff, sizeof(outBuff), "Read Wifi complete\n");
 					break;
 
 					case CLEARALL:
@@ -188,36 +212,36 @@ int main(int argc, char **argv) {
 			break;
 
 			case POST:
-				switch(processPath(path)){
-					case UPLOAD:
-						switch(processContentType(type)){
-							case JSONCONTENT:
+				switch(processContentType(type)){
+					case JSONCONTENT:
+						switch(processPath(path)){
+							case UPLOAD:
 								listBtDevices = jsonParser.parseBtJson(inBuff);
 								listWifiNetworks = jsonParser.parseWifiJson(inBuff);
-								newBt = dao.insertBtResults(listBtDevices);
-								newWifi = dao.insertWifiResults(listWifiNetworks);
 								snprintf(outBuff, sizeof(outBuff), "%d/%lu Bluetooth devices and %d/%lu Wifi networks inserted.\n"
-														,newBt ,listBtDevices.size(), newWifi, listWifiNetworks.size());
+										,dao.insertBtResults(listBtDevices) ,listBtDevices.size(), dao.insertWifiResults(listWifiNetworks), listWifiNetworks.size());
 							break;
 
-							case XMLCONTENT:
-								snprintf(outBuff, sizeof(outBuff), "XML Not supported\n");
+							case SYNCBT:
+								listBtDevices = jsonParser.parseBtJson(inBuff);
+								dao.syncBtResults(listBtDevices); // Insert all devices that are not in db already
+								sendResults(listBtDevices); // Send response containing devices that were not in user's initial list
+								snprintf(outBuff, sizeof(outBuff), "BT sync complete. \n");
 							break;
-						} // Type
+
+							case SYNCWIFI:
+								listWifiNetworks = jsonParser.parseWifiJson(inBuff);
+								dao.syncWifiResults(listWifiNetworks);
+								sendResults(listWifiNetworks);
+								snprintf(outBuff, sizeof(outBuff), "Wifi sync complete. \n");
+							break;
+						} // Path
 					break;
 
-					case SYNCBT:
-						listBtDevices = jsonParser.parseBtJson(inBuff);
-						dao.syncBtResults(listBtDevices);
-						snprintf(outBuff, sizeof(outBuff), "Sync complete. \n%s\n", jsonParser.btResultsToJson(listBtDevices).c_str());
+					case XMLCONTENT:
+						snprintf(outBuff, sizeof(outBuff), "XML Not supported\n");
 					break;
-
-					case SYNCWIFI:
-						listWifiNetworks = jsonParser.parseWifiJson(inBuff);
-						dao.syncWifiResults(listWifiNetworks);
-						snprintf(outBuff, sizeof(outBuff), "Sync complete. \n%s\n", jsonParser.wifiResultsToJson(listWifiNetworks).c_str());
-					break;
-				} // Path
+				} // Type
 			break;
 		}// CMD
 
