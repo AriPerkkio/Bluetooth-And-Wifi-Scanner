@@ -113,7 +113,6 @@ void Dao::readCredentials(){
 				azureUrl = urlBuff, azureUser = userBuff, azurePass = passBuff, azureSchema = schemaBuff;
 			if(sscanf(oneLine.c_str(), "DigiOcean: {\"URL\":\"%[^\"]\", \"USER\":\"%[^\"]\", \"PASS\":\"%[^\"]\", \"SCHEMA\":\"%[^\"]\"}", urlBuff, userBuff, passBuff, schemaBuff)==4)
 				digioceanUrl = urlBuff, digioceanUser = userBuff, digioceanPass = passBuff, digioceanSchema = schemaBuff;
-
 		}
 	}
 	memset(fileBuff, 0, sizeof(fileBuff)); //Empty filedata buffer
@@ -254,7 +253,6 @@ int Dao::getWifiCount(){
 
 vector<Btresult> Dao::getAllBtResults(){
 	vector<Btresult> returnList;
-	returnList.clear(); // TODO: Test removing
 	try {
 		priorityConnect();
 		stmt = conn->createStatement();
@@ -274,7 +272,6 @@ vector<Btresult> Dao::getAllBtResults(){
 
 vector<Wifiresult> Dao::getAllWifiResults(){
 	vector<Wifiresult> returnList;
-	returnList.clear(); // TODO: Test removing
 	try {
 		priorityConnect();
 		stmt = conn->createStatement();
@@ -296,7 +293,6 @@ vector<Wifiresult> Dao::getAllWifiResults(){
 // 1. Add new devices
 // 2. Get all results
 void Dao::syncBtResults(vector<Btresult>& _list){
-	cout << "1. _list size " << _list.size() << "\n";
 	insertBtResults(_list); // Add all new devices
 	try {
 		priorityConnect();
@@ -316,7 +312,6 @@ void Dao::syncBtResults(vector<Btresult>& _list){
 	delete stmt;
 	delete conn;
 	delete res;
-	cout << "1. _list size " << _list.size();
 }
 
 void Dao::syncWifiResults(vector<Wifiresult>& _list){
@@ -341,7 +336,6 @@ void Dao::syncWifiResults(vector<Wifiresult>& _list){
 	delete res;
 }
 
-// TODO: Remove
 void Dao::tempClearDb(){
 	for(int i=0;i<3;i++){
 		try{
@@ -363,6 +357,5 @@ void Dao::tempClearDb(){
 }
 
 Dao::~Dao() {
-	// TODO Auto-generated destructor stub
 }
 
