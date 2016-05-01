@@ -296,6 +296,7 @@ vector<Wifiresult> Dao::getAllWifiResults(){
 // 1. Add new devices
 // 2. Get all results
 void Dao::syncBtResults(vector<Btresult>& _list){
+	cout << "1. _list size " << _list.size() << "\n";
 	insertBtResults(_list); // Add all new devices
 	try {
 		priorityConnect();
@@ -305,6 +306,8 @@ void Dao::syncBtResults(vector<Btresult>& _list){
 			Btresult newBtDev = Btresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5)));
 			if(find(_list.begin(), _list.end(), newBtDev) == _list.end()) // List doesn't contain newDev
 				_list.push_back(newBtDev);
+			else
+				_list.erase(remove(_list.begin(), _list.end(), newBtDev), _list.end());
 		}
 	}catch (sql::SQLException &e) {
 		std::cout << " (MySQL error code: " << e.getErrorCode();
@@ -313,6 +316,7 @@ void Dao::syncBtResults(vector<Btresult>& _list){
 	delete stmt;
 	delete conn;
 	delete res;
+	cout << "1. _list size " << _list.size();
 }
 
 void Dao::syncWifiResults(vector<Wifiresult>& _list){
@@ -325,6 +329,8 @@ void Dao::syncWifiResults(vector<Wifiresult>& _list){
 			Wifiresult newWifiNetwork = Wifiresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5)), string(res->getString(6)));
 			if(find(_list.begin(), _list.end(), newWifiNetwork) == _list.end()) // List doesn't contain newWifiNetwork
 				_list.push_back(newWifiNetwork);
+			else
+				_list.erase(remove(_list.begin(), _list.end(), newWifiNetwork), _list.end());
 		}
 	}catch (sql::SQLException &e) {
 		std::cout << " (MySQL error code: " << e.getErrorCode();
