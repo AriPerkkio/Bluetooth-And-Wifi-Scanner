@@ -17,7 +17,8 @@
             android:src="@mipmap/ic_launcher"
             android:layout_weight="0.03"
             android:layout_alignBottom="@+id/scanrowThree"
-            android:paddingTop="2dp" />
+            android:paddingTop="2dp"
+            android:layout_alignParentTop="true" />
 
         <TextView
             android:layout_width="match_parent"
