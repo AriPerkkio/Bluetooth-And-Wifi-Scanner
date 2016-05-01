@@ -44,6 +44,7 @@
 
 void error(const char *msg) {
     perror(msg);
+    system(std::string("echo \"\nError: \nMsg: %s\n \" >> Log.txt", msg).c_str()); // Append log
     exit(1);
 }
 
@@ -114,7 +115,7 @@ int main(int argc, char **argv) {
 		len = sizeof(cliaddr); // Set len to correct sizeof cliaddr struct.
 		connfd = accept(listenfd, (struct sockaddr *) &cliaddr, &len); //Accept connection, save clients address to variable
 		// Convert clients address from binary to text form. Save it to clientBuff. Convert clients port from network byte order to host byte order
-		snprintf(logBuff, 256, "echo \"\nConnection from: %s : %d \" >> Log.txt", inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port));
+		snprintf(logBuff, 256, "echo \"\nConnection from: %s:%d \" >> Log.txt", inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port));
 		system(logBuff); // Append log
 
 		while((n = read(connfd, inBuff, sizeof(inBuff))) > 0 ) {
@@ -158,7 +159,20 @@ int main(int argc, char **argv) {
 
 					case GETALLBT:
 						listBtDevices = dao.getAllBtResults();
-						snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.btResultsToJson(listBtDevices).c_str());
+						// Send results in blocks of 10 devices - avoid buffer overflow
+						while(listBtDevices.size()!=0){
+							vector<Btresult> listBtDevicesTwo;
+							for(int i=0;i<10;i++){ // 10 at once
+								if(listBtDevices.size()==0) break;
+								listBtDevicesTwo.push_back(listBtDevices.at(0));
+								listBtDevices.erase(remove(listBtDevices.begin(), listBtDevices.end(), listBtDevices.at(0)), listBtDevices.end()); // Remove picked result
+							}
+							snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.btResultsToJson(listBtDevicesTwo).c_str());
+							write(connfd, outBuff, strlen(outBuff)); // Send data
+							memset(outBuff, sizeof(outBuff), 0);
+							listBtDevicesTwo.clear();
+						}
+						snprintf(outBuff, sizeof(outBuff), " "); // Empty message, avoid unknown request detection
 					break;
 
 					case GETALLWIFI:
@@ -212,7 +226,7 @@ int main(int argc, char **argv) {
 		if(outBuff[0]==0)
 			snprintf(outBuff, sizeof(outBuff), "Successfully read unknown request\n");
 
-		snprintf(logBuff, 256, "echo \"Command: %s\nContent-Type: %s\nReply: %s\n\" >> Log.txt",cmd, type, outBuff);
+		snprintf(logBuff, 256, "echo \"Command: %s\nPath: %s\nContent-Type: %s\nReply: %s\n\" >> Log.txt",cmd, path, type, outBuff);
 		system(logBuff); // Append log
 
 		std::cout << "\nSending: " << outBuff << std::endl; // Print out-going data to server
