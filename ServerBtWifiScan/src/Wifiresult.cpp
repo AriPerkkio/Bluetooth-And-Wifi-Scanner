@@ -37,7 +37,7 @@ string Wifiresult::getLoc(){ return this->location; }
 
 // SSID should always be unique
 bool Wifiresult::operator==(const Wifiresult &first) const{
-	return this->ssid.compare(first.ssid)==0;
+	return this->bssid.compare(first.bssid)==0;
 }
 
 Wifiresult::~Wifiresult() {

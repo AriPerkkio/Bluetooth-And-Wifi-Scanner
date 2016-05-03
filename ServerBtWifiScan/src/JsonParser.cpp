@@ -80,7 +80,7 @@ std::string JsonParser::btResultsToJson(vector<Btresult> _list){
 		if(i+1!=_list.size()) returnJson.append(",\n"); // Not last row
 		memset(devRow, 0, sizeof(devRow));
 	}
-	returnJson.append("\n]}\n");
+	returnJson.append("\n]}");
 	return returnJson;
 }
 
@@ -95,7 +95,7 @@ std::string JsonParser::wifiResultsToJson(vector<Wifiresult> _list){
 		if(i+1!=_list.size()) returnJson.append(",\n"); // Not last row
 		memset(netRow, 0, sizeof(netRow));
 	}
-	returnJson.append("\n]}\n");
+	returnJson.append("\n]}");
 	return returnJson;
 }
 

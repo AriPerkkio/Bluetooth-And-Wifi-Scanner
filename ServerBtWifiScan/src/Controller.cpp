@@ -43,29 +43,31 @@
 #define XMLCONTENT 302
 
 // Connection constants
-#define BUFFER 2048
-#define RESULTRESP 10 // Number of results sent in one HTTP response
+#define BUFFER 4096
+#define RESULTRESP 7 // Number of results sent in one HTTP response
 
 // Connection
-	int 		listenfd, connfd, n; // Socket IDs; Listening socket and connected socket. n for indexing loops
-	struct 		sockaddr_in servaddr, cliaddr; // Address structure to hold server's and client's address
-	char 		inBuff[BUFFER], outBuff[BUFFER], logBuff[BUFFER]; // Data buffers for input and output + logs
-	char 		clientBuff[256]; // To hold converted client address
-	socklen_t 	len; // Client address info
+int 		listenfd, connfd, n; // Socket IDs; Listening socket and connected socket. n for indexing loops
+struct 		sockaddr_in servaddr, cliaddr; // Address structure to hold server's and client's address
+char 		inBuff[BUFFER], outBuff[BUFFER], logBuff[BUFFER]; // Data buffers for input and output + logs
+char 		clientBuff[256]; // To hold converted client address
+socklen_t 	len; // Client address info
 
-	// HTTP Request
-	char		cmd[16], path[64], type[64]; // HTTP-request details
-	std::string header; // HTTP-header
+// HTTP Request
+char		cmd[16], path[64], type[64]; // HTTP-request details
+std::string header; // HTTP-header
+char 		HTTP_OK_HEADER[100] = "HTTP/1.1 200 OK\r\nServer: HTTPServerFile/1.1\r\nConnection: close\r\n\r\n";
+char 		HTTP_ERROR[100] = "HTTP/1.0 404 Not Found\r\n\r\n";
 
-	// JSON parsing
-	JsonParser jsonParser;
+// JSON parsing
+JsonParser jsonParser;
 
-	// Database
-	Dao	dao;
+// Database
+Dao	dao;
 
-	// Results
-	std::vector<Btresult> listBtDevices; // Bluetooth results
-	std::vector<Wifiresult> listWifiNetworks; // Wifi results
+// Results
+std::vector<Btresult> listBtDevices; // Bluetooth results
+std::vector<Wifiresult> listWifiNetworks; // Wifi results
 
 void error(const char *msg) {
     perror(msg);
@@ -110,7 +112,7 @@ void sendResults(vector<Btresult>& _list){
 			sendList.push_back(_list.at(0));
 			_list.erase(remove(_list.begin(), _list.end(), _list.at(0)), _list.end()); // Remove picked result
 		}
-		snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.btResultsToJson(sendList).c_str());
+		snprintf(outBuff, sizeof(outBuff), "%s   \n", jsonParser.btResultsToJson(sendList).c_str());
 		write(connfd, outBuff, strlen(outBuff)); // Send data
 		memset(outBuff, sizeof(outBuff), 0);
 		sendList.clear();
@@ -125,7 +127,7 @@ void sendResults(vector<Wifiresult>& _list){
 			sendList.push_back(_list.at(0));
 			_list.erase(remove(_list.begin(), _list.end(), _list.at(0)), _list.end());
 		}
-		snprintf(outBuff, sizeof(outBuff), "%s\n", jsonParser.wifiResultsToJson(sendList).c_str());
+		snprintf(outBuff, sizeof(outBuff), "%s   \n", jsonParser.wifiResultsToJson(sendList).c_str());
 		write(connfd, outBuff, strlen(outBuff));
 		memset(outBuff, sizeof(outBuff), 0);
 		sendList.clear();
@@ -159,6 +161,11 @@ int main(int argc, char **argv) {
 			inBuff[n] = 0; //Null terminate
 			if(strstr(inBuff, "\r\n\r\n")) break; // End of HTTP-request
 		}
+
+		if (n < 0)  // Error with data reading
+			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
+		else
+			write(connfd, HTTP_OK_HEADER, strlen(HTTP_OK_HEADER));
 
 		// Parse Content Type
 		std::istringstream req(inBuff);
@@ -201,7 +208,7 @@ int main(int argc, char **argv) {
 					case GETALLWIFI:
 						listWifiNetworks = dao.getAllWifiResults();
 						sendResults(listWifiNetworks);
-						snprintf(outBuff, sizeof(outBuff), "Read Wifi complete\n");
+						snprintf(outBuff, sizeof(outBuff), "\n");
 					break;
 
 					case CLEARALL:
@@ -245,8 +252,6 @@ int main(int argc, char **argv) {
 			break;
 		}// CMD
 
-		if (n < 0)  // Error with data reading
-			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
 		if(outBuff[0]==0)
 			snprintf(outBuff, sizeof(outBuff), "Successfully read unknown request\n");
 
