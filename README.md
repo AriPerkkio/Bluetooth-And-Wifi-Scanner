@@ -1,5 +1,10 @@
-School project for module Mobile Software Development.
+Development after first release: 
 
+Latest builds: http://scanner.aperkkio.me/
+
+
+
+School project for module Mobile Software Development.
 
 APK Download: 
 http://www.students.oamk.fi/~t3pear00/.Temp/BtWifi_Location.apk
