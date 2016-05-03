@@ -25,12 +25,14 @@ import android.widget.Toast;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Vector;
 
-public class subPrevScanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener, ListView.OnItemLongClickListener {
+public class subPrevScanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener, ListView.OnItemLongClickListener, HttpResponsePass {
 
     private Button back;
     private Button rename;
     private Button map;
+    private Button upload;
 
     private EditText scanNameField;
     private TextView scanDate;
@@ -43,6 +45,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
 
     private ListView list;
     private databaseManager database;
+    private GlobalDbConnection globalDbConnection;
     private subPrevScanCursorAdapter listAdapter;
     private Cursor btCursor;
     private Cursor wifiCursor;
@@ -64,11 +67,14 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         rename.setOnClickListener(this);
         map = (Button) findViewById(R.id.subPrevScanMap);
         map.setOnClickListener(this);
+        upload = (Button) findViewById(R.id.subPrevScanUpload);
+        upload.setOnClickListener(this);
         scanNameField = (EditText) findViewById(R.id.subPrevScanName);
         scanDate = (TextView) findViewById(R.id.subPrevScanDate);
         btNumber = (TextView) findViewById(R.id.subPrevScanBtNumber);
         wifiNumber = (TextView) findViewById(R.id.subPrevScanWifiNumber);
         database = new databaseManager(this);
+        globalDbConnection = new GlobalDbConnection(this, this);
 
         // Set scan details to text fields
         scanNameField.setText(getIntent().getExtras().getString("scanName"));
@@ -100,6 +106,36 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         mapsProgressDialog = new ProgressDialog(subPrevScanActivity.this);
         mapsProgressDialog.setMessage("Setting up maps... ");
         mapsProgressDialog.hide();
+    }
+
+    public void onResponseRead(String response, String method){
+        switch(method){
+            case "uploadBt": // I.e. "3/3 Bluetooth devices and 0/0 Wifi networks inserted."
+                String newDevices = response.split("/")[0];
+                String totalDevices = response.split("/")[1].split(" ")[0];
+                Toast.makeText(this, newDevices+"/"+totalDevices+" Bluetooth results uploaded.", Toast.LENGTH_SHORT).show();
+                break;
+
+            case "uploadWifi": // I.e. "3/3 Bluetooth devices and 0/0 Wifi networks inserted."
+                Log.d("uploadWifisubprev", response); // Crash here sometimes
+                String newNetworks = response.split("/")[1].split(" and")[1];
+                String totalNetworks = response.split("/")[2].split(" ")[0];
+                Toast.makeText(this, newNetworks+"/"+totalNetworks+" Wifi results uploaded.", Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
+    public void onResponseRead(String response){
+        Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
+    }
+
+    public void scanResultPass(String method, List<scanResult> resultList){
+        switch(method){
+            case "syncBt":
+                break;
+            case "syncWifi":
+                break;
+        }
     }
 
     public void onClick(View v) {
@@ -166,6 +202,30 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                 btCursor.moveToFirst();
                 wifiCursor.moveToFirst();
                 startActivity(intent);
+            break;
+
+            case R.id.subPrevScanUpload:
+                List<scanResult> results = new Vector<>();
+                btCursor.moveToFirst();
+                wifiCursor.moveToFirst();
+                for (int i = 0; i < btCursor.getCount(); i++){
+                    results.add(new scanResult(btCursor.getString(1),
+                            btCursor.getString(2),
+                            globalDbConnection.reverseBtType(btCursor.getString(3)),
+                            Integer.parseInt(btCursor.getString(4)),
+                            btCursor.getString(5)));
+                    btCursor.moveToNext();
+                }
+                for (int i = 0; i < wifiCursor.getCount(); i++) {
+                    results.add(new scanResult(wifiCursor.getString(1),
+                            wifiCursor.getString(2),
+                            wifiCursor.getString(3),
+                            Integer.parseInt(wifiCursor.getString(4)),
+                            Integer.parseInt(wifiCursor.getString(5)),
+                            wifiCursor.getString(6)));
+                    wifiCursor.moveToNext();
+                }
+                globalDbConnection.upload(results, getString(R.string.servOne));
             break;
         }
     }

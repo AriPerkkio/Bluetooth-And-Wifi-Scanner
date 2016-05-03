@@ -28,17 +28,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class scanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener, LocationListener {
+public class scanActivity extends Activity implements View.OnClickListener, ListView.OnItemClickListener, LocationListener, HttpResponsePass {
 
     // General
     private Button endScan; // 'End scanning' button
     private Button save; // 'Save' button
     private Button dontSave; // 'Don't save' button
     private Button map;
+    private Button globalUpload;
     private TextView scanName;
     private TextView scanFoundBt;
     private TextView scanFoundWifi;
@@ -51,6 +51,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private databaseManager database;
     private saveResultsBackground backgroundSaver;
     private ProgressDialog progressDialog;
+    GlobalDbConnection globalDbConnection;
 
     // Scanning
     private int sampleRate;
@@ -109,6 +110,9 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         dontSave.setVisibility(View.GONE); //Not visible until scan ended
         map = (Button) findViewById(R.id.ScanMap);
         map.setOnClickListener(this);
+        globalUpload = (Button) findViewById(R.id.scanGlobal);
+        globalUpload.setOnClickListener(this);
+        globalUpload.setVisibility(View.GONE);
 
         // Text Fields
         scanName = (TextView) findViewById(R.id.ScanName);
@@ -145,13 +149,13 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             locGps = getIntent().getExtras().getBoolean("locationGps");
             locNet = getIntent().getExtras().getBoolean("locationNet");
         }
-        Log.e("Bt opts", btStatus +" "+ btDevName);
         // Get scan name and sample rate
         scanName.setText(getIntent().getExtras().getString("scanName"));
         sampleRate = getIntent().getExtras().getInt("sampleRate");
 
         // Database and List objects
         database = new databaseManager(this);
+        globalDbConnection = new GlobalDbConnection(this, this);
         scanresults = new ArrayList<scanResult>();
         scanResultList = (ListView) findViewById(R.id.ScanList);
         scanResultList.setOnItemClickListener(scanActivity.this);
@@ -185,7 +189,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
                 // Check options and get requested attributes. By ignoring one, it keeps its default value initialized above
                 if (btDevName)
-                    deviceName = btDevice.getName();
+                    deviceName = globalDbConnection.checkStr(globalDbConnection.checkName(btDevice.getName()));
                 if (btDevAddr)
                     address = btDevice.getAddress();
                 if (btDevType)
@@ -243,12 +247,34 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         }
     }
 
+    public void onResponseRead(String response, String method){
+        switch(method){
+            case "uploadBt": // 3/3 Bluetooth devices and 0/0 Wifi networks inserted.
+                String newDevices = response.split("/")[0];
+                String totalDevices = response.split("/")[1].split(" ")[0];
+                Toast.makeText(this, newDevices+"/"+totalDevices+" Bluetooth results uploaded.", Toast.LENGTH_SHORT).show();
+            break;
+
+            case "uploadWifi": // 3/3 Bluetooth devices and 0/0 Wifi networks inserted.
+                String newNetworks = response.split("/")[1].split(" and")[1];
+                String totalNetworks = response.split("/")[2].split(" ")[0];
+                Toast.makeText(this, newNetworks+"/"+totalNetworks+" Wifi results uploaded.", Toast.LENGTH_SHORT).show();
+            break;
+        }
+    }
+    public void onResponseRead(String response){
+        Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
+    }
+
+    public void scanResultPass(String method, List<scanResult> resultList){ }
+
     public void onClick(View v) {
         switch (v.getId()) {
             case (R.id.scanEnd): // End scan button
                 backgroundScanner.cancel(true); // End background scanning
                 save.setVisibility(View.VISIBLE); // Show 'Save' button
                 dontSave.setVisibility(View.VISIBLE); // Show "Don't save" button
+                globalUpload.setVisibility(View.VISIBLE);
                 endScan.setVisibility(View.GONE); // Hide 'End scan' button
                 if(btAdapter != null && btAdapter.isDiscovering())
                     btAdapter.cancelDiscovery(); // End bt scanning if its still running
@@ -262,6 +288,10 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Close previous activities
                 startActivity(intent);
+            break;
+
+            case (R.id.scanGlobal):
+                globalDbConnection.upload(scanresults, getResources().getString(R.string.servOne));
             break;
 
             case (R.id.ScanMap):
@@ -297,7 +327,6 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                     }
                 }
                 startActivity(intent);
-
             break;
         }
     }
@@ -387,11 +416,11 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
                         // Check options and get requested attributes. By ignoring one, it keeps its default value initialized above
                         if (wifiSSID)
-                            SSID = wifiScanResults.get(i).SSID;
+                            SSID = globalDbConnection.checkStr(wifiScanResults.get(i).SSID);
                         if (wifiBSSID)
                             BSSID = wifiScanResults.get(i).BSSID;
                         if (wifiCapabilities)
-                            capabilities = wifiScanResults.get(i).capabilities;
+                            capabilities = globalDbConnection.checkStr(wifiScanResults.get(i).capabilities);
                         if (wifiFrequency)
                             frequency = wifiScanResults.get(i).frequency;
                         if (wifiRSSI)

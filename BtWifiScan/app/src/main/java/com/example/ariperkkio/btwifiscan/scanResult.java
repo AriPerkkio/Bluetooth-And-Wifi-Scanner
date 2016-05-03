@@ -109,4 +109,12 @@ public class scanResult {
     }
 
     public String getLocation() { return location; }
+
+    // Simpler way to get access for address. Added after first release.
+    public String getMac(){
+        if(technology.equals("Bluetooth"))
+            return this.btDevAddr;
+        else
+            return this.getWifiSSID();
+    }
 }

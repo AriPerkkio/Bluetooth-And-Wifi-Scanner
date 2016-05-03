@@ -1,28 +1,26 @@
 package com.example.ariperkkio.btwifiscan;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.StrictMode;
-import android.util.JsonReader;
 import android.util.Log;
-import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Vector;
+
 
 /**
  * Created by AriPerkkio on 01/05/16.
@@ -32,37 +30,141 @@ public class GlobalDbConnection {
     private ConnectivityManager connMgr;
     private JSONArray jsonArray;
     private Context context;
+    final int sendingSize = 7; // Send results in blocks of ten
+    HttpResponsePass responseListener;
 
-    public GlobalDbConnection(Context ctx){
+    public GlobalDbConnection(Context ctx, HttpResponsePass _responseListener) {
         context = ctx;
+        responseListener = _responseListener;
         connMgr = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
         networkInfo = connMgr.getActiveNetworkInfo();
-        if( networkInfo != null && networkInfo.isConnected() ) {
+        if (networkInfo != null && networkInfo.isConnected()) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
-        }
-        else
-            Log.e("GlobDbCon constr", "networkinfo: "+(networkInfo != null));
+        } else
+            Log.e("GlobDbCon constr", "networkinfo: " + (networkInfo != null));
     }
 
     private class downloader extends AsyncTask<String, Void, String> {
-        protected String doInBackground(String... urls){
+        private String method;
+        private ProgressDialog progressDialog = new ProgressDialog(context);
+        public downloader(String _method){
+            method = _method;
+        }
+
+        protected String doInBackground(String... urls) {
             try {
                 return downloadUrl(urls[0]);
             } catch (IOException e) {
                 return "Unable to retrieve web page. URL may be invalid. \n" + e.toString();
             }
         }
-        protected void onPostExecute(String result){
-            Log.d("onPostExecute", result);
+        protected void onPreExecute() {
+            String message = "";
+            switch(method){
+                case "getAllBt":
+                    message = "Downloading Bluetooth results...";
+                break;
+
+                case "getAllWifi":
+                    message = "Downloading Wifi results...";
+                break;
+
+                case "pingServerOne":
+                case "pingServerTwo":
+                    message = "Checking status of server";
+                break;
+
+                case "pingDbOne":
+                case "pingDbTwo":
+                case "pingDbThree":
+                    message = "Checking status of database";
+                break;
+
+                case "countBt":
+                case "countWifi":
+                    message = "Calculating scan results...";
+                break;
+            }
+            progressDialog.setMessage(message);
+            progressDialog.show();
+            progressDialog.setCanceledOnTouchOutside(false);
+        }
+        protected void onPostExecute(String result) {
+            progressDialog.hide();
+            switch(method){
+                case "getAllBt":
+                    responseListener.scanResultPass("getAllResults", parseBtJson(result));
+                break;
+
+                case "getAllWifi":
+                    responseListener.scanResultPass("getAllResults", parseWifiJson(result));
+                break;
+
+                case "countBt":
+                case "countWifi":
+                case "pingServerOne":
+                case "pingServerTwo":
+                case "pingDbOne":
+                case "pingDbThree":
+                case "pingDbTwo":
+                    Log.d("onPost", method+":"+result);
+                    responseListener.onResponseRead(result, method);
+                break;
+            }
         }
     }
 
-    public String downloadUrl(String myurl) throws IOException {
+    private class uploader extends AsyncTask<String, Void, String> {
+        private String method;
+        private String data;
+        private ProgressDialog progressDialog = new ProgressDialog(context);
+        public uploader(String _method, String _data){
+            method = _method;
+            data = _data;
+        }
+        protected String doInBackground(String... urls) {
+            try {
+                return postToUrl(urls[0], data);
+            } catch (IOException e) {
+                return "Unable to retrieve web page. URL may be invalid. \n" + e.toString();
+            }
+        }
+        protected void onPreExecute() {
+            String message = "";
+            switch(method){
+                case "uploadBt":
+                case "uploadWifi":
+                    message = "Uploading results...";
+                break;
+
+                case "syncAll":
+                    message = "Synchronizing results...";
+                break;
+            }
+            progressDialog.setMessage(message);
+            progressDialog.show();
+            progressDialog.setCanceledOnTouchOutside(false);
+        }
+        protected void onPostExecute(String result) {
+            progressDialog.hide();
+            switch(method){
+                case "uploadBt":
+                case "uploadWifi":
+                    responseListener.onResponseRead(result, method);
+                break;
+
+                case "syncAll":
+                    responseListener.onResponseRead(result);
+                break;
+            }
+        }
+    }
+
+    public String downloadUrl(String _url) throws IOException {
         InputStream is = null;
-        int len = 2048;
         try {
-            URL url = new URL(myurl);
+            URL url = new URL(_url);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(10000);
             conn.setConnectTimeout(15000);
@@ -70,7 +172,7 @@ public class GlobalDbConnection {
             conn.setDoInput(true);
             conn.connect();
             is = conn.getInputStream();
-            return readIt(is, len);
+            return readIt(is);
         } finally {
             if (is != null) {
                 is.close();
@@ -78,96 +180,191 @@ public class GlobalDbConnection {
         }
     }
 
-    private String readIt(InputStream stream, int len) throws IOException{
+    public String postToUrl(String _url, String data) throws IOException {
+        InputStream is = null;
+        try {
+            URL url = new URL(_url);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoInput(true);
+            DataOutputStream outputStream = new DataOutputStream((conn.getOutputStream()));
+            outputStream.writeBytes(data);
+            outputStream.flush();
+            outputStream.close();
+            conn.connect();
+            is = conn.getInputStream();
+            return readIt(is);
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+
+    private String readIt(InputStream stream) throws IOException {
+        String returnString = "";
         Reader reader = new InputStreamReader(stream, "UTF-8");
-        BufferedReader bfReader = new BufferedReader(reader, len);
-        char[] buffer = new char[len];
-        bfReader.read(buffer);
-        return new String(buffer);
+        BufferedReader bfReader = new BufferedReader(reader);
+        String newLine;
+        while((newLine = bfReader.readLine())!=null)
+            returnString += newLine;
+        return returnString;
+    }
+
+    public void getAllResults(String server) {
+        new downloader("getAllBt").execute(server + "/getAllBt");
+        new downloader("getAllWifi").execute(server + "/getAllWifi");
     }
 
     public List<scanResult> parseBtJson(String inputString) {
         List<scanResult> btDeviceList = new Vector<>();
+        String[] btJson = inputString.split("   "); // Each root separated by three spaces
         try {
-            JSONObject  jsonRootObject = new JSONObject(inputString);
-            jsonArray = jsonRootObject.optJSONArray("btscans");
-            for(int i =0; i<jsonArray.length(); i++) {
-                JSONObject newJsonObject = jsonArray.getJSONObject(i);
-                btDeviceList.add(new scanResult(
-                        (String) newJsonObject.get("devName"),
-                        (String) newJsonObject.get("devAddr"),
-                        reverseBtType((String) newJsonObject.get("devType")),
-                        reverseRssi((String) newJsonObject.get("devRssi")),
-                        (String) newJsonObject.get("location")));
+            for (String btSubJson:btJson){
+                JSONObject jsonRootObject = new JSONObject(btSubJson);
+                jsonArray = jsonRootObject.optJSONArray("btscans");
+                for (int ii = 0; ii < jsonArray.length(); ii++) {
+                    if(jsonArray.length()==ii) break; // All results read
+                    JSONObject newJsonObject = jsonArray.getJSONObject(ii);
+                    btDeviceList.add(new scanResult(
+                            (String) newJsonObject.get("devName"),
+                            (String) newJsonObject.get("devAddr"),
+                            reverseBtType((String) newJsonObject.get("devType")),
+                            reverseRssi((String) newJsonObject.get("devRssi")),
+                            (String) newJsonObject.get("location")));
+                }
             }
-        }catch(JSONException e) {
+        } catch (JSONException e) {
             Log.e("JSON", e.toString());
         }
         return btDeviceList;
     }
 
-    public List<scanResult> getAllBt(String server){
-        String btJson = "";
+    public List<scanResult> parseWifiJson(String inputString) {
+        List<scanResult> wifiNetworkList = new Vector<>();
+        String[] wifiJson = inputString.split("   "); // Each root separated by three spaces
         try {
-            btJson = downloadUrl(server+"/getAllBt");
-        }catch(java.io.IOException e) {
-            Log.e("getAllBt", e.toString());
+            for(String wifiSubJson:wifiJson) {
+                JSONObject jsonRootObject = new JSONObject(wifiSubJson);
+                jsonArray = jsonRootObject.optJSONArray("wifiscans");
+                for (int ii = 0; ii < sendingSize; ii++) {
+                    if(jsonArray.length()==ii) break; // All results read
+                    JSONObject newJsonObject = jsonArray.getJSONObject(ii);
+                    wifiNetworkList.add(new scanResult(
+                            (String) newJsonObject.get("ssid"),
+                            (String) newJsonObject.get("bssid"),
+                            (String) newJsonObject.get("capabilities"),
+                            reverseFreq((String) newJsonObject.get("freq")),
+                            reverseRssi((String) (newJsonObject.get("rssi"))),
+                            (String) newJsonObject.get("location")));
+                }
+            }
+        }catch (JSONException e) {
+            Log.e("JSON", e.toString());
         }
-        return parseBtJson(btJson);
+        return wifiNetworkList;
     }
 
-    public boolean pingServerOne(){
-        String response = "";
-        try {
-            response = downloadUrl(context.getResources().getString(R.string.servOne)).split("\n")[0];
-        }catch(java.io.IOException e) {
-            Log.e("pingServerOne", e.toString());
-        }
-        return response.equals("Successfully read unknown request");
+    public void pingServerOne() {
+        new downloader("pingServerOne").execute(context.getResources().getString(R.string.servOne));
     }
 
-    public boolean pingServerTwo(){
-        String response = "";
-        try {
-            response = downloadUrl(context.getResources().getString(R.string.servTwo)).split("\n")[0];
-        }catch(java.io.IOException e) {
-            Log.e("pingServerTwo", e.toString());
-        }
-        return response.equals("Successfully read unknown request");
+    public void pingServerTwo() {
+        new downloader("pingServerTwo").execute(context.getResources().getString(R.string.servTwo));
     }
 
-    public boolean pingDbOne(String server){
-        String response = "";
-        try {
-            response = downloadUrl(server+"/pingOkeanos").split("\n")[0];
-        }catch(java.io.IOException e) {
-            Log.e("pingDbOne", e.toString());
-        }
-        return response.equals("Okeanos-DB ping OK");
+    public void pingDbOne(String server) {
+        new downloader("pingDbOne").execute(server + "/pingOkeanos");
     }
 
-    public boolean pingDbTwo(String server){
-        String response = "";
-        try {
-            response = downloadUrl(server+"/pingAzure").split("\n")[0];
-        }catch(java.io.IOException e) {
-            Log.e("pingDbTwo", e.toString());
-        }
-        return response.equals("Azure-DB ping OK");
+    public void pingDbTwo(String server) {
+        new downloader("pingDbTwo").execute(server + "/pingDigiOcean");
     }
 
-    public boolean pingDbThree(String server){
-        String response = "";
-        try {
-            response = downloadUrl(server+"/pingDigiOcean").split("\n")[0];
-        }catch(java.io.IOException e) {
-            Log.e("pingDbThree", e.toString());
-        }
-        return response.equals("DigitalOcean-DB ping OK");
+    public void pingDbThree(String server) {
+        new downloader("pingDbThree").execute(server + "/pingAzure");
     }
 
-    private int reverseBtType(String type){
-        switch(type) { // Convert int getType() into correct string
+    public void getBtCount(String server) {
+        new downloader("countBt").execute(server + "/countBt");
+    }
+
+    public void getWifiCount(String server) {
+        new downloader("countWifi").execute(server + "/countWifi");
+    }
+
+    public void upload(List<scanResult> list, String server){
+        List<scanResult> btList = new Vector<>();
+        JSONObject btResultsJson = new JSONObject();
+        JSONArray btArray = new JSONArray();
+        JSONObject btJson = new JSONObject();
+        List<scanResult> wifiList = new Vector<>();
+        JSONObject wifiResultsJson = new JSONObject();
+        JSONArray wifiArray = new JSONArray();
+        JSONObject wifiJson = new JSONObject();
+
+        for(int i=0;i<list.size();i++){
+            if(list.get(i).getTechnology().equals("Bluetooth"))
+                btList.add(list.get(i));
+            else
+                wifiList.add((list.get(i)));
+        }
+
+        do {
+            try {
+                int devCount = 0;
+                do {
+                    if (btList.size() == 0) break;
+                    btResultsJson.put("devName", checkStr(checkName(btList.get(0).getBtDevName())));
+                    btResultsJson.put("devAddr", btList.get(0).getBtDevAddr());
+                    btResultsJson.put("devType", btList.get(0).getBtDevType());
+                    btResultsJson.put("devRssi", btList.get(0).getBtRSSI() + "dBm");
+                    btResultsJson.put("location", btList.get(0).getLocation());
+                    btArray.put(btResultsJson);
+                    btResultsJson = new JSONObject();
+                    btList.remove(0);
+                    devCount++;
+                } while (devCount != sendingSize); // 10 Results in JSON
+                btJson.put("btscans", btArray);
+                new uploader("uploadBt", btJson.toString()).execute(server+"/upload");
+            } catch (JSONException e) {
+                Log.e("btscans", e.toString());
+            }
+            btJson.remove("btscans");
+            btArray = new JSONArray();
+        }while(btList.size()!=0);
+
+        do {
+            try {
+                int networkCount = 0;
+                do {
+                    if (wifiList.size() == 0) break;
+                    wifiResultsJson.put("ssid", checkStr(checkName(wifiList.get(0).getWifiSSID())));
+                    wifiResultsJson.put("bssid", wifiList.get(0).getWifiBSSID());
+                    wifiResultsJson.put("capabilities", checkStr(wifiList.get(0).getWifiCapabilities()));
+                    wifiResultsJson.put("rssi", wifiList.get(0).getWifiRSSI()+"dBm");
+                    wifiResultsJson.put("freq", wifiList.get(0).getWifiFrequency()+"MHz");
+                    wifiResultsJson.put("location", wifiList.get(0).getLocation());
+                    wifiArray.put(wifiResultsJson);
+                    wifiResultsJson = new JSONObject();
+                    wifiList.remove(0);
+                    networkCount ++;
+                } while (networkCount  != sendingSize); // 10 Results in JSON
+                wifiJson.put("wifiscans", wifiArray);
+                new uploader("uploadWifi", "{\"btscans\":[{}]}"+wifiJson.toString()).execute(server+"/upload");
+            } catch (JSONException e) {
+                Log.e("wifiscans", e.toString());
+            }
+            wifiJson.remove("wifiscans");
+            wifiArray = new JSONArray();
+        }while(wifiList.size()!=0);
+    }
+
+    public int reverseBtType(String type) {
+        switch (type) { // Convert int getType() into correct string
             case "Unknown":
                 return 0;
             case "Classic":
@@ -181,7 +378,44 @@ public class GlobalDbConnection {
         }
     }
 
-    private int reverseRssi(String rssi){
-        return Integer.parseInt(rssi.split("d")[0]); // I.e. "-113dbm" -> -113
+    public String checkName(String name){
+        if(name == null || name.equals(""))
+            return " ";
+        return name;
+    }
+
+    private int reverseRssi(String rssi) {
+        return Integer.parseInt(rssi.split("dBm")[0]); // I.e. "-113dbm" -> -113
+    }
+
+    private int reverseFreq(String freq) {
+        return Integer.parseInt(freq.split("MHz")[0]); // I.e. "2400MHz" -> 2400
+    }
+
+    /** temp **/
+    // Change '[' and ']' to '(' and ')' so that JSON won't get messed up later
+    public String checkStr(String input){
+        char[] inputStr = input.toCharArray();
+        for(int i=0;i<input.length();i++){
+            if(input.charAt(i)=='[')
+                inputStr[i] = '(';
+            if(input.charAt(i)==']')
+                inputStr[i] = ')';
+            if(input.charAt(i)=='\'')
+                inputStr[i]=' ';
+            if(input.charAt(i)=='\\')
+                inputStr[i]=' ';
+            if(input.charAt(i)=='/')
+                inputStr[i]=' ';
+            if(input.charAt(i)=='´')
+                inputStr[i]=' ';
+            if(input.charAt(i)=='¨')
+                inputStr[i]=' ';
+            if(input.charAt(i)=='ˇ')
+                inputStr[i]=' ';
+            if(input.charAt(i)=='̧')
+                inputStr[i]=' ';
+        }
+        return String.valueOf(inputStr);
     }
 }

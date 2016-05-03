@@ -31,6 +31,18 @@
         android:layout_above="@+id/space17"
         android:layout_centerHorizontal="true" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Upload to\nGlobal database"
+        android:id="@+id/scanGlobal"
+        android:background="@android:color/background_dark"
+        android:paddingRight="5dp"
+        android:paddingLeft="5dp"
+        android:textColor="@color/mainColorCyan"
+        android:layout_above="@+id/space17"
+        android:layout_centerHorizontal="true" />
+
     <Space
         android:layout_width="fill_parent"
         android:layout_height="20dp"
@@ -159,10 +171,10 @@
         android:layout_height="wrap_content"
         android:text="Save"
         android:id="@+id/scanSave"
-        android:layout_above="@+id/space17"
-        android:layout_toStartOf="@+id/space21"
         android:textColor="@color/mainColorCyan"
-        android:background="@android:color/background_dark" />
+        android:background="@android:color/background_dark"
+        android:layout_alignBottom="@+id/space18"
+        android:layout_toEndOf="@+id/scanHeader" />
 
     <TextView
         android:layout_width="wrap_content"

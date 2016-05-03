@@ -47,6 +47,8 @@ public class scanMap extends FragmentActivity implements OnMapReadyCallback {
             subPrevScanActivity.mapsProgressDialog.hide();
         if(getIntent().getExtras().getString("Caller") != null && getIntent().getExtras().getString("Caller").equals("class com.example.ariperkkio.btwifiscan.scanActivity"))
             scanActivity.mapsProgressDialog.hide();
+        if(getIntent().getExtras().getString("Caller") != null && getIntent().getExtras().getString("Caller").equals("class com.example.ariperkkio.btwifiscan.GlobalActivity"))
+            GlobalActivity.mapsProgressDialog.hide();
 
     }
 
