@@ -1,6 +1,8 @@
-Development continues after first release. 
+Development after first release: 
 
 Latest builds: http://scanner.aperkkio.me/
+
+
 
 School project for module Mobile Software Development.
 
