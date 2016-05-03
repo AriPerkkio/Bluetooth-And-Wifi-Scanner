@@ -115,6 +115,6 @@ public class scanResult {
         if(technology.equals("Bluetooth"))
             return this.btDevAddr;
         else
-            return this.getWifiSSID();
+            return this.wifiBSSID;
     }
 }
