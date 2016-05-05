@@ -55,9 +55,9 @@ socklen_t 	len; // Client address info
 
 // HTTP Request
 char		cmd[16], path[64], type[64]; // HTTP-request details
+char 		contentLength[16];
 std::string header; // HTTP-header
-char 		HTTP_OK_HEADER[100] = "HTTP/1.1 200 OK\r\nServer: HTTPServerFile/1.1\r\nConnection: close\r\n\r\n";
-char 		HTTP_ERROR[100] = "HTTP/1.0 404 Not Found\r\n\r\n";
+char 		HTTP_OK_HEADER[100] =  "HTTP/1.1 200 OK\r\nServer: BtWifiScanServer/1.1\r\nConnection: close\r\n\r\n";
 
 // JSON parsing
 JsonParser jsonParser;
@@ -156,21 +156,42 @@ int main(int argc, char **argv) {
 		snprintf(logBuff, 256, "echo \"\nConnection from: %s:%d \" >> Log.txt", inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port));
 		system(logBuff); // Append log
 
-		while((n = read(connfd, inBuff, sizeof(inBuff))) > 0 ) {
+
+/*		while((n = read(connfd, inBuff, sizeof(inBuff))) > 0 ) {
 			sscanf(inBuff, "%s %s", cmd, path); // Parse HTTP request's command and path
 			inBuff[n] = 0; //Null terminate
+			printf("Line: (%s)", inBuff);
 			if(strstr(inBuff, "\r\n\r\n")) break; // End of HTTP-request
 		}
+*/
+		// Read buffer one char at time - stop when reached the start of payload
+		char oneChar[1];
+		int charCounter=0;
+		do{
+			n = read(connfd, oneChar, 1);
+			sscanf(inBuff, "%s %s", cmd, path); // Parse HTTP request's command and path
+			inBuff[charCounter] = oneChar[0];
+			charCounter++;
+			if(strstr(inBuff, "\r\n\r\n")) break;
+			if(strstr(inBuff, "\r\n\n")) break;
+		}while(n>0);
+		inBuff[charCounter+1] = 0; //Null terminate
+		cout << "Read input: ****"<< inBuff << "\n******\n";
+
+		// Parse Content Type
+		std::istringstream req(inBuff);
+
+		while (std::getline(req, header)){
+			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
+			sscanf(header.c_str(), "Content-Length: %s", contentLength);
+		}
+		char dataBuff[atoi(contentLength)];
+
 
 		if (n < 0)  // Error with data reading
 			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
 		else
 			write(connfd, HTTP_OK_HEADER, strlen(HTTP_OK_HEADER));
-
-		// Parse Content Type
-		std::istringstream req(inBuff);
-		while (std::getline(req, header))
-			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
 
 		cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type << "\nPath: " << path;
 		switch(processCmd(cmd)){
@@ -222,22 +243,27 @@ int main(int argc, char **argv) {
 				switch(processContentType(type)){
 					case JSONCONTENT:
 						switch(processPath(path)){
-							case UPLOAD:
-								listBtDevices = jsonParser.parseBtJson(inBuff);
-								listWifiNetworks = jsonParser.parseWifiJson(inBuff);
+							case UPLOAD: // TODO: Fix (MySQL error code: 1406, SQLState: 22001 ) (Data too long for row)
+								n = read(connfd, dataBuff, sizeof(dataBuff));
+								dataBuff[n] = 0;
+								printf("Data buff: (%s). \nValue for n: %d",dataBuff, n);
+								cout << "\nSize of dataBuff: "<< sizeof(dataBuff) << "\nData: \n" << dataBuff;
+								listBtDevices = jsonParser.parseBtJson(dataBuff, sizeof(dataBuff));
+								listWifiNetworks = jsonParser.parseWifiJson(dataBuff, sizeof(dataBuff));
+								cout << "\nSize BT " << listBtDevices.size() << ". Wifi: "<< listWifiNetworks.size() << "\n" << endl;
 								snprintf(outBuff, sizeof(outBuff), "%d/%lu Bluetooth devices and %d/%lu Wifi networks inserted.\n"
 										,dao.insertBtResults(listBtDevices) ,listBtDevices.size(), dao.insertWifiResults(listWifiNetworks), listWifiNetworks.size());
 							break;
 
-							case SYNCBT:
-								listBtDevices = jsonParser.parseBtJson(inBuff);
+							case SYNCBT: // TODO: Test same kind of reading as in UPLOAD
+								listBtDevices = jsonParser.parseBtJson(inBuff, sizeof(inBuff));
 								dao.syncBtResults(listBtDevices); // Insert all devices that are not in db already
 								sendResults(listBtDevices); // Send response containing devices that were not in user's initial list
 								snprintf(outBuff, sizeof(outBuff), "BT sync complete. \n");
 							break;
 
 							case SYNCWIFI:
-								listWifiNetworks = jsonParser.parseWifiJson(inBuff);
+								listWifiNetworks = jsonParser.parseWifiJson(inBuff, sizeof(inBuff));
 								dao.syncWifiResults(listWifiNetworks);
 								sendResults(listWifiNetworks);
 								snprintf(outBuff, sizeof(outBuff), "Wifi sync complete. \n");
@@ -268,6 +294,7 @@ int main(int argc, char **argv) {
 		memset(&type[0], 0, sizeof(type));
 		memset(&inBuff[0], 0, sizeof(inBuff));
 		memset(&outBuff[0], 0, sizeof(outBuff));
+		memset(&dataBuff[0], 0, sizeof(dataBuff));
 		listBtDevices.clear();
 		listWifiNetworks.clear();
 		req.clear();

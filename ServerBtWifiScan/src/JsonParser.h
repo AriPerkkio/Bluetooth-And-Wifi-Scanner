@@ -16,8 +16,8 @@ class JsonParser {
 public:
 	JsonParser();
 	virtual ~JsonParser();
-	vector<Btresult> parseBtJson(char[]);
-	vector<Wifiresult> parseWifiJson(char[]);
+	vector<Btresult> parseBtJson(char[], int buffSize);
+	vector<Wifiresult> parseWifiJson(char[], int buffSize);
 	std::string btResultsToJson(vector<Btresult>);
 	std::string wifiResultsToJson(vector<Wifiresult>);
 };
