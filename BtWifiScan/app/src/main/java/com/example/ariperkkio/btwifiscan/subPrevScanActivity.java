@@ -42,6 +42,8 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
     private int numberOfWifiNetworks = 0;
     private int scanId;
     public static ProgressDialog mapsProgressDialog;
+    private int countUploaded;
+    private int countToUpload;
 
     private ListView list;
     private databaseManager database;
@@ -111,16 +113,20 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
     public void onResponseRead(String response, String method){
         switch(method){
             case "uploadBt": // I.e. "3/3 Bluetooth devices and 0/0 Wifi networks inserted."
-                String newDevices = response.split("/")[0];
+                if(response.split("/").length<2) break;
                 String totalDevices = response.split("/")[1].split(" ")[0];
-                Toast.makeText(this, newDevices+"/"+totalDevices+" Bluetooth results uploaded.", Toast.LENGTH_SHORT).show();
+                countUploaded += Integer.parseInt(totalDevices);
+                Toast.makeText(this, countUploaded+"/"+countToUpload+" results uploaded.", Toast.LENGTH_SHORT).show();
+                if(countUploaded==countToUpload) globalDbConnection.hideUploaderProgDiag();
                 break;
 
             case "uploadWifi": // I.e. "3/3 Bluetooth devices and 0/0 Wifi networks inserted."
                 Log.d("uploadWifisubprev", response); // Crash here sometimes
-                String newNetworks = response.split("/")[1].split(" and")[1];
+                if(response.split("/").length<2) break;
                 String totalNetworks = response.split("/")[2].split(" ")[0];
-                Toast.makeText(this, newNetworks+"/"+totalNetworks+" Wifi results uploaded.", Toast.LENGTH_SHORT).show();
+                countUploaded += Integer.parseInt(totalNetworks);
+                Toast.makeText(this, countUploaded+"/"+countToUpload+" results uploaded.", Toast.LENGTH_SHORT).show();
+                if(countUploaded==countToUpload) globalDbConnection.hideUploaderProgDiag();
                 break;
         }
     }
@@ -146,7 +152,6 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                 break;
 
             case (R.id.subPrevScanRename): // 'Rename' button
-
                 if (scanNameField.getText().toString().equals("")) // Check if empty name
                     Toast.makeText(this, "Scan name can't be empty.", Toast.LENGTH_SHORT).show();
                     // Check if rename has been pressed without making changes to scan name
@@ -206,6 +211,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
 
             case R.id.subPrevScanUpload:
                 List<scanResult> results = new Vector<>();
+                countUploaded = 0;
                 btCursor.moveToFirst();
                 wifiCursor.moveToFirst();
                 for (int i = 0; i < btCursor.getCount(); i++){
@@ -225,6 +231,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                             wifiCursor.getString(6)));
                     wifiCursor.moveToNext();
                 }
+                countToUpload = results.size();
                 globalDbConnection.upload(results, getString(R.string.servOne));
             break;
         }

@@ -52,6 +52,8 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private saveResultsBackground backgroundSaver;
     private ProgressDialog progressDialog;
     GlobalDbConnection globalDbConnection;
+    private int countToUpload;
+    private int countUploaded;
 
     // Scanning
     private int sampleRate;
@@ -249,17 +251,22 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
     public void onResponseRead(String response, String method){
         switch(method){
-            case "uploadBt": // 3/3 Bluetooth devices and 0/0 Wifi networks inserted.
-                String newDevices = response.split("/")[0];
+            case "uploadBt": // I.e. "3/3 Bluetooth devices and 0/0 Wifi networks inserted."
+                if(response.split("/").length<2) break;
                 String totalDevices = response.split("/")[1].split(" ")[0];
-                Toast.makeText(this, newDevices+"/"+totalDevices+" Bluetooth results uploaded.", Toast.LENGTH_SHORT).show();
-            break;
+                countUploaded += Integer.parseInt(totalDevices);
+                Toast.makeText(this, countUploaded+"/"+countToUpload+" results uploaded.", Toast.LENGTH_SHORT).show();
+                if(countUploaded==countToUpload) globalDbConnection.hideUploaderProgDiag();
+                break;
 
-            case "uploadWifi": // 3/3 Bluetooth devices and 0/0 Wifi networks inserted.
-                String newNetworks = response.split("/")[1].split(" and")[1];
+            case "uploadWifi": // I.e. "3/3 Bluetooth devices and 0/0 Wifi networks inserted."
+                Log.d("uploadWifisubprev", response); // Crash here sometimes
+                if(response.split("/").length<2) break;
                 String totalNetworks = response.split("/")[2].split(" ")[0];
-                Toast.makeText(this, newNetworks+"/"+totalNetworks+" Wifi results uploaded.", Toast.LENGTH_SHORT).show();
-            break;
+                countUploaded += Integer.parseInt(totalNetworks);
+                Toast.makeText(this, countUploaded+"/"+countToUpload+" results uploaded.", Toast.LENGTH_SHORT).show();
+                if(countUploaded==countToUpload) globalDbConnection.hideUploaderProgDiag();
+                break;
         }
     }
     public void onResponseRead(String response){
@@ -292,6 +299,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
 
             case (R.id.scanGlobal):
                 globalDbConnection.upload(scanresults, getResources().getString(R.string.servOne));
+                countToUpload = scanresults.size();
             break;
 
             case (R.id.ScanMap):
