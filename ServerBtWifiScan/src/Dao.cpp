@@ -140,6 +140,7 @@ bool Dao::checkExistingResult(Btresult _btDevice){
 int Dao::insertBtResults(vector<Btresult> _list){
 	int newDevices = 0;
 	for(int i=0;i<3;i++){ // Three databases
+		// Don't setup connections when no results
 		if(i==0) setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
 		if(i==1) setConnection(azureUrl, azureUser, azurePass, azureSchema);
 		if(i==2) setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
@@ -159,6 +160,7 @@ int Dao::insertBtResults(vector<Btresult> _list){
 			}catch (sql::SQLException &e) {
 				std::cout << " (MySQL error code: " << e.getErrorCode();
 				std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+				std::cout << "Error device: \n" << _list.at(ii).toString() << "\n";
 			}
 		}
 		delete conn;
@@ -188,6 +190,7 @@ bool Dao::checkExistingResult(Wifiresult _wifiNetwork){
 int Dao::insertWifiResults(vector<Wifiresult> _list){
 	int newNetworks = 0;
 	for(int i=0;i<3;i++){ // Three databases
+		if(_list.size()==0) break; // Don't setup connections when no results
 		if(i==0) setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
 		if(i==1) setConnection(azureUrl, azureUser, azurePass, azureSchema);
 		if(i==2) setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
@@ -208,6 +211,7 @@ int Dao::insertWifiResults(vector<Wifiresult> _list){
 			}catch (sql::SQLException &e) {
 				std::cout << " (MySQL error code: " << e.getErrorCode();
 				std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+				std::cout << "Error network: \n" << _list.at(ii).toString() << "\n";
 			}
 		}
 		delete conn;
