@@ -156,14 +156,6 @@ int main(int argc, char **argv) {
 		snprintf(logBuff, 256, "echo \"\nConnection from: %s:%d \" >> Log.txt", inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port));
 		system(logBuff); // Append log
 
-
-/*		while((n = read(connfd, inBuff, sizeof(inBuff))) > 0 ) {
-			sscanf(inBuff, "%s %s", cmd, path); // Parse HTTP request's command and path
-			inBuff[n] = 0; //Null terminate
-			printf("Line: (%s)", inBuff);
-			if(strstr(inBuff, "\r\n\r\n")) break; // End of HTTP-request
-		}
-*/
 		// Read buffer one char at time - stop when reached the start of payload
 		char oneChar[1];
 		int charCounter=0;
@@ -187,11 +179,11 @@ int main(int argc, char **argv) {
 		}
 		char dataBuff[atoi(contentLength)];
 
-
 		if (n < 0)  // Error with data reading
 			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
 		else
 			write(connfd, HTTP_OK_HEADER, strlen(HTTP_OK_HEADER));
+
 
 		cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type << "\nPath: " << path;
 		switch(processCmd(cmd)){
@@ -243,11 +235,20 @@ int main(int argc, char **argv) {
 				switch(processContentType(type)){
 					case JSONCONTENT:
 						switch(processPath(path)){
-							case UPLOAD: // TODO: Fix (MySQL error code: 1406, SQLState: 22001 ) (Data too long for row)
-								n = read(connfd, dataBuff, sizeof(dataBuff));
-								dataBuff[n] = 0;
+							case UPLOAD: // TODO: Fix (MySQL error code: 1406, SQLState: 22001 ) (Data too long for row). Cause: "(WPA-PSK-CCMP+TKIP)(WPA2-PSK-CCMP+TKIP-preauth)(ESS)"
+								cout << "\nSize of dataBuff: "<< sizeof(dataBuff) << "\n";
+								charCounter = 0;
+								do{
+									n = read(connfd, oneChar, 1);
+									dataBuff[charCounter] = oneChar[0];
+									charCounter++;
+									if(strstr(dataBuff, "\r\n\r\n")) break;
+									if(strstr(dataBuff, "\r\n\n")) break;
+									if(charCounter==sizeof(dataBuff)) break;
+								}while(n>0);
+								dataBuff[charCounter+1] = 0; //Null terminate
 								printf("Data buff: (%s). \nValue for n: %d",dataBuff, n);
-								cout << "\nSize of dataBuff: "<< sizeof(dataBuff) << "\nData: \n" << dataBuff;
+								printf("\nData: %s\n", dataBuff);
 								listBtDevices = jsonParser.parseBtJson(dataBuff, sizeof(dataBuff));
 								listWifiNetworks = jsonParser.parseWifiJson(dataBuff, sizeof(dataBuff));
 								cout << "\nSize BT " << listBtDevices.size() << ". Wifi: "<< listWifiNetworks.size() << "\n" << endl;
