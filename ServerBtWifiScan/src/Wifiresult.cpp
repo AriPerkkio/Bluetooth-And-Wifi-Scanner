@@ -35,6 +35,10 @@ string Wifiresult::getRssi(){ return this->rssi; }
 string Wifiresult::getFreq(){ return this->frequency; }
 string Wifiresult::getLoc(){ return this->location; }
 
+string Wifiresult::toString(){
+	return string(this->ssid+", "+this->bssid+", "+this->capabilities+", "+this->rssi+", "+this->frequency+", "+this->location+"\n");
+}
+
 // SSID should always be unique
 bool Wifiresult::operator==(const Wifiresult &first) const{
 	return this->bssid.compare(first.bssid)==0;
