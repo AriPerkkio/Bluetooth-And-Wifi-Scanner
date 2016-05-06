@@ -31,7 +31,7 @@ public class GlobalDbConnection {
     private ConnectivityManager connMgr;
     private JSONArray jsonArray;
     private Context context;
-    final int sendingSize = 25; // Send results in blocks
+    final int sendingSize = 100; // Send results in blocks
     HttpResponsePass responseListener;
     private static ProgressDialog uploaderProgressDialog;
 
@@ -221,20 +221,11 @@ public class GlobalDbConnection {
         Log.d("Data", data.charAt(data.length()-6)+""+data.charAt(data.length()-5)+""+data.charAt(data.length()-4)+""
                 +data.charAt(data.length()-3)+""+data.charAt(data.length()-2)+""+data.charAt(data.length()-1));
         InputStream is = null;
-        /**
-         * 5.5.
-         * Sent packets are not complete all the time. +8000 char, 25 results can be stable when 3000, 17 is unstable...
-         * Multiple requests cause java.net.SocketException: recvfrom failed: ECONNRESET (Connection reset by peer)
-         *
-         * I.e. 1000 results sent in big requests (+25 result per request, 3500-8000 char in JSON) - not received completely.
-         *      When sent in 100 requests -> ECONNRESET error.
-         *
-         */
-
         try {
             URL url = new URL(_url);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             System.setProperty("http.keepAlive", "false");
+            System.setProperty("http.maxConnections", "25");
             conn.setReadTimeout(100000);
             conn.setConnectTimeout(150000);
             conn.setRequestMethod("POST");
@@ -245,6 +236,7 @@ public class GlobalDbConnection {
             conn.setDoInput(true);
             DataOutputStream outputStream = new DataOutputStream((conn.getOutputStream()));
             outputStream.writeBytes(data);
+            Log.i("outputSteam", "Written data length: "+outputStream.size());
             outputStream.flush();
             outputStream.close();
             conn.connect();
