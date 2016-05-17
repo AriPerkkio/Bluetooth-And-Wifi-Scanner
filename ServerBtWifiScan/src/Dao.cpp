@@ -119,6 +119,10 @@ void Dao::readCredentials(){
 }
 
 bool Dao::checkExistingResult(Btresult _btDevice){
+	/** TODO: Methods for getAllAddress() from DB every time server started
+	 * - When inserting new results, add address to list
+	 * - When inserting new result, check if it's in the list
+	 * - List is kept in the memory al lthe time **/
 	try{
 		prep_stmt = conn->prepareStatement("SELECT COUNT(*) FROM BluetoothResults WHERE DeviceAddress = ?");
 		prep_stmt->setString(1, _btDevice.getAddress());
@@ -140,7 +144,7 @@ bool Dao::checkExistingResult(Btresult _btDevice){
 int Dao::insertBtResults(vector<Btresult> _list){
 	int newDevices = 0;
 	for(int i=0;i<3;i++){ // Three databases
-		// Don't setup connections when no results
+		if(_list.size()==0) break; // Don't setup connections when no results
 		if(i==0) setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
 		if(i==1) setConnection(azureUrl, azureUser, azurePass, azureSchema);
 		if(i==2) setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);

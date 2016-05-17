@@ -62,7 +62,7 @@ public:
 	int insertWifiResults(vector<Wifiresult>);
 	int getBtCount();
 	int getWifiCount();
-	void tempClearDb(); // TODO: Delete
+	void tempClearDb();
 	vector<Btresult> getAllBtResults();
 	vector<Wifiresult> getAllWifiResults();
 	void syncBtResults(vector<Btresult>&);

@@ -17,7 +17,7 @@ char		btInitialJsonParse[] = "{\"btscans\":[%[^]]%n", wifiInitialJsonParse[] = "
 char		btJsonParse[] = "\"devName\":\"%[^\"]\", \"devAddr\":\"%[^\"]\", \"devType\":\"%[^\"]\", \"devRssi\":\"%[^\"]\", \"location\":\"%[^\"]\"";
 char		wifiJsonParse[] = "\"ssid\":\"%[^\"]\", \"bssid\":\"%[^\"]\", \"capabilities\":\"%[^\"]\", \"rssi\":\"%[^\"]\", \"freq\":\"%[^\"]\", \"location\":\"%[^\"]\"";
 char		btdevjson[4096], devName[256], devAddr[64], devType[64], devRssi[64], btloc[64];
-char		wifinetjson[4096], ssid[256], bssid[64], capabilities[64], wifiRssi[64], freq[64], wifiloc[64];
+char		wifinetjson[4096], ssid[256], bssid[64], capabilities[256], wifiRssi[64], freq[64], wifiloc[64];
 int 		offset = 0, pos;
 std::vector<Wifiresult> _listWifiNetworks;
 std::vector<Btresult> _listBtDevices;
@@ -26,8 +26,7 @@ JsonParser::JsonParser() {
 	// TODO Auto-generated constructor stub
 }
 vector<Btresult> JsonParser::parseBtJson(char _buff[], int buffSize){
-	char btjson[buffSize];
-	cout << "\njsonParser btbuffer size: "<<sizeof(btjson)<<"\n";
+	char btjson[buffSize]; // sizeof(_buff) won't work - integer parameter required
 	_listBtDevices.clear();
 	std::string header;
 	std::istringstream req(_buff);
@@ -49,9 +48,8 @@ vector<Btresult> JsonParser::parseBtJson(char _buff[], int buffSize){
 }
 
 vector<Wifiresult> JsonParser::parseWifiJson(char _buff[], int buffSize){
-	char btjson[buffSize];
+	char btjson[buffSize]; // sizeof(_buff) won't work - integer parameter required
 	char wifijson[buffSize];
-	cout << "\njsonParser wifibuffer size: "<<sizeof(wifijson)<<"\n";
 	_listWifiNetworks.clear();
 	std::string header;
 	std::istringstream req(_buff);

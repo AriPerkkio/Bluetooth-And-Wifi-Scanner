@@ -60,10 +60,10 @@ std::string header; // HTTP-header
 char 		HTTP_OK_HEADER[100] =  "HTTP/1.1 200 OK\r\nServer: BtWifiScanServer/1.1\r\nConnection: close\r\n\r\n";
 
 // JSON parsing
-JsonParser jsonParser;
+JsonParser 	jsonParser;
 
 // Database
-Dao	dao;
+Dao			dao;
 
 // Results
 std::vector<Btresult> listBtDevices; // Bluetooth results
@@ -89,7 +89,7 @@ int processPath(char _path[]){
 	if(strcmp(_path, "/countWifi") == 0) return COUNTWIFI;
 	if(strcmp(_path, "/getAllBt") == 0) return GETALLBT;
 	if(strcmp(_path, "/getAllWifi") == 0) return GETALLWIFI;
-	if(strcmp(_path, "/clearAll") == 0) return CLEARALL;
+	//if(strcmp(_path, "/clearAll") == 0) return CLEARALL;
 	if(strcmp(_path, "/syncBt") == 0) return SYNCBT;
 	if(strcmp(_path, "/syncWifi") == 0) return SYNCWIFI;
 	if(strcmp(_path, "/upload") == 0) return UPLOAD;
@@ -104,6 +104,7 @@ int processContentType(char _type[]){
 
 // Send all results in multiple HTTP responses, each containing amount of RESULTRESP results in JSON
 // I.e. 35 results, RESULTRESP 8. Send 5 HTTP responses, with results of 8, 8, 8, 8, 3
+// Android side uses three spaces to identify each set
 void sendResults(vector<Btresult>& _list){
 	while(_list.size()!=0){
 		vector<Btresult> sendList;
@@ -156,34 +157,33 @@ int main(int argc, char **argv) {
 		snprintf(logBuff, 256, "echo \"\nConnection from: %s:%d \" >> Log.txt", inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port));
 		system(logBuff); // Append log
 
-		// Read buffer one char at time - stop when reached the start of payload
+		// Read buffer one char at time - stop when reached the start of payload or end of request
 		char oneChar[1];
-		int charCounter=0;
+		unsigned int charCounter=0;
 		do{
 			n = read(connfd, oneChar, 1);
 			sscanf(inBuff, "%s %s", cmd, path); // Parse HTTP request's command and path
 			inBuff[charCounter] = oneChar[0];
 			charCounter++;
-			if(strstr(inBuff, "\r\n\r\n")) break;
-			if(strstr(inBuff, "\r\n\n")) break;
+			if(strstr(inBuff, "\r\n\r\n")) break; // End of HTTP
+			if(strstr(inBuff, "\r\n\n")) break; // Start of payload
 		}while(n>0);
 		inBuff[charCounter+1] = 0; //Null terminate
 		cout << "Read input: ****"<< inBuff << "\n******\n";
 
-		// Parse Content Type
-		std::istringstream req(inBuff);
+		if (n < 0)  // Error with data reading
+			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
+		else
+			write(connfd, HTTP_OK_HEADER, strlen(HTTP_OK_HEADER)); // Request read successfully
 
+		// Parse Content Type and Length
+		std::istringstream req(inBuff);
 		while (std::getline(req, header)){
 			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
 			sscanf(header.c_str(), "Content-Length: %s", contentLength);
 		}
+		// Buffer to hold payload
 		char dataBuff[atoi(contentLength)];
-
-		if (n < 0)  // Error with data reading
-			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
-		else
-			write(connfd, HTTP_OK_HEADER, strlen(HTTP_OK_HEADER));
-
 
 		cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type << "\nPath: " << path;
 		switch(processCmd(cmd)){
@@ -215,7 +215,7 @@ int main(int argc, char **argv) {
 					case GETALLBT:
 						listBtDevices = dao.getAllBtResults();
 						sendResults(listBtDevices);
-						snprintf(outBuff, sizeof(outBuff), "Read BT complete\n");
+						snprintf(outBuff, sizeof(outBuff), "\n");
 					break;
 
 					case GETALLWIFI:
@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 						snprintf(outBuff, sizeof(outBuff), "\n");
 					break;
 
-					case CLEARALL:
+					case CLEARALL: // Disabled
 						dao.tempClearDb();
 						snprintf(outBuff, sizeof(outBuff), "DB Cleared.\nCount of Bluetooth Devices: %d\nCount of Wifi Networks: %d\n", dao.getBtCount(), dao.getWifiCount());
 					break;
@@ -234,37 +234,35 @@ int main(int argc, char **argv) {
 			case POST:
 				switch(processContentType(type)){
 					case JSONCONTENT:
+						// Read payload to dataBuff
+						charCounter = 0;
+						do{
+							n = read(connfd, oneChar, 1);
+							dataBuff[charCounter] = oneChar[0];
+							charCounter++;
+							if(strstr(dataBuff, "\r\n\r\n")) break;
+							if(strstr(dataBuff, "\r\n\n")) break;
+							if(charCounter==sizeof(dataBuff)) break;
+						}while(n>0);
+						dataBuff[charCounter+1] = 0; //Null terminate
+
 						switch(processPath(path)){
-							case UPLOAD: // TODO: Fix (MySQL error code: 1406, SQLState: 22001 ) (Data too long for row). Cause: "(WPA-PSK-CCMP+TKIP)(WPA2-PSK-CCMP+TKIP-preauth)(ESS)"
-								cout << "\nSize of dataBuff: "<< sizeof(dataBuff) << "\n";
-								charCounter = 0;
-								do{
-									n = read(connfd, oneChar, 1);
-									dataBuff[charCounter] = oneChar[0];
-									charCounter++;
-									if(strstr(dataBuff, "\r\n\r\n")) break;
-									if(strstr(dataBuff, "\r\n\n")) break;
-									if(charCounter==sizeof(dataBuff)) break;
-								}while(n>0);
-								dataBuff[charCounter+1] = 0; //Null terminate
-								printf("Data buff: (%s). \nValue for n: %d",dataBuff, n);
-								printf("\nData: %s\n", dataBuff);
+							case UPLOAD:
 								listBtDevices = jsonParser.parseBtJson(dataBuff, sizeof(dataBuff));
 								listWifiNetworks = jsonParser.parseWifiJson(dataBuff, sizeof(dataBuff));
-								cout << "\nSize BT " << listBtDevices.size() << ". Wifi: "<< listWifiNetworks.size() << "\n" << endl;
 								snprintf(outBuff, sizeof(outBuff), "%d/%lu Bluetooth devices and %d/%lu Wifi networks inserted.\n"
 										,dao.insertBtResults(listBtDevices) ,listBtDevices.size(), dao.insertWifiResults(listWifiNetworks), listWifiNetworks.size());
 							break;
 
 							case SYNCBT: // TODO: Test same kind of reading as in UPLOAD
-								listBtDevices = jsonParser.parseBtJson(inBuff, sizeof(inBuff));
+								listBtDevices = jsonParser.parseBtJson(dataBuff, sizeof(dataBuff));
 								dao.syncBtResults(listBtDevices); // Insert all devices that are not in db already
 								sendResults(listBtDevices); // Send response containing devices that were not in user's initial list
 								snprintf(outBuff, sizeof(outBuff), "BT sync complete. \n");
 							break;
 
 							case SYNCWIFI:
-								listWifiNetworks = jsonParser.parseWifiJson(inBuff, sizeof(inBuff));
+								listWifiNetworks = jsonParser.parseWifiJson(dataBuff, sizeof(dataBuff));
 								dao.syncWifiResults(listWifiNetworks);
 								sendResults(listWifiNetworks);
 								snprintf(outBuff, sizeof(outBuff), "Wifi sync complete. \n");
