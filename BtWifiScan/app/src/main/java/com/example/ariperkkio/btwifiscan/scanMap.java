@@ -25,10 +25,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.List;
+
 public class scanMap extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private int btCount, wifiCount;
     private double latitude, longitude;
 
     @Override
@@ -39,9 +40,6 @@ public class scanMap extends FragmentActivity implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        btCount = getIntent().getExtras().getInt("BtCount");
-        wifiCount = getIntent().getExtras().getInt("WifiCount");
 
         if(getIntent().getExtras().getString("Caller") != null && getIntent().getExtras().getString("Caller").equals("class com.example.ariperkkio.btwifiscan.subPrevScanActivity"))
             subPrevScanActivity.mapsProgressDialog.hide();
@@ -55,43 +53,32 @@ public class scanMap extends FragmentActivity implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        for(int i = 0; i<wifiCount;i++){
-            String wifiNetwork = getIntent().getExtras().getString("wifi "+i);
-            if(wifiNetwork!=null) {
-                String[] attributes = wifiNetwork.split("\n");
-                String[] location = attributes[5].split(",");
+        ResultListHolder resultListHolder = ResultListHolder.getInstance();
+        List<scanResult> results = resultListHolder.getResults();
 
-                latitude = Double.parseDouble(location[0]);
-                longitude = Double.parseDouble(location[1]);
+        for(int i=0;i<results.size();i++){
+            scanResult result = results.get(i);
+            String[] location = result.getLocation().split(",");
+            latitude = Double.parseDouble(location[0]);
+            longitude = Double.parseDouble(location[1]);
+
+            if(result.getTechnology().equals("Bluetooth") && latitude != 0.0 && longitude != 0.0)
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+                            .title("Name: "+result.getBtDevName())
+                            .snippet("Address: "+result.getBtDevAddr() + "\n" +
+                                    "Type: "+result.getBtDevType() + "\n" +
+                                    "RSSI: "+result.getBtRSSI() + "dBm")
+                            .icon((BitmapDescriptorFactory.fromResource(R.drawable.btmarker))));
+            else // Wifi Result
                 if(latitude != 0.0 && longitude != 0.0)
                     mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
-                        .title("SSID: "+attributes[0])
-                        .snippet("BSSID: "+attributes[1] + "\n" +
-                                "Capabilities: "+attributes[2] + "\n" +
-                                "Frequency: "+attributes[3] + "MHz\n" +
-                                "RSSI: "+attributes[4] + "dbm")
-                        .icon((BitmapDescriptorFactory.fromResource(R.mipmap.wifiicon))));
-            }
+                        .title("SSID: "+result.getWifiSSID())
+                        .snippet("BSSID: "+result.getWifiBSSID() + "\n" +
+                                "Capabilities: "+result.getWifiCapabilities() + "\n" +
+                                "Frequency: "+result.getWifiFrequency() + "MHz\n" +
+                                "RSSI: "+result.getWifiRSSI() + "dbm")
+                        .icon((BitmapDescriptorFactory.fromResource(R.drawable.wifimarker))));
         }
-
-        for(int i = 0; i<btCount;i++){
-            String btDevice = getIntent().getExtras().getString("bluetooth "+i);
-            if(btDevice != null) {
-                String[] attributes = btDevice.split("\n");
-                String[] location = attributes[4].split(",");
-
-                latitude = Double.parseDouble(location[0]);
-                longitude = Double.parseDouble(location[1]);
-                if(latitude != 0.0 && longitude != 0.0)
-                    mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
-                        .title("Name: "+attributes[0])
-                        .snippet("Address: "+attributes[1] + "\n" +
-                                "Type: "+attributes[2] + "\n" +
-                                "RSSI: "+attributes[3] + "dBm")
-                        .icon((BitmapDescriptorFactory.fromResource(R.mipmap.bticon))));
-            }
-        }
-
         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude)));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 13));
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {

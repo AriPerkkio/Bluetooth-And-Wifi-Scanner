@@ -177,32 +177,31 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                 mapsProgressDialog.setCanceledOnTouchOutside(false); // Force dialog show (disable click responsive)
                 intent = new Intent(getApplicationContext(), scanMap.class);
                 intent.putExtra("Caller",this.getClass().toString());
-                intent.putExtra("BtCount", btCursor.getCount());
-                intent.putExtra("WifiCount", wifiCursor.getCount());
                 bothCursors.moveToFirst();
                 btCursor.moveToFirst();
                 wifiCursor.moveToFirst();
+                List<scanResult> results = new Vector<>();
 
                 for (int i = 0; i < btCursor.getCount(); i++){
-                    intent.putExtra("bluetooth " + Integer.toString(i),
-                                    btCursor.getString(1) + "\n" +
-                                    btCursor.getString(2) + "\n" +
-                                    btCursor.getString(3) + "\n" +
-                                    btCursor.getString(4) + "\n" +
-                                    btCursor.getString(5));
+                    results.add(new scanResult(btCursor.getString(1),
+                            btCursor.getString(2),
+                            reverseBtType(btCursor.getString(3)),
+                            Integer.parseInt(btCursor.getString(4)),
+                            btCursor.getString(5)));
                     btCursor.moveToNext();
                 }
 
                 for (int i = 0; i < wifiCursor.getCount(); i++) {
-                    intent.putExtra("wifi " + i,
-                                    wifiCursor.getString(1) + "\n" +
-                                    wifiCursor.getString(2) + "\n" +
-                                    wifiCursor.getString(3) + "\n" +
-                                    wifiCursor.getString(4) + "\n" +
-                                    wifiCursor.getString(5) + "\n" +
-                                    wifiCursor.getString(6));
+                    results.add(new scanResult(wifiCursor.getString(1),
+                            wifiCursor.getString(2),
+                            wifiCursor.getString(3),
+                            Integer.parseInt(wifiCursor.getString(4)),
+                            Integer.parseInt(wifiCursor.getString(5)),
+                            wifiCursor.getString(6)));
                     wifiCursor.moveToNext();
                 }
+                ResultListHolder resultListHolder = ResultListHolder.getInstance();
+                resultListHolder.setResults(results);
                 bothCursors.moveToFirst();
                 btCursor.moveToFirst();
                 wifiCursor.moveToFirst();
@@ -210,14 +209,14 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
             break;
 
             case R.id.subPrevScanUpload:
-                List<scanResult> results = new Vector<>();
+                results = new Vector<>();
                 countUploaded = 0;
                 btCursor.moveToFirst();
                 wifiCursor.moveToFirst();
                 for (int i = 0; i < btCursor.getCount(); i++){
                     results.add(new scanResult(btCursor.getString(1),
                             btCursor.getString(2),
-                            globalDbConnection.reverseBtType(btCursor.getString(3)),
+                            reverseBtType(btCursor.getString(3)),
                             Integer.parseInt(btCursor.getString(4)),
                             btCursor.getString(5)));
                     btCursor.moveToNext();
@@ -232,6 +231,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                     wifiCursor.moveToNext();
                 }
                 countToUpload = results.size();
+                // TODO: Active server getter
                 globalDbConnection.upload(results, getString(R.string.servOne));
             break;
         }
@@ -369,4 +369,19 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
             return cursorInflater.inflate(R.layout.scanrow, parent, false);
         }
     }// Close inner class
+
+    public int reverseBtType(String type) {
+        switch (type) { // Convert int getType() into correct string
+            case "Unknown":
+                return 0;
+            case "Classic":
+                return 1;
+            case "Low Energy":
+                return 2;
+            case "Dual Mode":
+                return 3;
+            default: // This is set when user unchecks Device Type from newScanActivity
+                return 4;
+        }
+    }
 }

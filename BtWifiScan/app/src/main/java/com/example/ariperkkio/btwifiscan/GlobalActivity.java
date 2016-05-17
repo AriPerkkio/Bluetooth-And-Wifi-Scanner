@@ -126,7 +126,6 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
     public void scanResultPass(String method, List<scanResult> resultList){
         switch(method){
             case "getAllResults":
-                Log.i("GlobalActivity", "Received "+resultList.size());
                 for(int i=0;i<resultList.size();i++)
                     if(!macAddressList.contains(resultList.get(i).getMac())){
                         results.add(resultList.get(i));
@@ -148,34 +147,9 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
                 mapsProgressDialog.setCanceledOnTouchOutside(false); // Force dialog show (disable click responsive)
                 Intent intent = new Intent(getApplicationContext(), scanMap.class);
                 intent.putExtra("Caller",this.getClass().toString());
-                int wifiCounter = 0;
-                int btCounter = 0;
-
-                for (int i = 0; i < results.size(); i++){
-                    if(results.get(i).getTechnology().equals("Wifi")){
-                        intent.putExtra("wifi " + wifiCounter,
-                                results.get(i).getWifiSSID() + "\n" +
-                                        results.get(i).getWifiBSSID() + "\n" +
-                                        results.get(i).getWifiCapabilities() + "\n" +
-                                        results.get(i).getWifiFrequency() + "\n" +
-                                        results.get(i).getWifiRSSI() + "\n" +
-                                        results.get(i).getLocation());
-                        wifiCounter++;
-                    }
-                    else{
-                        intent.putExtra("bluetooth " + btCounter,
-                                results.get(i).getBtDevName() + "\n" +
-                                        results.get(i).getBtDevAddr() + "\n" +
-                                        results.get(i).getBtDevType() + "\n" +
-                                        results.get(i).getBtRSSI() + "\n" +
-                                        results.get(i).getLocation());
-                        btCounter++;
-                    }
-                }
-                intent.putExtra("BtCount", btCounter);
-                intent.putExtra("WifiCount", wifiCounter);
+                ResultListHolder resultListHolder = ResultListHolder.getInstance();
+                resultListHolder.setResults(results);
                 startActivity(intent);
-
             break;
         }
     }

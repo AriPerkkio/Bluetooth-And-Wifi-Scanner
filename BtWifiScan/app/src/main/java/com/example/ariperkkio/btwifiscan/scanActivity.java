@@ -298,7 +298,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             break;
 
             case (R.id.scanGlobal):
-                globalDbConnection.upload(scanresults, getResources().getString(R.string.servOne));
+                globalDbConnection.upload(scanresults, getResources().getString(R.string.servOne)); // TODO: ActiveServer getter
                 countToUpload = scanresults.size();
             break;
 
@@ -307,33 +307,8 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 mapsProgressDialog.setCanceledOnTouchOutside(false); // Force dialog show (disable click responsive)
                 intent = new Intent(getApplicationContext(), scanMap.class);
                 intent.putExtra("Caller",this.getClass().toString());
-                intent.putExtra("BtCount", Integer.parseInt(scanFoundBt.getText().toString()));
-                intent.putExtra("WifiCount", Integer.parseInt(scanFoundWifi.getText().toString()));
-                int wifiCounter = 0;
-                int btCounter = 0;
-
-                for (int i = 0; i < scanresults.size(); i++){
-                    if(scanresults.get(i).getTechnology().equals("Wifi")){
-                        intent.putExtra("wifi " + wifiCounter,
-                                        scanresults.get(i).getWifiSSID() + "\n" +
-                                        scanresults.get(i).getWifiBSSID() + "\n" +
-                                        scanresults.get(i).getWifiCapabilities() + "\n" +
-                                        scanresults.get(i).getWifiFrequency() + "\n" +
-                                        scanresults.get(i).getWifiRSSI() + "\n" +
-                                        scanresults.get(i).getLocation());
-                        wifiCounter++;
-                    }
-                    else{
-                        intent.putExtra("bluetooth " + btCounter,
-                                        scanresults.get(i).getBtDevName() + "\n" +
-                                        scanresults.get(i).getBtDevAddr() + "\n" +
-                                        scanresults.get(i).getBtDevType() + "\n" +
-                                        scanresults.get(i).getBtRSSI() + "\n" +
-                                        scanresults.get(i).getLocation());
-                        btCounter++;
-
-                    }
-                }
+                ResultListHolder resultListHolder = ResultListHolder.getInstance();
+                resultListHolder.setResults(scanresults);
                 startActivity(intent);
             break;
         }
