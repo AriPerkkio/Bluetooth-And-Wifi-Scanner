@@ -79,8 +79,8 @@
         android:id="@+id/globalServTwo"
         android:textColor="@color/OFFLINE"
         android:layout_marginLeft="5dp"
-        android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/globalBtnMap" />
+        android:layout_above="@+id/globalDbTwo"
+        android:layout_toEndOf="@+id/textView5" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -152,7 +152,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Global Database results: "
+        android:text="Global DB results: "
         android:id="@+id/textView8"
         android:textColor="@color/mainColorCyan"
         android:layout_below="@+id/textView4"
