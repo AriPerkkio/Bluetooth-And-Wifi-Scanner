@@ -126,7 +126,6 @@ public class GlobalDbConnection {
             uploaderProgressDialog.hide();
             uploaderProgressDialog = null;
         }
-
         public uploader(String _method, String _data, int _totalResults){
             method = _method;
             data = _data;
@@ -186,7 +185,7 @@ public class GlobalDbConnection {
                 break;
 
                 case "syncAll":
-                    responseListener.onResponseRead(result);
+                    responseListener.onResponseRead(result, method);
                 break;
             }
         }
@@ -375,60 +374,6 @@ public class GlobalDbConnection {
         }while(wifiList.size()!=0);
     }
 
-    public void uploadAllTester(List<scanResult> list, String server){
-        List<scanResult> btList = new Vector<>();
-        JSONObject btResultsJson = new JSONObject();
-        JSONArray btArray = new JSONArray();
-        JSONObject btJson = new JSONObject();
-        List<scanResult> wifiList = new Vector<>();
-        JSONObject wifiResultsJson = new JSONObject();
-        JSONArray wifiArray = new JSONArray();
-        JSONObject wifiJson = new JSONObject();
-        for(int i=0;i<list.size();i++){
-            if(list.get(i).getTechnology().equals("Bluetooth")) btList.add(list.get(i));
-            else wifiList.add((list.get(i)));
-        }
-
-       try {
-           int devCount = 0;
-           while (btList.size() != 0) {
-               btResultsJson.put("devName", checkStr(checkName(btList.get(0).getBtDevName())));
-               btResultsJson.put("devAddr", btList.get(0).getBtDevAddr());
-               btResultsJson.put("devType", btList.get(0).getBtDevType());
-               btResultsJson.put("devRssi", btList.get(0).getBtRSSI() + "dBm");
-               btResultsJson.put("location", btList.get(0).getLocation());
-               btArray.put(btResultsJson);
-               btResultsJson = new JSONObject();
-               btList.remove(0);
-               devCount++;
-           }
-           btJson.put("btscans", btArray);
-       } catch (JSONException e) {
-           Log.e("btscans", e.toString());
-       }
-        try {
-            int networkCount = 0;
-            while (wifiList.size() != 0) {
-                wifiResultsJson.put("ssid", checkStr(checkName(wifiList.get(0).getWifiSSID())));
-                wifiResultsJson.put("bssid", wifiList.get(0).getWifiBSSID());
-                wifiResultsJson.put("capabilities", checkStr(wifiList.get(0).getWifiCapabilities()));
-                wifiResultsJson.put("rssi", wifiList.get(0).getWifiRSSI() + "dBm");
-                wifiResultsJson.put("freq", wifiList.get(0).getWifiFrequency() + "MHz");
-                wifiResultsJson.put("location", wifiList.get(0).getLocation());
-                wifiArray.put(wifiResultsJson);
-                wifiResultsJson = new JSONObject();
-                wifiList.remove(0);
-                networkCount++;
-            }
-                wifiJson.put("wifiscans", wifiArray);
-            } catch (JSONException e) {
-            Log.e("wifiscans", e.toString());
-        }
-        Log.d("uploadTwo", "ListSize "+ list.size());
-        new uploader("uploadBt", btJson.toString(), list.size()).execute(server+"/upload");
-        new uploader("uploadWifi", "{\"btscans\":[{}]}"+wifiJson.toString(), list.size()).execute(server+"/upload");
-    }
-
     public void getAllResults(String server) {
         new downloader("getAllBt").execute(server + "/getAllBt");
         new downloader("getAllWifi").execute(server + "/getAllWifi");
@@ -493,6 +438,7 @@ public class GlobalDbConnection {
 
     /** temp **/
     // Change '[' and ']' to '(' and ')' so that JSON won't get messed up later
+    // Also check for mysql illegal chars
     public String checkStr(String input){
         char[] inputStr = input.toCharArray();
         for(int i=0;i<input.length();i++){
