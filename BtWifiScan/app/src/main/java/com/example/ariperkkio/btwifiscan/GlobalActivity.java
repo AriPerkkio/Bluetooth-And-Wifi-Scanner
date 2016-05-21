@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 
+import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -16,6 +18,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +28,7 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
     // UI Elements
     private Button btnGetAll;
     private Button btnMap;
+    private Button btnSave;
     private ListView resultList;
     private TextView servOneText;
     private TextView servTwoText;
@@ -40,6 +44,11 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
     private ArrayList<scanResult> results;
     private ArrayList<String> macAddressList;
     private GlobalDbConnection globalDbConnection;
+    private int gdbId = 999;
+    private databaseManager localDb;
+    private saveResultsBackground localDbSaver;
+    private Cursor btCursor;
+    private Cursor wifiCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +57,14 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //Set full screen
         setContentView(R.layout.activity_global);
         globalDbConnection = new GlobalDbConnection(this, this);
+        localDb = new databaseManager(this);
+        localDbSaver = new saveResultsBackground();
         btnGetAll = (Button) findViewById(R.id.globalBtnGetAll);
         btnMap = (Button) findViewById(R.id.globalBtnMap);
+        btnSave = (Button) findViewById(R.id.globalBtnSave);
         btnGetAll.setOnClickListener(this);
         btnMap.setOnClickListener(this);
+        btnSave.setOnClickListener(this);
         servOneText = (TextView) findViewById(R.id.globalServOne);
         servTwoText = (TextView) findViewById(R.id.globalServTwo);
         dbOneText = (TextView) findViewById(R.id.globalDbOne);
@@ -63,16 +76,42 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
         macAddressList = new ArrayList<String>();
         resultList = (ListView) findViewById(R.id.globalListResults);
         resultList.setOnItemClickListener(this);
-        listAdapter = new customAdapter(this, results);
-        resultList.setAdapter(listAdapter);
         mapsProgressDialog = new ProgressDialog(GlobalActivity.this);
         mapsProgressDialog.setMessage("Setting up maps... ");
         mapsProgressDialog.hide();
         globalDbConnection.pingServerOne();
         globalDbConnection.pingServerTwo();
+
+        try {
+            localDb.open();
+            btCursor = localDb.getBtResultsById(gdbId);
+            wifiCursor = localDb.getWifiResultsById(gdbId);
+            localDb.close();
+        }catch (SQLException e){
+            Log.e("GlobalActivity cursors", e.toString());
+        }
+        for (int i = 0; i < btCursor.getCount(); i++){
+            results.add(new scanResult(btCursor.getString(1),
+                    btCursor.getString(2),
+                    globalDbConnection.reverseBtType(btCursor.getString(3)),
+                    Integer.parseInt(btCursor.getString(4)),
+                    btCursor.getString(5)));
+            btCursor.moveToNext();
+        }
+        for (int i = 0; i < wifiCursor.getCount(); i++) {
+            results.add(new scanResult(wifiCursor.getString(1),
+                    wifiCursor.getString(2),
+                    wifiCursor.getString(3),
+                    Integer.parseInt(wifiCursor.getString(4)),
+                    Integer.parseInt(wifiCursor.getString(5)),
+                    wifiCursor.getString(6)));
+            wifiCursor.moveToNext();
+        }
+        listAdapter = new customAdapter(this, results);
+        resultList.setAdapter(listAdapter);
     }
 
-    public void onResponseRead(String response){ };
+    public void onResponseRead(String response){ }
     public void onResponseRead(String response, String method){
         switch(method){
             case "pingServerOne":
@@ -142,6 +181,18 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
                 globalDbConnection.getAllResults(activeServer);
             break;
 
+            case R.id.globalBtnSave:
+                try{
+                    localDb.open();
+                    localDb.deleteScan(gdbId);
+                    localDb.createLocalGDB();
+                    localDb.close();
+                }catch(SQLException e){
+                    Log.e("globalBtnGetAll", e.toString());
+                }
+                localDbSaver.execute(results);
+            break;
+
             case R.id.globalBtnMap:
                 mapsProgressDialog.show();
                 mapsProgressDialog.setCanceledOnTouchOutside(false); // Force dialog show (disable click responsive)
@@ -175,4 +226,56 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
 
         startActivity(intent); // Start resultDetailsActivity but keep this one alive
     }
+
+    // Background result saving with progress bar
+    private class saveResultsBackground extends AsyncTask<List<scanResult>, Integer, Void> {
+        ProgressDialog progressDialog = new ProgressDialog(GlobalActivity.this);
+
+        // Before saving show progress dialog
+        // Runs on UI thread - View updating allowed
+        protected void onPreExecute() {
+            progressDialog.setMessage("Saving results");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.setIndeterminate(false); //Set progress updates visible
+            progressDialog.setMax(results.size());
+            progressDialog.show();
+            progressDialog.setCanceledOnTouchOutside(false); // Force dialog show (disable click responsive)
+        }
+        // After saving
+        protected void onPostExecute(Void value) {
+            // Refresh result history on mainActivity when finishing this one
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+        // Save results and update progress dialog after each insert
+        protected Void doInBackground(List<scanResult>... resultList) {
+            try {
+                localDb.open();
+                int scanId = gdbId;
+
+                for (int i = 0; i < resultList[0].size(); i++) {
+                    if (resultList[0].get(i).getTechnology().equals("Bluetooth"))
+                        localDb.insertIntoBtResults(scanId, resultList[0].get(i).getBtDevName(),
+                                resultList[0].get(i).getBtDevAddr(), resultList[0].get(i).getBtDevType(),
+                                resultList[0].get(i).getBtRSSI(), resultList[0].get(i).getLocation());
+                    if (resultList[0].get(i).getTechnology().equals("Wifi")) {
+                        localDb.insertIntoWifiResults(scanId, resultList[0].get(i).getWifiSSID(),
+                                resultList[0].get(i).getWifiBSSID(), resultList[0].get(i).getWifiCapabilities(),
+                                resultList[0].get(i).getWifiFrequency(), resultList[0].get(i).getWifiRSSI(), resultList[0].get(i).getLocation());
+                    }
+                    publishProgress(i); //Update current progress
+                }
+                localDb.close();
+            } catch (SQLException e) {
+                Log.e("InsertIntoScans", e.toString());
+            }
+            return null;
+        }
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            progressDialog.setProgress(progress[0]);
+        }
+    }
+
 }

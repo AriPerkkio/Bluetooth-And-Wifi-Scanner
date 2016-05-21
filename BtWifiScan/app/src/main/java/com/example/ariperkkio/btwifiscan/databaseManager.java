@@ -112,11 +112,19 @@ public class databaseManager {
         return db.insert(DATABASE_TABLE_SCANS, null, initialValues);
     }
 
-    public long insertIntoBtResults(int idScans, String DeviceName, String DeviceAddres, String DeviceType, int RSSI, String Location){
+    public long createLocalGDB(){
+        // Create ID for global DB results - 999
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(scans_ScanName, "Global Database");
+        initialValues.put(scans_ScanId, 999);
+        return db.insert(DATABASE_TABLE_SCANS, null, initialValues);
+    }
+
+    public long insertIntoBtResults(int idScans, String DeviceName, String DeviceAddress, String DeviceType, int RSSI, String Location){
         ContentValues initialValues = new ContentValues();
         initialValues.put(btResults_ScanId, idScans);
         initialValues.put(btResults_DevName, DeviceName);
-        initialValues.put(btResults_DevAddr, DeviceAddres);
+        initialValues.put(btResults_DevAddr, DeviceAddress);
         initialValues.put(btResults_DevType, DeviceType);
         initialValues.put(btResults_RSSI, RSSI);
         initialValues.put(btResults_Location, Location);
