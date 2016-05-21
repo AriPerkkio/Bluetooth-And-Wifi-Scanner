@@ -201,4 +201,14 @@
         android:layout_marginLeft="5dp"
         android:layout_below="@+id/globalDbThree"
         android:layout_toEndOf="@+id/globalBtCount" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Local\nSave"
+        android:id="@+id/globalBtnSave"
+        android:background="@android:color/background_dark"
+        android:textColor="@color/mainColorCyan"
+        android:layout_below="@+id/globalListResults"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>
