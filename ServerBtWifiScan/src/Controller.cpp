@@ -16,6 +16,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <vector>
+#include <ctime>
 
 #include "Btresult.h"
 #include "Wifiresult.h"
@@ -53,6 +54,10 @@ char 		inBuff[BUFFER], outBuff[BUFFER], logBuff[BUFFER]; // Data buffers for inp
 char 		clientBuff[256]; // To hold converted client address
 socklen_t 	len; // Client address info
 
+// Log
+struct tm * timestamp;
+time_t t;
+
 // HTTP Request
 char		cmd[16], path[64], type[64]; // HTTP-request details
 char 		contentLength[16];
@@ -63,7 +68,7 @@ char 		HTTP_OK_HEADER[100] =  "HTTP/1.1 200 OK\r\nServer: BtWifiScanServer/1.1\r
 JsonParser 	jsonParser;
 
 // Database
-Dao			dao;
+Dao		dao;
 
 // Results
 std::vector<Btresult> listBtDevices; // Bluetooth results
@@ -153,8 +158,11 @@ int main(int argc, char **argv) {
 	for ( ; ; ) {
 		len = sizeof(cliaddr); // Set len to correct sizeof cliaddr struct.
 		connfd = accept(listenfd, (struct sockaddr *) &cliaddr, &len); //Accept connection, save clients address to variable
-		// Convert clients address from binary to text form. Save it to clientBuff. Convert clients port from network byte order to host byte order
-		snprintf(logBuff, 256, "echo \"\nConnection from: %s:%d \" >> Log.txt", inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port));
+		t = time(0);
+		timestamp = localtime(&t);
+		snprintf(logBuff, 256, "echo \"\n%d/%d/%d %d:%d\nConnection from: %s:%d \" >> Log.txt",
+				timestamp->tm_mday, 1+timestamp->tm_mon, 1900+timestamp->tm_year, timestamp->tm_hour, timestamp->tm_min, // Timestamp
+				inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port)); // Convert clients address from binary to text form. Save it to clientBuff. Convert clients port from network byte order to host byte order
 		system(logBuff); // Append log
 
 		// Read buffer one char at time - stop when reached the start of payload or end of request
@@ -240,9 +248,9 @@ int main(int argc, char **argv) {
 							n = read(connfd, oneChar, 1);
 							dataBuff[charCounter] = oneChar[0];
 							charCounter++;
-							if(strstr(dataBuff, "\r\n\r\n")) break;
-							if(strstr(dataBuff, "\r\n\n")) break;
-							if(charCounter==sizeof(dataBuff)) break;
+							if(strstr(dataBuff, "\r\n\r\n")) break; // End of HTTP
+							if(strstr(dataBuff, "\r\n\n")) break; // Start of payload - should never happen with correct requests
+							if(charCounter==sizeof(dataBuff)) break; // Read whole payload
 						}while(n>0);
 						dataBuff[charCounter+1] = 0; //Null terminate
 
