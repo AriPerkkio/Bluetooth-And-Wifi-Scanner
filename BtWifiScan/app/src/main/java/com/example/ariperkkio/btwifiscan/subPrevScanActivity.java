@@ -41,6 +41,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
     private int numberOfBtDevices = 0;
     private int numberOfWifiNetworks = 0;
     private int scanId;
+    List<scanResult> results = new Vector<>();
     public static ProgressDialog mapsProgressDialog;
     private int countUploaded;
     private int countToUpload;
@@ -128,6 +129,22 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                 Toast.makeText(this, countUploaded+"/"+countToUpload+" results uploaded.", Toast.LENGTH_SHORT).show();
                 if(countUploaded==countToUpload) globalDbConnection.hideUploaderProgDiag();
                 break;
+            case "pingServerOne":
+                if(!response.equals("Successfully read unknown request")){
+                    globalDbConnection.pingServerTwo();
+                    break;
+                }
+                globalDbConnection.upload(results, getResources().getString(R.string.servOne));
+                countToUpload = results.size();
+                break;
+            case "pingServerTwo":
+                if(!response.equals("Successfully read unknown request")) {
+                    Toast.makeText(this, "Unable to connect to servers.", Toast.LENGTH_LONG).show();
+                    break;
+                }
+                globalDbConnection.upload(results, getResources().getString(R.string.servTwo));
+                countToUpload = results.size();
+                break;
         }
     }
 
@@ -180,7 +197,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                 bothCursors.moveToFirst();
                 btCursor.moveToFirst();
                 wifiCursor.moveToFirst();
-                List<scanResult> results = new Vector<>();
+                results = new Vector<>();
 
                 for (int i = 0; i < btCursor.getCount(); i++){
                     results.add(new scanResult(btCursor.getString(1),
@@ -231,8 +248,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                     wifiCursor.moveToNext();
                 }
                 countToUpload = results.size();
-                // TODO: Active server getter
-                globalDbConnection.upload(results, getString(R.string.servOne));
+                globalDbConnection.pingServerOne();
             break;
         }
     }

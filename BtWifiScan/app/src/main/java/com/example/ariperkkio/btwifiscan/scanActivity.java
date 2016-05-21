@@ -267,6 +267,22 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 Toast.makeText(this, countUploaded+"/"+countToUpload+" results uploaded.", Toast.LENGTH_SHORT).show();
                 if(countUploaded==countToUpload) globalDbConnection.hideUploaderProgDiag();
                 break;
+            case "pingServerOne":
+                if(!response.equals("Successfully read unknown request")){
+                    globalDbConnection.pingServerTwo();
+                    break;
+                }
+                globalDbConnection.upload(scanresults, getResources().getString(R.string.servOne));
+                countToUpload = scanresults.size();
+            break;
+            case "pingServerTwo":
+                if(!response.equals("Successfully read unknown request")) {
+                    Toast.makeText(this, "Unable to connect to servers.", Toast.LENGTH_LONG).show();
+                    break;
+                }
+                globalDbConnection.upload(scanresults, getResources().getString(R.string.servTwo));
+                countToUpload = scanresults.size();
+            break;
         }
     }
     public void onResponseRead(String response){
@@ -298,8 +314,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             break;
 
             case (R.id.scanGlobal):
-                globalDbConnection.upload(scanresults, getResources().getString(R.string.servOne)); // TODO: ActiveServer getter
-                countToUpload = scanresults.size();
+                globalDbConnection.pingServerOne();
             break;
 
             case (R.id.ScanMap):
