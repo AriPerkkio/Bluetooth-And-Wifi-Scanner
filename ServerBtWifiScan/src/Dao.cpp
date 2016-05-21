@@ -27,6 +27,10 @@ Dao::Dao() {
 	btGetAllQuery = "SELECT * FROM BluetoothResults";
 	wifiGetAllQuery = "SELECT * FROM WifiResults";
 	readCredentials();
+	btList = getAllBtResults();
+	wifiList = getAllWifiResults();
+	cout << "Initial BtList size: " << btList.size() << "\n" << endl;
+	cout << "Initial WifiList size: " << wifiList.size() << "\n" << endl;
 }
 
 // Check status of Azure DB
@@ -119,26 +123,10 @@ void Dao::readCredentials(){
 }
 
 bool Dao::checkExistingResult(Btresult _btDevice){
-	/** TODO: Methods for getAllAddress() from DB every time server started
-	 * - When inserting new results, add address to list
-	 * - When inserting new result, check if it's in the list
-	 * - List is kept in the memory al lthe time **/
-	try{
-		prep_stmt = conn->prepareStatement("SELECT COUNT(*) FROM BluetoothResults WHERE DeviceAddress = ?");
-		prep_stmt->setString(1, _btDevice.getAddress());
-		res = prep_stmt->executeQuery();
-		res->next();
-		delete prep_stmt;
-		if(res->getInt(1)!=0){
-			delete res;
-			return true;
-		}
-	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-	}
-	delete res;
-	return false;
+	if(find(btList.begin(), btList.end(), _btDevice) == btList.end()) // List doesn't contain btDevice
+		return false;
+	btList.push_back(_btDevice);
+	return true;
 }
 
 int Dao::insertBtResults(vector<Btresult> _list){
@@ -173,22 +161,10 @@ int Dao::insertBtResults(vector<Btresult> _list){
 }
 
 bool Dao::checkExistingResult(Wifiresult _wifiNetwork){
-	try{
-		prep_stmt = conn->prepareStatement("SELECT COUNT(*) FROM WifiResults WHERE BSSID = ?");
-		prep_stmt->setString(1, _wifiNetwork.getBssid());
-		res = prep_stmt->executeQuery();
-		res->next();
-		delete prep_stmt;
-		if(res->getInt(1)!=0){
-			delete res;
-			return true;
-		}
-	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-	}
-	delete res;
-	return false;
+	if(find(wifiList.begin(), wifiList.end(), _wifiNetwork) == wifiList.end()) // List doesn't contain wifiNetwork
+		return false;
+	wifiList.push_back(_wifiNetwork);
+	return true;
 }
 
 int Dao::insertWifiResults(vector<Wifiresult> _list){
@@ -299,7 +275,7 @@ vector<Wifiresult> Dao::getAllWifiResults(){
 
 // Synchronize device DB with remote DB.
 // 1. Add new devices
-// 2. Get all results
+// 2. Get missing results
 void Dao::syncBtResults(vector<Btresult>& _list){
 	insertBtResults(_list); // Add all new devices
 	try {

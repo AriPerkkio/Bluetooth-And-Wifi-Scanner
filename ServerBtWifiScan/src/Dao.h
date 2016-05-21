@@ -19,6 +19,9 @@
 #include "Wifiresult.h"
 using namespace std;
 class Dao {
+	// Results - Read from DB when server started
+	vector<Btresult> btList;
+	vector<Wifiresult> wifiList;
 	// SQL Connection
 	sql::Driver *driver;
 	sql::Connection *conn;
