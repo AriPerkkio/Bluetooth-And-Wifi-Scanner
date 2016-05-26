@@ -22,15 +22,13 @@ Dao::Dao() {
 	res = 0, conn = 0, stmt = 0;
 	driver = get_driver_instance();
 	pingQuery = "SELECT 1";
-	btCountQuery = "SELECT COUNT(*) FROM BluetoothResults";
-	wifiCountQuery = "SELECT COUNT(*) FROM WifiResults";
+	btCountQuery = "SELECT COUNT(DISTINCT DeviceAddress) FROM BluetoothResults";
+	wifiCountQuery = "SELECT COUNT(DISTINCT BSSID) FROM WifiResults";
 	btGetAllQuery = "SELECT * FROM BluetoothResults";
 	wifiGetAllQuery = "SELECT * FROM WifiResults";
 	readCredentials();
 	btList = getAllBtResults();
 	wifiList = getAllWifiResults();
-	cout << "Initial BtList size: " << btList.size() << "\n" << endl;
-	cout << "Initial WifiList size: " << wifiList.size() << "\n" << endl;
 }
 
 // Check status of Azure DB
@@ -62,7 +60,7 @@ bool Dao::pingDb(string _url, string _user, string _pass, string _schema){
 			delete res;
 			return true;
 		}
-	delete res;
+		delete res;
 	}catch (sql::SQLException &e) {
 		std::cout << " (MySQL error code: " << e.getErrorCode();
 		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
