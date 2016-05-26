@@ -2,7 +2,9 @@ package com.example.ariperkkio.btwifiscan;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.database.Cursor;
@@ -17,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -44,7 +47,7 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
     private ArrayList<scanResult> results;
     private ArrayList<String> macAddressList;
     private GlobalDbConnection globalDbConnection;
-    private int gdbId = 999;
+    private int gdbId = 0;
     private databaseManager localDb;
     private saveResultsBackground localDbSaver;
     private Cursor btCursor;
@@ -111,7 +114,6 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
         resultList.setAdapter(listAdapter);
     }
 
-    public void onResponseRead(String response){ }
     public void onResponseRead(String response, String method){
         switch(method){
             case "pingServerOne":
@@ -149,6 +151,7 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
             case "countWifi":
                 wifiCountText.setText(response.split("Networks: ")[1]); // I.e. "Count of Wifi Networks: 9" -> 9
                 wifiCountText.setTextColor(getResources().getColor(R.color.ONLINE));
+                compareDb();
             break;
         }
     }
@@ -175,9 +178,45 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
         }
     }
 
+    private void compareDb(){
+        int btLocal= btCursor.getCount();
+        int wifiLocal = wifiCursor.getCount();
+        int btGlobal = Integer.parseInt(btCountText.getText().toString());
+        int wifiGlobal = Integer.parseInt(wifiCountText.getText().toString());
+        Log.d("compareDb", "Bt: "+btLocal+"/"+btGlobal+". Wifi: "+wifiLocal+"/"+wifiGlobal+".");
+        String message = "";
+        if(btLocal!=btGlobal)
+            message = "Bluetooth results are not synchronized.";
+        if(wifiLocal!=wifiGlobal)
+            message = "Wifi results are not synchronized.";
+        if(btLocal!=btGlobal && wifiLocal!=wifiGlobal)
+            message = "Bluetooth and Wifi results are not synchronized.";
+        if(!message.equals("")){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this); // Create new builder for alert dialog
+            builder.setMessage(message).setTitle("Synchronize results"); // Add message and title for dialog
+            builder.setPositiveButton("Synchronize", new DialogInterface.OnClickListener() { // Add 'Remove' button for dialog - using anonymous click listener
+                public void onClick(DialogInterface dialog, int id) {
+                    // TODO: globalDbConnection.syncResults() etc.
+                    dialog.cancel();
+                }
+            });
+            // Add 'Cancel' button for dialog
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel(); // Hide dialog
+                }
+            });
+            AlertDialog dialog = builder.create(); // Create dialog from previous attributes
+            dialog.show(); // Show dialog
+
+        }
+
+    }
+
     public void onClick(View v){
         switch(v.getId()){
             case R.id.globalBtnGetAll:
+                results.clear();
                 globalDbConnection.getAllResults(activeServer);
             break;
 
