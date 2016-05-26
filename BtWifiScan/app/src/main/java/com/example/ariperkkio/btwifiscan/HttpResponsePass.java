@@ -7,7 +7,11 @@ import java.util.List;
  * Interface to handle HTTP responses' data
  */
 public interface HttpResponsePass {
-    void onResponseRead(String response); // TODO: Remove later
+    // Ping servers and databases
+    // Get result counts
     void onResponseRead(String response, String method);
+
+    // Get all results
+    // Synchronize results
     void scanResultPass(String method, List<scanResult> results);
 }
