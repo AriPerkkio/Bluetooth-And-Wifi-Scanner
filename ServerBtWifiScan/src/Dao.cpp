@@ -22,8 +22,8 @@ Dao::Dao() {
 	res = 0, conn = 0, stmt = 0;
 	driver = get_driver_instance();
 	pingQuery = "SELECT 1";
-	btCountQuery = "SELECT COUNT(DISTINCT DeviceAddress) FROM BluetoothResults";
-	wifiCountQuery = "SELECT COUNT(DISTINCT BSSID) FROM WifiResults";
+	btCountQuery = "SELECT COUNT(*) FROM BluetoothResults";
+	wifiCountQuery = "SELECT COUNT(*) FROM WifiResults";
 	btGetAllQuery = "SELECT * FROM BluetoothResults";
 	wifiGetAllQuery = "SELECT * FROM WifiResults";
 	readCredentials();
@@ -89,6 +89,21 @@ void Dao::priorityConnect(){
 		setConnection(azureUrl, azureUser, azurePass, azureSchema);
 }
 
+void Dao::getConnectionById(int &id){
+	if(id==0) {
+		if(pingOkeanos()) setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
+		else id++;
+	}
+	if(id==1) {
+		if(pingAzure()) setConnection(azureUrl, azureUser, azurePass, azureSchema);
+		else id++;
+	}
+	if(id==2){
+		if(pingDigiocean()) setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
+		else id++;
+	}
+}
+
 // Read database credentials from file into variables
 void Dao::readCredentials(){
 	FILE 			*fp;
@@ -121,19 +136,18 @@ void Dao::readCredentials(){
 }
 
 bool Dao::checkExistingResult(Btresult _btDevice){
-	if(find(btList.begin(), btList.end(), _btDevice) == btList.end()) // List doesn't contain btDevice
-		return false;
+	if(find(btList.begin(), btList.end(), _btDevice) != btList.end()) // List contains btDevice
+		return true;
 	btList.push_back(_btDevice);
-	return true;
+	return false;
 }
 
 int Dao::insertBtResults(vector<Btresult> _list){
 	int newDevices = 0;
 	for(int i=0;i<3;i++){ // Three databases
 		if(_list.size()==0) break; // Don't setup connections when no results
-		if(i==0) setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
-		if(i==1) setConnection(azureUrl, azureUser, azurePass, azureSchema);
-		if(i==2) setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
+		getConnectionById(i);
+		if(i==4) break;
 		for(unsigned int ii=0;ii<_list.size();ii++){ // All results
 			try{
 				if(!checkExistingResult(_list.at(ii))){
@@ -159,19 +173,18 @@ int Dao::insertBtResults(vector<Btresult> _list){
 }
 
 bool Dao::checkExistingResult(Wifiresult _wifiNetwork){
-	if(find(wifiList.begin(), wifiList.end(), _wifiNetwork) == wifiList.end()) // List doesn't contain wifiNetwork
-		return false;
+	if(find(wifiList.begin(), wifiList.end(), _wifiNetwork) != wifiList.end()) // List contains wifiNetwork
+		return true;
 	wifiList.push_back(_wifiNetwork);
-	return true;
+	return false;
 }
 
 int Dao::insertWifiResults(vector<Wifiresult> _list){
 	int newNetworks = 0;
 	for(int i=0;i<3;i++){ // Three databases
 		if(_list.size()==0) break; // Don't setup connections when no results
-		if(i==0) setConnection(okeanosUrl, okeanosUser, okeanosPass, okeanosSchema);
-		if(i==1) setConnection(azureUrl, azureUser, azurePass, azureSchema);
-		if(i==2) setConnection(digioceanUrl, digioceanUser, digioceanPass, digioceanSchema);
+		getConnectionById(i);
+		if(i==4) break;
 		for(unsigned int ii=0;ii<_list.size();ii++){ // All results
 			try{
 				if(!checkExistingResult(_list.at(ii))){
@@ -241,7 +254,6 @@ vector<Btresult> Dao::getAllBtResults(){
 		res = stmt->executeQuery(btGetAllQuery);
 		while(res->next())
 			returnList.push_back(Btresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5))));
-
 	}catch (sql::SQLException &e) {
 		std::cout << " (MySQL error code: " << e.getErrorCode();
 		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
@@ -260,7 +272,6 @@ vector<Wifiresult> Dao::getAllWifiResults(){
 		res = stmt->executeQuery(wifiGetAllQuery);
 		while(res->next())
 			returnList.push_back(Wifiresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5)), string(res->getString(6))));
-
 	}catch (sql::SQLException &e) {
 		std::cout << " (MySQL error code: " << e.getErrorCode();
 		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
@@ -271,7 +282,7 @@ vector<Wifiresult> Dao::getAllWifiResults(){
 	return returnList;
 }
 
-// Synchronize device DB with remote DB.
+// Synchronize device DB with remote DB. Combine client + host results
 // 1. Add new devices
 // 2. Get missing results
 void Dao::syncBtResults(vector<Btresult>& _list){

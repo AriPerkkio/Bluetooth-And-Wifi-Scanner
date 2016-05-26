@@ -55,6 +55,7 @@ class Dao {
 	bool checkExistingResult(Btresult);
 	bool checkExistingResult(Wifiresult);
 	void priorityConnect();
+	void getConnectionById(int&);
 public:
 	Dao();
 	virtual ~Dao();
