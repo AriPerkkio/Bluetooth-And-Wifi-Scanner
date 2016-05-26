@@ -217,9 +217,9 @@ public class databaseManager {
 
     // Delete scan and its results
     public void deleteScan(int scanId) throws SQLException{
-        db.delete(DATABASE_TABLE_SCANS,"_id="+scanId,null);
         db.delete(DATABASE_TABLE_BTRESULTS, "_id=" + scanId, null);
         db.delete(DATABASE_TABLE_WIFIRESULTS, "_id=" + scanId, null);
+        db.delete(DATABASE_TABLE_SCANS,"_id="+scanId,null);
     }
 
     // TODO: Add location as parameter when deleting result
