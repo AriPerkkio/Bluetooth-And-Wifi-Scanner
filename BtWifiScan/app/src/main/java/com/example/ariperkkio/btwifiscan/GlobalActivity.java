@@ -32,6 +32,8 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
     private Button btnGetAll;
     private Button btnMap;
     private Button btnSave;
+    private Button btnSync;
+    private Button btnBack;
     private ListView resultList;
     private TextView servOneText;
     private TextView servTwoText;
@@ -52,6 +54,8 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
     private saveResultsBackground localDbSaver;
     private Cursor btCursor;
     private Cursor wifiCursor;
+    private boolean onBtSync = false; // Indicates if synchronizing has been started in the background
+    private boolean onWifiSync = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +69,13 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
         btnGetAll = (Button) findViewById(R.id.globalBtnGetAll);
         btnMap = (Button) findViewById(R.id.globalBtnMap);
         btnSave = (Button) findViewById(R.id.globalBtnSave);
+        btnSync = (Button) findViewById(R.id.globalBtnSync);
+        btnBack = (Button) findViewById(R.id.globalBtnBack);
         btnGetAll.setOnClickListener(this);
         btnMap.setOnClickListener(this);
         btnSave.setOnClickListener(this);
+        btnSync.setOnClickListener(this);
+        btnBack.setOnClickListener(this);
         servOneText = (TextView) findViewById(R.id.globalServOne);
         servTwoText = (TextView) findViewById(R.id.globalServTwo);
         dbOneText = (TextView) findViewById(R.id.globalDbOne);
@@ -167,6 +175,14 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
 
     public void scanResultPass(String method, List<scanResult> resultList){
         switch(method){
+            case "syncBt":
+                onBtSync = false;
+            case "syncWifi":
+                if(method.equals("syncWifi")) onWifiSync = false;
+                if(!onBtSync && !onWifiSync){ // Close progDiag when both syncs are complete
+                    globalDbConnection.hideUploaderProgDiag();
+                    Toast.makeText(this, "Synchronizing completed", Toast.LENGTH_SHORT).show();
+                }
             case "getAllResults":
                 for(int i=0;i<resultList.size();i++)
                     if(!macAddressList.contains(resultList.get(i).getMac())){
@@ -179,24 +195,35 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
     }
 
     private void compareDb(){
+        // TODO: If local copy is completely clear, 0 results, prompt to use .../getAllBt & .../getAllWifi instead of sync
         int btLocal= btCursor.getCount();
         int wifiLocal = wifiCursor.getCount();
         int btGlobal = Integer.parseInt(btCountText.getText().toString());
         int wifiGlobal = Integer.parseInt(wifiCountText.getText().toString());
         Log.d("compareDb", "Bt: "+btLocal+"/"+btGlobal+". Wifi: "+wifiLocal+"/"+wifiGlobal+".");
         String message = "";
-        if(btLocal!=btGlobal)
-            message = "Bluetooth results are not synchronized.";
-        if(wifiLocal!=wifiGlobal)
-            message = "Wifi results are not synchronized.";
-        if(btLocal!=btGlobal && wifiLocal!=wifiGlobal)
-            message = "Bluetooth and Wifi results are not synchronized.";
+        final boolean btSyncRequired = (btLocal!=btGlobal);
+        final boolean wifiSyncRequired = (wifiLocal!=wifiGlobal);
+        if(btSyncRequired)
+            message = "Bluetooth results are not synchronized. ("+btLocal+"/"+btGlobal+")";
+        if(wifiSyncRequired)
+            message = "Wifi results are not synchronized. ("+wifiLocal+"/"+wifiGlobal+")";
+        if(btSyncRequired && wifiSyncRequired)
+            message = "Bluetooth and Wifi results are not synchronized. ("+btLocal+"/"+btGlobal+") & ("+wifiLocal+"/"+wifiGlobal+")";
         if(!message.equals("")){
             AlertDialog.Builder builder = new AlertDialog.Builder(this); // Create new builder for alert dialog
             builder.setMessage(message).setTitle("Synchronize results"); // Add message and title for dialog
             builder.setPositiveButton("Synchronize", new DialogInterface.OnClickListener() { // Add 'Remove' button for dialog - using anonymous click listener
                 public void onClick(DialogInterface dialog, int id) {
-                    // TODO: globalDbConnection.syncResults() etc.
+                    if(btSyncRequired) {
+                        onBtSync = true;
+                        globalDbConnection.synchronizeBt(results, activeServer);
+                    }
+                    if(wifiSyncRequired){
+                        onWifiSync = true;
+                        globalDbConnection.synchronizeWifi(results, activeServer);
+                    }
+
                     dialog.cancel();
                 }
             });
@@ -208,7 +235,6 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
             });
             AlertDialog dialog = builder.create(); // Create dialog from previous attributes
             dialog.show(); // Show dialog
-
         }
 
     }
@@ -217,6 +243,7 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
         switch(v.getId()){
             case R.id.globalBtnGetAll:
                 results.clear();
+                listAdapter.notifyDataSetChanged();
                 globalDbConnection.getAllResults(activeServer);
             break;
 
@@ -240,6 +267,17 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
                 ResultListHolder resultListHolder = ResultListHolder.getInstance();
                 resultListHolder.setResults(results);
                 startActivity(intent);
+            break;
+
+            case R.id.globalBtnSync:
+                onBtSync = true;
+                globalDbConnection.synchronizeBt(results, activeServer);
+                onWifiSync = true;
+                globalDbConnection.synchronizeWifi(results, activeServer);
+            break;
+
+            case R.id.globalBtnBack:
+                this.finish();
             break;
         }
     }
