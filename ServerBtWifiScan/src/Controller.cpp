@@ -74,6 +74,10 @@ Dao		dao;
 std::vector<Btresult> listBtDevices; // Bluetooth results
 std::vector<Wifiresult> listWifiNetworks; // Wifi results
 
+// Payload reading
+char oneChar[1];
+unsigned int charCounter=0;
+
 void error(const char *msg) {
     perror(msg);
     system(std::string("echo \"\nError: \nMsg: %s\n \" >> Log.txt", msg).c_str()); // Append log
@@ -103,7 +107,7 @@ int processPath(char _path[]){
 
 int processContentType(char _type[]){
 	if(strcmp(_type, "application/json") == 0) return JSONCONTENT;
-	if(strcmp(_type, "application/xml") == 0) return XMLCONTENT; // Not tested, XML features not implemented
+	if(strcmp(_type, "application/xml") == 0) return XMLCONTENT;
 	return 0;
 }
 
@@ -126,8 +130,8 @@ void sendResults(vector<Btresult>& _list){
 }
 
 void sendResults(vector<Wifiresult>& _list){
+	vector<Wifiresult> sendList;
 	while(_list.size()!=0){
-		vector<Wifiresult> sendList;
 		for(int i=0;i<RESULTRESP;i++){
 			if(_list.size()==0) break;
 			sendList.push_back(_list.at(0));
@@ -166,8 +170,7 @@ int main(int argc, char **argv) {
 		system(logBuff); // Append log
 
 		// Read buffer one char at time - stop when reached the start of payload or end of request
-		char oneChar[1];
-		unsigned int charCounter=0;
+		charCounter = 0;
 		do{
 			n = read(connfd, oneChar, 1);
 			sscanf(inBuff, "%s %s", cmd, path); // Parse HTTP request's command and path
@@ -177,7 +180,7 @@ int main(int argc, char **argv) {
 			if(strstr(inBuff, "\r\n\n")) break; // Start of payload
 		}while(n>0);
 		inBuff[charCounter+1] = 0; //Null terminate
-		cout << "Read input: ****"<< inBuff << "\n******\n";
+		cout << "\nRead input: \n******\n"<< inBuff << "\n******\n";
 
 		if (n < 0)  // Error with data reading
 			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
@@ -190,8 +193,7 @@ int main(int argc, char **argv) {
 			sscanf(header.c_str(), "Content-Type: %s", type); // HTTP-Header: JSON or XML
 			sscanf(header.c_str(), "Content-Length: %s", contentLength);
 		}
-		// Buffer to hold payload
-		char dataBuff[atoi(contentLength)];
+		char dataBuff[atoi(contentLength)]; // Buffer to hold payload
 
 		cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type << "\nPath: " << path;
 		switch(processCmd(cmd)){
@@ -266,14 +268,14 @@ int main(int argc, char **argv) {
 								listBtDevices = jsonParser.parseBtJson(dataBuff, sizeof(dataBuff));
 								dao.syncBtResults(listBtDevices); // Insert all devices that are not in db already
 								sendResults(listBtDevices); // Send response containing devices that were not in user's initial list
-								snprintf(outBuff, sizeof(outBuff), "BT sync complete. \n");
+								snprintf(outBuff, sizeof(outBuff), "\n");
 							break;
 
 							case SYNCWIFI:
 								listWifiNetworks = jsonParser.parseWifiJson(dataBuff, sizeof(dataBuff));
 								dao.syncWifiResults(listWifiNetworks);
 								sendResults(listWifiNetworks);
-								snprintf(outBuff, sizeof(outBuff), "Wifi sync complete. \n");
+								snprintf(outBuff, sizeof(outBuff), "\n");
 							break;
 						} // Path
 					break;
@@ -294,7 +296,7 @@ int main(int argc, char **argv) {
 		std::cout << "\nSending: " << outBuff << std::endl; // Print out-going data to server
 		write(connfd, outBuff, strlen(outBuff)); // Send data
 		close(connfd); //Close current connection, loop back to polling connection
-
+		cout << "\nConnection closed.\n";
 		// Clear everything
 		memset(&cmd[0], 0, sizeof(cmd));
 		memset(&path[0], 0, sizeof(path));
@@ -302,6 +304,7 @@ int main(int argc, char **argv) {
 		memset(&inBuff[0], 0, sizeof(inBuff));
 		memset(&outBuff[0], 0, sizeof(outBuff));
 		memset(&dataBuff[0], 0, sizeof(dataBuff));
+		memset(&oneChar[0], 0, sizeof(oneChar));
 		listBtDevices.clear();
 		listWifiNetworks.clear();
 		req.clear();
