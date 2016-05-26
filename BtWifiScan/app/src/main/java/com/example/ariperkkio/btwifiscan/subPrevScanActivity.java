@@ -169,6 +169,10 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                 break;
 
             case (R.id.subPrevScanRename): // 'Rename' button
+                if (scanId==databaseManager.globaldb_id) { // Global DB cannot be renamed
+                    Toast.makeText(this,"Global Database cannot be renamed", Toast.LENGTH_SHORT).show();
+                    break;
+                }
                 if (scanNameField.getText().toString().equals("")) // Check if empty name
                     Toast.makeText(this, "Scan name can't be empty.", Toast.LENGTH_SHORT).show();
                     // Check if rename has been pressed without making changes to scan name
@@ -296,9 +300,9 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 String technology = ""; // String to identify which result it is, used in databaseManager class
-                if (selectedObject.getColumnCount() == 5)
-                    technology = "Bluetooth";
                 if (selectedObject.getColumnCount() == 6)
+                    technology = "Bluetooth";
+                if (selectedObject.getColumnCount() == 7)
                     technology = "Wifi";
                 try {
                     database.open();
