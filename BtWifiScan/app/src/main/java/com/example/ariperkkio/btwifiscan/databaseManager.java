@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 import java.sql.SQLException;
 
@@ -39,7 +40,10 @@ public class databaseManager {
     public static final String wifiResults_Frequency = "Frequency";
     public static final String wifiResults_Location = "Location";
 
-    private static final int DATABASE_VERSION = 2;
+    // Local copy of Global Database
+    public static final int globaldb_id = 0;
+
+    private static final int DATABASE_VERSION = 4;
 
     private static final String CREATE_TABLE_SCANS =
             "CREATE TABLE Scans(_id INTEGER PRIMARY KEY AUTOINCREMENT, "+
@@ -62,6 +66,8 @@ public class databaseManager {
                                         "Frequency INTEGER, "+
                                         "Location TEXT, "+
                                         "FOREIGN KEY (_id) REFERENCES Scans(_id))";
+    private static final String CREATE_ROW_GLOBALDB = "" +
+            "INSERT INTO Scans(_id, ScanName) VALUES("+globaldb_id+", \"GlobalDatabase\")";
 
     private final Context context;
     private MyDatabaseHelper DBHelper;
@@ -83,6 +89,7 @@ public class databaseManager {
             db.execSQL(CREATE_TABLE_SCANS);
             db.execSQL(CREATE_TABLE_BTRESULTS);
             db.execSQL(CREATE_TABLE_WIFIRESULTS);
+            db.execSQL(CREATE_ROW_GLOBALDB);
         }
 
         @Override
@@ -93,6 +100,7 @@ public class databaseManager {
             db.execSQL(CREATE_TABLE_SCANS);
             db.execSQL(CREATE_TABLE_BTRESULTS);
             db.execSQL(CREATE_TABLE_WIFIRESULTS);
+            db.execSQL(CREATE_ROW_GLOBALDB);
         }
     } //End inner class
 
@@ -113,10 +121,10 @@ public class databaseManager {
     }
 
     public long createLocalGDB(){
-        // Create ID for global DB results - 999
+        // Create ID for global DB results
         ContentValues initialValues = new ContentValues();
         initialValues.put(scans_ScanName, "Global Database");
-        initialValues.put(scans_ScanId, 999);
+        initialValues.put(scans_ScanId, globaldb_id);
         return db.insert(DATABASE_TABLE_SCANS, null, initialValues);
     }
 
