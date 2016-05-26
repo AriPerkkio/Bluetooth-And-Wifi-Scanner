@@ -81,33 +81,34 @@ public class previousScansActivity extends Activity implements View.OnClickListe
     // Listening long clicks on list items
     public boolean onItemLongClick(AdapterView<?> adapterView, View v, int position, long arg){
         final Cursor selectedObject = (Cursor) (list.getItemAtPosition(position)); //get clicked item
-
+        String scanName = selectedObject.getString(1);
+        String message = "Do you want to remove scan "+scanName+"?";
         AlertDialog.Builder builder = new AlertDialog.Builder(this); // Create new builder for alert dialog
-        builder.setMessage("Do you want to remove scan "+selectedObject.getString(1)+"?")
-                .setTitle("Remove scan"); // Add message and title for dialog
-        // Add 'Remove' button for dialog - using anonymous click listener
-        builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                try {
-                    db.open();
-                    db.deleteScan(selectedObject.getInt(0)); // Delete scan from db
-                    dataCursor = db.getScans(); // Get all scans
-                    db.close();
-                    Toast.makeText(previousScansActivity.this, "Removed "+selectedObject.getString(1), Toast.LENGTH_SHORT).show();
-                } catch (SQLException e) {
-                    Log.e("Delete:", e.toString());
+        if(scanName.equals("Global Database"))
+            message = "Global Database cannot be removed";
+        else
+            builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() { // Add 'Remove' button for dialog - using anonymous click listener
+                public void onClick(DialogInterface dialog, int id) {
+                    try {
+                        db.open();
+                        db.deleteScan(selectedObject.getInt(0)); // Delete scan from db
+                        dataCursor = db.getScans(); // Get all scans
+                        db.close();
+                        Toast.makeText(previousScansActivity.this, "Removed "+selectedObject.getString(1), Toast.LENGTH_SHORT).show();
+                    } catch (SQLException e) {
+                        Log.e("Delete:", e.toString());
+                    }
+                    customCursorAdapter.swapCursor(dataCursor); // Swap cursor to new one with updated values
+                    customCursorAdapter.notifyDataSetChanged(); // Refresh list data
                 }
-                customCursorAdapter.swapCursor(dataCursor); // Swap cursor to new one with updated values
-                customCursorAdapter.notifyDataSetChanged(); // Refresh list data
-            }
-        });
+            });
         // Add 'Cancel' button for dialog
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.cancel(); // Hide dialog
             }
         });
-
+        builder.setMessage(message).setTitle("Remove scan"); // Add message and title for dialog
         AlertDialog dialog = builder.create(); // Create dialog from previous attributes
         dialog.show(); // Show dialog
         return true;
