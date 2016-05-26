@@ -84,7 +84,7 @@ public class previousScansActivity extends Activity implements View.OnClickListe
         String scanName = selectedObject.getString(1);
         String message = "Do you want to remove scan "+scanName+"?";
         AlertDialog.Builder builder = new AlertDialog.Builder(this); // Create new builder for alert dialog
-        if(scanName.equals("Global Database"))
+        if(!scanName.equals("Global Database"))
             message = "Global Database cannot be removed";
         else
             builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() { // Add 'Remove' button for dialog - using anonymous click listener
