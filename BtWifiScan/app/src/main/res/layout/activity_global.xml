@@ -13,22 +13,22 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Get all"
+        android:text="Refresh\nAll"
         android:id="@+id/globalBtnGetAll"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
         android:background="@android:color/background_dark"
-        android:textColor="@color/mainColorCyan" />
+        android:textColor="@color/mainColorCyan"
+        android:layout_below="@+id/globalListResults"
+        android:layout_centerHorizontal="true" />
 
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/globalListResults"
         android:layout_centerHorizontal="true"
-        android:layout_above="@+id/globalBtnGetAll"
-        android:layout_marginBottom="20dp"
         android:layout_below="@+id/textView8"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="20dp"
+        android:layout_above="@+id/globalBtnMap"
+        android:layout_marginBottom="10dp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -37,8 +37,9 @@
         android:id="@+id/globalBtnMap"
         android:background="@android:color/background_dark"
         android:textColor="@color/mainColorCyan"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/globalBtnSave"
+        android:layout_marginBottom="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -209,6 +210,26 @@
         android:id="@+id/globalBtnSave"
         android:background="@android:color/background_dark"
         android:textColor="@color/mainColorCyan"
-        android:layout_below="@+id/globalListResults"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        android:id="@+id/globalBtnBack"
+        android:background="@android:color/background_dark"
+        android:textColor="@color/mainColorCyan"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sync\nResults"
+        android:id="@+id/globalBtnSync"
+        android:background="@android:color/background_dark"
+        android:textColor="@color/mainColorCyan"
+        android:layout_below="@+id/globalBtnMap"
+        android:layout_alignEnd="@+id/globalBtnGetAll" />
 </RelativeLayout>
