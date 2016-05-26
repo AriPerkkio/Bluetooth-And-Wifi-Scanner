@@ -149,13 +149,19 @@ public class GlobalDbConnection {
                 case "uploadWifi":
                     String totalNetworks = progress[0].split("/")[2].split(" ")[0];
                     resultUpdate += Integer.parseInt(totalNetworks);
+                    uploaderProgressDialog.setProgress(resultUpdate);
                 break;
                 case "uploadBt":
                     String totalDevices = progress[0].split("/")[1].split(" ")[0];
                     resultUpdate += Integer.parseInt(totalDevices);
+                    uploaderProgressDialog.setProgress(resultUpdate);
+                break;
+
+                case "syncBt":
+                case "syncWifi":
+                    //
                 break;
             }
-            uploaderProgressDialog.setProgress(resultUpdate);
         }
 
         protected void onPreExecute() {
@@ -164,17 +170,22 @@ public class GlobalDbConnection {
                 case "uploadBt":
                 case "uploadWifi":
                     message = "Uploading results...";
+                    uploaderProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    uploaderProgressDialog.setIndeterminate(false); //Set progress updates visible
+                    uploaderProgressDialog.setMax(totalResults);
                     break;
 
-                case "syncAll":
-                    message = "Synchronizing results...";
+                case "syncBt":
+                    message = "Synchronizing  Bluetooth results...";
                 break;
+
+                case "syncWifi":
+                    message = "Synchronizing  Wifi results...";
+                break;
+
             }
             uploaderProgressDialog.setMessage(message);
             uploaderProgressDialog.setCanceledOnTouchOutside(false);
-            uploaderProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            uploaderProgressDialog.setIndeterminate(false); //Set progress updates visible
-            uploaderProgressDialog.setMax(totalResults);
             uploaderProgressDialog.show();
         }
         protected void onPostExecute(String result) {
@@ -184,8 +195,12 @@ public class GlobalDbConnection {
                     responseListener.onResponseRead(result, method);
                 break;
 
-                case "syncAll":
-                    responseListener.onResponseRead(result, method);
+                case "syncBt":
+                    responseListener.scanResultPass(method, parseBtJson(result));
+                break;
+
+                case "syncWifi":
+                    responseListener.scanResultPass(method, parseWifiJson(result));
                 break;
             }
         }
@@ -217,8 +232,8 @@ public class GlobalDbConnection {
     }
 
     public String postToUrl(String _url, String data) throws IOException {
-        Log.d("Data", data.charAt(data.length()-6)+""+data.charAt(data.length()-5)+""+data.charAt(data.length()-4)+""
-                +data.charAt(data.length()-3)+""+data.charAt(data.length()-2)+""+data.charAt(data.length()-1));
+        //Log.d("Data", data.charAt(data.length()-6)+""+data.charAt(data.length()-5)+""+data.charAt(data.length()-4)+""
+        //        +data.charAt(data.length()-3)+""+data.charAt(data.length()-2)+""+data.charAt(data.length()-1));
         InputStream is = null;
         try {
             URL url = new URL(_url);
@@ -231,11 +246,11 @@ public class GlobalDbConnection {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Content-Length", data.length()+"");
             conn.setFixedLengthStreamingMode(data.length());
-            Log.d("Content-Length", data.length()+"");
+            //Log.d("Content-Length", data.length()+"");
             conn.setDoInput(true);
             DataOutputStream outputStream = new DataOutputStream((conn.getOutputStream()));
             outputStream.writeBytes(data);
-            Log.i("outputSteam", "Written data length: "+outputStream.size());
+            //Log.i("outputSteam", "Written data length: "+outputStream.size());
             outputStream.flush();
             outputStream.close();
             conn.connect();
@@ -366,6 +381,79 @@ public class GlobalDbConnection {
                 } while (networkCount  != sendingSize); // 10 Results in JSON
                 wifiJson.put("wifiscans", wifiArray);
                 new uploader("uploadWifi", "{\"btscans\":[{}]}"+wifiJson.toString(), list.size()).execute(server+"/upload");
+            } catch (JSONException e) {
+                Log.e("wifiscans", e.toString());
+            }
+            wifiJson.remove("wifiscans");
+            wifiArray = new JSONArray();
+        }while(wifiList.size()!=0);
+    }
+
+    public void synchronizeBt(List<scanResult> list, String server){
+        Log.d("synchronizeBt", "Results: "+list.size());
+        List<scanResult> btList = new Vector<>();
+        JSONObject btResultsJson = new JSONObject();
+        JSONArray btArray = new JSONArray();
+        JSONObject btJson = new JSONObject();
+
+        for(int i=0;i<list.size();i++)
+            if(list.get(i).getTechnology().equals("Bluetooth"))
+                btList.add(list.get(i));
+        final int totalSize = btList.size();
+        do {
+            try {
+                int devCount = 0;
+                do {
+                    if (btList.size() == 0) break;
+                    btResultsJson.put("devName", checkStr(checkName(btList.get(0).getBtDevName())));
+                    btResultsJson.put("devAddr", btList.get(0).getBtDevAddr());
+                    btResultsJson.put("devType", btList.get(0).getBtDevType());
+                    btResultsJson.put("devRssi", btList.get(0).getBtRSSI() + "dBm");
+                    btResultsJson.put("location", btList.get(0).getLocation());
+                    btArray.put(btResultsJson);
+                    btResultsJson = new JSONObject();
+                    btList.remove(0);
+                    devCount++;
+                } while (devCount != totalSize); // All results at once !
+                btJson.put("btscans", btArray);
+                new uploader("syncBt", btJson.toString(), btList.size()).execute(server+"/syncBt");
+            } catch (JSONException e) {
+                Log.e("btscans", e.toString());
+            }
+            btJson.remove("btscans");
+            btArray = new JSONArray();
+        }while(btList.size()!=0);
+    }
+
+    public void synchronizeWifi(List<scanResult> list, String server){
+        Log.d("synchronizeWifi", "Results: "+list.size());
+        List<scanResult> wifiList = new Vector<>();
+        JSONObject wifiResultsJson = new JSONObject();
+        JSONArray wifiArray = new JSONArray();
+        JSONObject wifiJson = new JSONObject();
+
+        for(int i=0;i<list.size();i++)
+            if(list.get(i).getTechnology().equals("Wifi"))
+                wifiList.add((list.get(i)));
+        final int totalSize = wifiList.size();
+        do {
+            try {
+                int networkCount = 0;
+                do {
+                    if (wifiList.size() == 0) break;
+                    wifiResultsJson.put("ssid", checkStr(checkName(wifiList.get(0).getWifiSSID())));
+                    wifiResultsJson.put("bssid", wifiList.get(0).getWifiBSSID());
+                    wifiResultsJson.put("capabilities", checkStr(wifiList.get(0).getWifiCapabilities()));
+                    wifiResultsJson.put("rssi", wifiList.get(0).getWifiRSSI()+"dBm");
+                    wifiResultsJson.put("freq", wifiList.get(0).getWifiFrequency()+"MHz");
+                    wifiResultsJson.put("location", wifiList.get(0).getLocation());
+                    wifiArray.put(wifiResultsJson);
+                    wifiResultsJson = new JSONObject();
+                    wifiList.remove(0);
+                    networkCount ++;
+                } while (networkCount  != totalSize); // All results at once !
+                wifiJson.put("wifiscans", wifiArray);
+                new uploader("syncWifi", "{\"btscans\":[{}]}"+wifiJson.toString(), wifiList.size()).execute(server+"/syncWifi");
             } catch (JSONException e) {
                 Log.e("wifiscans", e.toString());
             }
