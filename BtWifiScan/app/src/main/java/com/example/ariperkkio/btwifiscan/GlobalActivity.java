@@ -204,26 +204,35 @@ public class GlobalActivity extends Activity implements View.OnClickListener, Li
         String message = "";
         final boolean btSyncRequired = (btLocal!=btGlobal);
         final boolean wifiSyncRequired = (wifiLocal!=wifiGlobal);
+        final boolean empty = (btLocal==0 && wifiLocal==0); // Initial state - local DB empty
         if(btSyncRequired)
             message = "Bluetooth results are not synchronized. ("+btLocal+"/"+btGlobal+")";
         if(wifiSyncRequired)
             message = "Wifi results are not synchronized. ("+wifiLocal+"/"+wifiGlobal+")";
         if(btSyncRequired && wifiSyncRequired)
             message = "Bluetooth and Wifi results are not synchronized. ("+btLocal+"/"+btGlobal+") & ("+wifiLocal+"/"+wifiGlobal+")";
+        if(empty)
+            message = "Local Database is empty. Download "+wifiGlobal+" Wifi and "+btGlobal+" Bluetooth results from Global Database.";
         if(!message.equals("")){
             AlertDialog.Builder builder = new AlertDialog.Builder(this); // Create new builder for alert dialog
-            builder.setMessage(message).setTitle("Synchronize results"); // Add message and title for dialog
-            builder.setPositiveButton("Synchronize", new DialogInterface.OnClickListener() { // Add 'Remove' button for dialog - using anonymous click listener
+            String buttonText = "Synchronize";
+            if(empty) buttonText = "Download";
+            String titleText = "Synchronize results";
+            if(empty) titleText = "Download results";
+            builder.setMessage(message).setTitle(titleText); // Add message and title for dialog
+            builder.setPositiveButton(buttonText, new DialogInterface.OnClickListener() { // Add 'Remove' button for dialog - using anonymous click listener
                 public void onClick(DialogInterface dialog, int id) {
-                    if(btSyncRequired) {
+                    if(empty)
+                        globalDbConnection.getAllResults(activeServer);
+
+                    if(btSyncRequired && !empty) {
                         onBtSync = true;
                         globalDbConnection.synchronizeBt(results, activeServer);
                     }
-                    if(wifiSyncRequired){
+                    if(wifiSyncRequired && !empty){
                         onWifiSync = true;
                         globalDbConnection.synchronizeWifi(results, activeServer);
                     }
-
                     dialog.cancel();
                 }
             });
