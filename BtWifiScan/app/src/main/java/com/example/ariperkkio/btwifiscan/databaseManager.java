@@ -19,6 +19,7 @@ public class databaseManager {
     private static final String DATABASE_TABLE_SCANS = "Scans";
     public static final String scans_ScanId = "_id";
     public static final String scans_ScanName = "ScanName";
+    public static final String scans_GlobalDatabaseEnabled = "GdbEnabled";
     public static final String scans_Time = "Time";
 
     // Table BluetoothResulta and its columns
@@ -43,11 +44,12 @@ public class databaseManager {
     // Local copy of Global Database
     public static final int globaldb_id = 0;
 
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     private static final String CREATE_TABLE_SCANS =
             "CREATE TABLE Scans(_id INTEGER PRIMARY KEY AUTOINCREMENT, "+
                                 "ScanName TEXT, "+
+                                "GdbEnabled TEXT, "+ // YES or NO
                                 "Time DATETIME DEFAULT CURRENT_DATE)";
     private static final String CREATE_TABLE_BTRESULTS =
             "CREATE TABLE BluetoothResults(_id integer, "+
@@ -67,7 +69,7 @@ public class databaseManager {
                                         "Location TEXT, "+
                                         "FOREIGN KEY (_id) REFERENCES Scans(_id))";
     private static final String CREATE_ROW_GLOBALDB =
-            "INSERT INTO Scans(_id, ScanName) VALUES("+globaldb_id+", \"Global Database\")";
+            "INSERT INTO Scans(_id, ScanName, GdbEnabled) VALUES("+globaldb_id+", \"Global Database\", \"NO\")";
 
     private final Context context;
     private MyDatabaseHelper DBHelper;
@@ -113,10 +115,11 @@ public class databaseManager {
         DBHelper.close();
     }
 
-    public long insertIntoScans(String scanName) {
+    public long insertIntoScans(String scanName, String gdbEnabled) {
         // ScanId is Auto incremented, Time is CURRENT_DATE by default
         ContentValues initialValues = new ContentValues();
         initialValues.put(scans_ScanName, scanName);
+        initialValues.put(scans_GlobalDatabaseEnabled, gdbEnabled);
         return db.insert(DATABASE_TABLE_SCANS, null, initialValues);
     }
 
@@ -125,6 +128,7 @@ public class databaseManager {
         ContentValues initialValues = new ContentValues();
         initialValues.put(scans_ScanName, "Global Database");
         initialValues.put(scans_ScanId, globaldb_id);
+        initialValues.put(scans_GlobalDatabaseEnabled, "NO");
         return db.insert(DATABASE_TABLE_SCANS, null, initialValues);
     }
 
@@ -153,7 +157,7 @@ public class databaseManager {
 
    public Cursor getScans() throws SQLException {
         Cursor mCursor = db.query(true, DATABASE_TABLE_SCANS, new String[] {
-                scans_ScanId, scans_ScanName, scans_Time}, null, null, null, null, null, null);
+                scans_ScanId, scans_ScanName, scans_Time, scans_GlobalDatabaseEnabled}, null, null, null, null, null, null);
         if(mCursor!=null) {
             mCursor.moveToFirst();
         }
