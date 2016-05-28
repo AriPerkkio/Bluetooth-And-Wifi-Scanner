@@ -213,7 +213,9 @@
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textSize="20dp"
                 android:enabled="true"
-                android:checked="true" />
+                android:checked="true"
+                android:singleLine="true"
+                android:layout_alignParentTop="false" />
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -278,14 +280,13 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/material_blue_grey_800"
             android:layout_alignEnd="@+id/ScanName"
             android:layout_toEndOf="@+id/space10"
             android:layout_below="@+id/space9"
             android:id="@+id/relativeLayout3"
-            android:scrollIndicators="none"
-            android:layout_alignBottom="@+id/space8">
+            android:scrollIndicators="none">
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -389,7 +390,7 @@
             android:id="@+id/newScanRateNumber"
             android:layout_alignParentBottom="true"
             android:layout_alignStart="@+id/ScanName"
-            android:layout_below="@+id/relativeLayout3"
+            android:layout_below="@+id/relativeLayout4"
             android:layout_toStartOf="@+id/relativeLayout3" />
 
         <Space
@@ -405,9 +406,11 @@
             android:layout_height="wrap_content"
             android:background="@color/material_blue_grey_800"
             android:id="@+id/relativeLayout4"
-            android:layout_above="@+id/newScanRateNumber"
-            android:layout_toStartOf="@+id/space10"
-            android:layout_toEndOf="@+id/space11">
+            android:layout_above="@+id/space8"
+            android:layout_toEndOf="@+id/space11"
+            android:layout_below="@+id/relativeLayout2"
+            android:layout_alignRight="@+id/relativeLayout2"
+            android:layout_marginTop="5dp">
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -455,6 +458,41 @@
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true" />
 
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/material_blue_grey_800"
+            android:id="@+id/relativeLayout5"
+            android:layout_below="@+id/relativeLayout3"
+            android:layout_toStartOf="@+id/space12"
+            android:layout_alignLeft="@+id/relativeLayout3"
+            android:layout_alignRight="@+id/relativeLayout3"
+            android:layout_marginTop="5dp"
+            android:layout_above="@+id/newScanRateNumber">
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/space45" />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Global DB\nUploading"
+                android:id="@+id/newScanGdbSwitch"
+                android:textColor="@color/mainColorCyan"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="15dp"
+                android:enabled="true"
+                android:checked="true"
+                android:singleLine="false"
+                android:layout_alignParentTop="false"
+                android:paddingLeft="5dp"
+                android:layout_centerInParent="true" />
         </RelativeLayout>
 
     </RelativeLayout>
