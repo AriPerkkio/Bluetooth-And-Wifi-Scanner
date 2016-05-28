@@ -74,6 +74,8 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private String latitude = "0";
     private String longitude = "0";
     public static ProgressDialog mapsProgressDialog;
+    // Global Database
+    private String enableGlobalDb = "NO";
 
     // Options
     // Bluetooth
@@ -93,6 +95,8 @@ public class scanActivity extends Activity implements View.OnClickListener, List
     private boolean locStatus;
     private boolean locGps;
     private boolean locNet;
+    // Global Database
+    private boolean globalDbStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +155,10 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             locGps = getIntent().getExtras().getBoolean("locationGps");
             locNet = getIntent().getExtras().getBoolean("locationNet");
         }
+        // Get option for Global Database
+        globalDbStatus = getIntent().getExtras().getBoolean("globalDatabaseStatus");
+        if(globalDbStatus) enableGlobalDb = "YES";
+
         // Get scan name and sample rate
         scanName.setText(getIntent().getExtras().getString("scanName"));
         sampleRate = getIntent().getExtras().getInt("sampleRate");
@@ -285,9 +293,6 @@ public class scanActivity extends Activity implements View.OnClickListener, List
             break;
         }
     }
-    public void onResponseRead(String response){
-        Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
-    }
 
     public void scanResultPass(String method, List<scanResult> resultList){ }
 
@@ -297,7 +302,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
                 backgroundScanner.cancel(true); // End background scanning
                 save.setVisibility(View.VISIBLE); // Show 'Save' button
                 dontSave.setVisibility(View.VISIBLE); // Show "Don't save" button
-                globalUpload.setVisibility(View.VISIBLE);
+                if(globalDbStatus) globalUpload.setVisibility(View.VISIBLE);
                 endScan.setVisibility(View.GONE); // Hide 'End scan' button
                 if(btAdapter != null && btAdapter.isDiscovering())
                     btAdapter.cancelDiscovery(); // End bt scanning if its still running
@@ -472,7 +477,7 @@ public class scanActivity extends Activity implements View.OnClickListener, List
         protected Void doInBackground(List<scanResult>... resultList) {
             try {
                 database.open();
-                database.insertIntoScans(getIntent().getExtras().getString("scanName")); // Creates new scan with auto incremented scanId -> highest Id is latest scan
+                database.insertIntoScans(getIntent().getExtras().getString("scanName"), enableGlobalDb); // Creates new scan with auto incremented scanId -> highest Id is latest scan
                 int scanId = database.getHighestId(); // Get latest scanId
 
                 for (int i = 0; i < resultList[0].size(); i++) {

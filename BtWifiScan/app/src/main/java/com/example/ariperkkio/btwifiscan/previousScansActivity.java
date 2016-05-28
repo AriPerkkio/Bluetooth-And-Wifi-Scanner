@@ -75,6 +75,8 @@ public class previousScansActivity extends Activity implements View.OnClickListe
         intent.putExtra("scanId", selectedObject.getInt(0));
         intent.putExtra("scanName", selectedObject.getString(1));
         intent.putExtra("scanDate", selectedObject.getString(2));
+        intent.putExtra("enabledGdb", selectedObject.getString(3));
+        Log.d("enabledGdb prevscans", selectedObject.getString(3));
         startActivity(intent); // Start subPrevScanActivity but keep this one alive
     }
 
@@ -84,7 +86,8 @@ public class previousScansActivity extends Activity implements View.OnClickListe
         String scanName = selectedObject.getString(1);
         String message = "Do you want to remove scan "+scanName+"?";
         AlertDialog.Builder builder = new AlertDialog.Builder(this); // Create new builder for alert dialog
-        if(!scanName.equals("Global Database"))
+        Log.d("remover", "scanName: "+scanName+". Bool check: "+(scanName.equals("Global Database")));
+        if(scanName.equals("Global Database"))
             message = "Global Database cannot be removed";
         else
             builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() { // Add 'Remove' button for dialog - using anonymous click listener

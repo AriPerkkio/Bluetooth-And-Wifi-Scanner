@@ -7,6 +7,7 @@ import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -55,6 +56,9 @@ public class newScanActivity extends Activity implements View.OnClickListener {
     private Switch switchLocation;
     private CheckBox locGps;
     private CheckBox locNetwork;
+
+    //Widgets for Global Database option
+    private Switch switchGdb;
 
 
     @Override
@@ -113,6 +117,10 @@ public class newScanActivity extends Activity implements View.OnClickListener {
         locNetwork = (CheckBox) findViewById(R.id.newScanNetChk);
         locNetwork.setOnClickListener(this);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        // Widgets for Global Database
+        switchGdb = (Switch) findViewById(R.id.newScanGdbSwitch);
+        switchGdb.setOnClickListener(this);
 
         // Check if device's bluetooth is ON when activity launched
         if (btAdapter != null && btAdapter.isEnabled())
@@ -215,7 +223,21 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     setLocationOptionsOFF();
                     switchLocation.setChecked(false);
                 }
+            break;
 
+            case (R.id.newScanGdbSwitch):
+                // Global Database results required all settings enabled
+                if(switchGdb.isChecked()){
+                    if(switchWifi.isChecked())
+                        setWifiOptionsON();
+                    if(switchBluetooth.isChecked())
+                        setBtOptionsON();
+                    if(!switchLocation.isChecked())
+                        switchLocation.performClick();
+                }
+                // Check if settings were successfully enabled
+                if(!switchLocation.isChecked())
+                    switchGdb.setChecked(false);
             break;
 
             // 'Start scanning' button to start new activity with chosen options
@@ -236,12 +258,35 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     Toast.makeText(this, "Please check Wifi options", Toast.LENGTH_SHORT).show();
                     break;
                 }
+                // For location: Check that there is at least one location provider option checked
+                else if(switchLocation.isChecked() && !locGps.isChecked() && !locNetwork.isChecked()){
+                    Toast.makeText(this, "Please check Location options", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                // For Global Database: All the options of each technology has to be enabled. Location has to be enabled
+                else if(switchGdb.isChecked() && !switchLocation.isChecked()) {
+                    Toast.makeText(this, "Location must be enabled when using Global Database.", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                else if(switchGdb.isChecked() && switchWifi.isChecked() &&
+                        (!wifiSSID.isChecked() || !wifiBSSID.isChecked() || !wifiCapabilities.isChecked() || !wifiFrequency.isChecked() || !wifiRSSI.isChecked())){
+                    Toast.makeText(this, "All Wifi options must be checked when using Global Database.", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                else if(switchGdb.isChecked() && switchBluetooth.isChecked() &&
+                        (!btDevName.isChecked() || !btDevAddr.isChecked() || !btDevType.isChecked() || !btRSSI.isChecked())){
+                    Toast.makeText(this, "All Bluetooth options must be checked when using Global Database.", Toast.LENGTH_SHORT).show();
+                    break;
+                }
                 // Scan name must be inserted
                 else if(scanName.length() <= 0 ){
                     Toast.makeText(this, "Please insert scan name", Toast.LENGTH_SHORT).show();
                     break;
                 }
-
+                else if(scanName.getText().toString().equals("Global Database")){
+                    Toast.makeText(this, "Scan name cannot be "+scanName.getText().toString()+". Please rename scan. ", Toast.LENGTH_SHORT).show();
+                    break;
+                }
                 else { // OK, gather options
                     intent = new Intent(newScanActivity.this, scanActivity.class); //Create intent for scanActivity
 
@@ -250,16 +295,16 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     intent.putExtra("scanName", scanName.getText().toString());
 
                     // Fill in options for bluetooth scanning
+                    intent.putExtra("btStatus", switchBluetooth.isChecked());
                     if(switchBluetooth.isChecked()) {
-                        intent.putExtra("btStatus", switchBluetooth.isChecked());
                         intent.putExtra("btDevName", btDevName.isChecked());
                         intent.putExtra("btDevAddr", btDevAddr.isChecked());
                         intent.putExtra("btDevType", btDevType.isChecked());
                         intent.putExtra("btRSSI", btRSSI.isChecked());
                     }
                     // Fill in options for wifi scanning
+                    intent.putExtra("wifiStatus", switchWifi.isChecked());
                     if(switchWifi.isChecked()) {
-                        intent.putExtra("wifiStatus", switchWifi.isChecked());
                         intent.putExtra("wifiSSID", wifiSSID.isChecked());
                         intent.putExtra("wifiBSSID", wifiBSSID.isChecked());
                         intent.putExtra("wifiCapabilities", wifiCapabilities.isChecked());
@@ -268,11 +313,15 @@ public class newScanActivity extends Activity implements View.OnClickListener {
                     }
 
                     // Fill in option for location
+                    intent.putExtra("locationStatus", switchLocation.isChecked());
                     if(switchLocation.isChecked()){
-                        intent.putExtra("locationStatus", switchLocation.isChecked());
                         intent.putExtra("locationGps", locGps.isChecked());
                         intent.putExtra("locationNet", locNetwork.isChecked());
                     }
+
+                    // Fill in options for Global Database
+                    intent.putExtra("globalDatabaseStatus", switchGdb.isChecked());
+
                     finish(); //Finish this activity and start new scan
                     startActivity(intent);
                 }
