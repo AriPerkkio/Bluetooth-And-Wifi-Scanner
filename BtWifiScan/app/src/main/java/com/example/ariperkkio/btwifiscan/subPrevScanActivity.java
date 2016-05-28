@@ -41,6 +41,7 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
     private int numberOfBtDevices = 0;
     private int numberOfWifiNetworks = 0;
     private int scanId;
+    private boolean enabledGdb = false;
     List<scanResult> results = new Vector<>();
     public static ProgressDialog mapsProgressDialog;
     private int countUploaded;
@@ -83,6 +84,10 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
         scanNameField.setText(getIntent().getExtras().getString("scanName"));
         scanDate.setText(getIntent().getExtras().getString("scanDate"));
         scanId = getIntent().getExtras().getInt("scanId");
+        String gdbOption = getIntent().getExtras().getString("enabledGdb");
+        enabledGdb = (gdbOption != null && gdbOption.equals("YES"));
+        if(!enabledGdb)
+            upload.setVisibility(View.GONE); // Hide upload button when looking at Global DB copy
 
         list = (ListView) findViewById(R.id.subPrevScanList);
         list.setOnItemClickListener(this);
@@ -146,10 +151,6 @@ public class subPrevScanActivity extends Activity implements View.OnClickListene
                 countToUpload = results.size();
                 break;
         }
-    }
-
-    public void onResponseRead(String response){
-        Toast.makeText(this, response, Toast.LENGTH_SHORT).show();
     }
 
     public void scanResultPass(String method, List<scanResult> resultList){
