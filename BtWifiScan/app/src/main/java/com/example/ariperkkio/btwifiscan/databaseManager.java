@@ -66,8 +66,8 @@ public class databaseManager {
                                         "Frequency INTEGER, "+
                                         "Location TEXT, "+
                                         "FOREIGN KEY (_id) REFERENCES Scans(_id))";
-    private static final String CREATE_ROW_GLOBALDB = "" +
-            "INSERT INTO Scans(_id, ScanName) VALUES("+globaldb_id+", \"GlobalDatabase\")";
+    private static final String CREATE_ROW_GLOBALDB =
+            "INSERT INTO Scans(_id, ScanName) VALUES("+globaldb_id+", \"Global Database\")";
 
     private final Context context;
     private MyDatabaseHelper DBHelper;
