@@ -53,6 +53,8 @@ struct 		sockaddr_in servaddr, cliaddr; // Address structure to hold server's an
 char 		inBuff[BUFFER], outBuff[BUFFER], logBuff[BUFFER]; // Data buffers for input and output + logs
 char 		clientBuff[256]; // To hold converted client address
 socklen_t 	len; // Client address info
+struct timeval timeout; // Timeout for connections
+
 
 // Log
 struct tm * timestamp;
@@ -149,6 +151,8 @@ int main(int argc, char **argv) {
 	if (argc != 3) // Verify number of args
 	   error("usage: <Program Name> <IP Addr>  <Port No.>");
 
+	timeout.tv_sec = 20, timeout.tv_usec = 0; // Timeout requests
+
 	listenfd = socket(AF_INET, SOCK_STREAM, 0); // Create socket
 
 	bzero(&servaddr, sizeof(servaddr)); // Zero and fill in server address structure
@@ -169,6 +173,12 @@ int main(int argc, char **argv) {
 				inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port)); // Convert clients address from binary to text form. Save it to clientBuff. Convert clients port from network byte order to host byte order
 		system(logBuff); // Append log
 
+		// Timeout requests
+		if (setsockopt (connfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0){
+			system("echo \"Close: Timeout\" >> Log.txt");
+			error("setsockopt failed\n");
+		}
+
 		// Read buffer one char at time - stop when reached the start of payload or end of request
 		charCounter = 0;
 		do{
@@ -180,7 +190,7 @@ int main(int argc, char **argv) {
 			if(strstr(inBuff, "\r\n\n")) break; // Start of payload
 		}while(n>0);
 		inBuff[charCounter+1] = 0; //Null terminate
-		cout << "\nRead input: \n******\n"<< inBuff << "\n******\n";
+		std::cout << "\nRead input: \n******\n"<< inBuff << "\n******\n";
 
 		if (n < 0)  // Error with data reading
 			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
@@ -264,7 +274,7 @@ int main(int argc, char **argv) {
 										,dao.insertBtResults(listBtDevices) ,listBtDevices.size(), dao.insertWifiResults(listWifiNetworks), listWifiNetworks.size());
 							break;
 
-							case SYNCBT: // TODO: Test same kind of reading as in UPLOAD
+							case SYNCBT:
 								listBtDevices = jsonParser.parseBtJson(dataBuff, sizeof(dataBuff));
 								dao.syncBtResults(listBtDevices); // Insert all devices that are not in db already
 								sendResults(listBtDevices); // Send response containing devices that were not in user's initial list
@@ -296,7 +306,7 @@ int main(int argc, char **argv) {
 		std::cout << "\nSending: " << outBuff << std::endl; // Print out-going data to server
 		write(connfd, outBuff, strlen(outBuff)); // Send data
 		close(connfd); //Close current connection, loop back to polling connection
-		cout << "\nConnection closed.\n";
+		std::cout << "\nConnection closed.\n";
 		// Clear everything
 		memset(&cmd[0], 0, sizeof(cmd));
 		memset(&path[0], 0, sizeof(path));
