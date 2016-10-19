@@ -22,6 +22,8 @@ int 		offset = 0, pos;
 std::vector<Wifiresult> _listWifiNetworks;
 std::vector<Btresult> _listBtDevices;
 
+using namespace std;
+
 JsonParser::JsonParser() {
 	// TODO Auto-generated constructor stub
 }
@@ -41,9 +43,9 @@ vector<Btresult> JsonParser::parseBtJson(char _buff[], int buffSize){
 		offset += pos+2;
 		if(sscanf(btdevjson, btJsonParse, devName, devAddr, devType, devRssi, btloc) == 5) // All five successful
 			_listBtDevices.push_back(Btresult(devName, devAddr, devType, devRssi, btloc)); // Add new bt result
-		memset(btdevjson, 0, sizeof(btdevjson));
+		memset(&btdevjson, 0, sizeof(btdevjson));
 	}
-	memset(btjson, 0, sizeof(btjson));
+	memset(&btjson, 0, sizeof(btjson));
 	return _listBtDevices;
 }
 
@@ -65,10 +67,10 @@ vector<Wifiresult> JsonParser::parseWifiJson(char _buff[], int buffSize){
 		offset += pos+2;
 		if(sscanf(wifinetjson, wifiJsonParse, ssid, bssid, capabilities, wifiRssi, freq, wifiloc) == 6) // All six successful
 			_listWifiNetworks.push_back(Wifiresult(ssid, bssid, capabilities, wifiRssi, freq, wifiloc)); // Add wifi result
-		memset(wifinetjson, 0, sizeof(wifinetjson));
+		memset(&wifinetjson, 0, sizeof(wifinetjson));
 	}
-	memset(btjson, 0, sizeof(btjson));
-	memset(wifijson, 0, sizeof(wifijson));
+	memset(&btjson, 0, sizeof(btjson));
+	memset(&wifijson, 0, sizeof(wifijson));
 	return _listWifiNetworks;
 }
 
@@ -80,7 +82,7 @@ std::string JsonParser::btResultsToJson(vector<Btresult> _list){
 				_list.at(i).getName().c_str(), _list.at(i).getAddress().c_str(), _list.at(i).getType().c_str(), _list.at(i).getRssi().c_str(), _list.at(i).getLoc().c_str());
 		returnJson.append(devRow);
 		if(i+1!=_list.size()) returnJson.append(",\n"); // Not last row
-		memset(devRow, 0, sizeof(devRow));
+		memset(&devRow, 0, sizeof(devRow));
 	}
 	returnJson.append("\n]}");
 	return returnJson;
@@ -95,7 +97,7 @@ std::string JsonParser::wifiResultsToJson(vector<Wifiresult> _list){
 				_list.at(i).getSsid().c_str(), _list.at(i).getBssid().c_str(), _list.at(i).getCap().c_str(), _list.at(i).getRssi().c_str(), _list.at(i).getFreq().c_str(), _list.at(i).getLoc().c_str());
 		returnJson.append(netRow);
 		if(i+1!=_list.size()) returnJson.append(",\n"); // Not last row
-		memset(netRow, 0, sizeof(netRow));
+		memset(&netRow, 0, sizeof(netRow));
 	}
 	returnJson.append("\n]}");
 	return returnJson;

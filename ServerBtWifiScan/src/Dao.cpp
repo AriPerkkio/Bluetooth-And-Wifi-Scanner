@@ -62,8 +62,8 @@ bool Dao::pingDb(string _url, string _user, string _pass, string _schema){
 		}
 		delete res;
 	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << " )" << endl;
 	}
 	return false;
 }
@@ -72,10 +72,10 @@ void Dao::setConnection(string _url, string _user, string _pass, string _schema)
 	try {
 		conn = driver->connect(_url, _user, _pass);
 		conn->setSchema(_schema);
-		std::cout << "\nSetting up connection to " << _url << endl;
+		cout << "\nSetting up connection to " << _url << endl;
 	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << " )" << endl;
 	}
 }
 
@@ -111,7 +111,7 @@ void Dao::readCredentials(){
 	unsigned int	c, count=0;
 
 	fp = fopen("./credentials.txt", "r");
-	if(fp==0) std::cout << "Credentials.txt not found";
+	if(fp==0) cout << "Credentials.txt not found";
 	else {
 		while(1){
 			c = fgetc(fp);
@@ -122,7 +122,7 @@ void Dao::readCredentials(){
 		fclose(fp);	//Close the file
 		istringstream fileContent(fileBuff);
 		string oneLine;
-		while (std::getline(fileContent, oneLine)) {
+		while (getline(fileContent, oneLine)) {
 			char urlBuff[64], userBuff[64], passBuff[64], schemaBuff[64];
 			if(sscanf(oneLine.c_str(), "Okeanos: {\"URL\":\"%[^\"]\", \"USER\":\"%[^\"]\", \"PASS\":\"%[^\"]\", \"SCHEMA\":\"%[^\"]\"}", urlBuff, userBuff, passBuff, schemaBuff)==4)
 				okeanosUrl = urlBuff, okeanosUser = userBuff, okeanosPass = passBuff, okeanosSchema = schemaBuff;
@@ -132,7 +132,7 @@ void Dao::readCredentials(){
 				digioceanUrl = urlBuff, digioceanUser = userBuff, digioceanPass = passBuff, digioceanSchema = schemaBuff;
 		}
 	}
-	memset(fileBuff, 0, sizeof(fileBuff)); //Empty filedata buffer
+	memset(&fileBuff, 0, sizeof(fileBuff)); //Empty filedata buffer
 }
 
 bool Dao::checkExistingResult(Btresult _btDevice){
@@ -162,9 +162,9 @@ int Dao::insertBtResults(vector<Btresult> _list){
 					newDevices++;
 				}
 			}catch (sql::SQLException &e) {
-				std::cout << " (MySQL error code: " << e.getErrorCode();
-				std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-				std::cout << "Error device: \n" << _list.at(ii).toString() << "\n";
+				cout << " (MySQL error code: " << e.getErrorCode();
+				cout << ", SQLState: " << e.getSQLState() << " )" << endl;
+				cout << "Error device: \n" << _list.at(ii).toString() << "\n";
 			}
 		}
 		delete conn;
@@ -200,9 +200,9 @@ int Dao::insertWifiResults(vector<Wifiresult> _list){
 					newNetworks++;
 				}
 			}catch (sql::SQLException &e) {
-				std::cout << " (MySQL error code: " << e.getErrorCode();
-				std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-				std::cout << "Error network: \n" << _list.at(ii).toString() << "\n";
+				cout << " (MySQL error code: " << e.getErrorCode();
+				cout << ", SQLState: " << e.getSQLState() << " )" << endl;
+				cout << "Error network: \n" << _list.at(ii).toString() << "\n";
 			}
 		}
 		delete conn;
@@ -222,8 +222,8 @@ int Dao::getBtCount(){
 		delete conn;
 		delete res;
 	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << " )" << endl;
 	}
 	return btCount;
 }
@@ -240,8 +240,8 @@ int Dao::getWifiCount(){
 		delete conn;
 		delete res;
 	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << " )" << endl;
 	}
 	return wifiCount;
 }
@@ -255,8 +255,8 @@ vector<Btresult> Dao::getAllBtResults(){
 		while(res->next())
 			returnList.push_back(Btresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5))));
 	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << " )" << endl;
 	}
 	delete stmt;
 	delete conn;
@@ -273,8 +273,8 @@ vector<Wifiresult> Dao::getAllWifiResults(){
 		while(res->next())
 			returnList.push_back(Wifiresult(string(res->getString(1)), string(res->getString(2)), string(res->getString(3)), string(res->getString(4)), string(res->getString(5)), string(res->getString(6))));
 	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << " )" << endl;
 	}
 	delete stmt;
 	delete conn;
@@ -299,8 +299,8 @@ void Dao::syncBtResults(vector<Btresult>& _list){
 				_list.erase(remove(_list.begin(), _list.end(), newBtDev), _list.end());
 		}
 	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << " )" << endl;
 	}
 	delete stmt;
 	delete conn;
@@ -321,8 +321,8 @@ void Dao::syncWifiResults(vector<Wifiresult>& _list){
 				_list.erase(remove(_list.begin(), _list.end(), newWifiNetwork), _list.end());
 		}
 	}catch (sql::SQLException &e) {
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << " )" << endl;
 	}
 	delete stmt;
 	delete conn;
@@ -343,8 +343,8 @@ void Dao::tempClearDb(){
 			delete stmt;
 			delete conn;
 		}catch (sql::SQLException &e) {
-			std::cout << " (MySQL error code: " << e.getErrorCode();
-			std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+			cout << " (MySQL error code: " << e.getErrorCode();
+			cout << ", SQLState: " << e.getSQLState() << " )" << endl;
 		}
 	}
 }

@@ -125,8 +125,8 @@ void sendResults(vector<Btresult>& _list){
 			_list.erase(remove(_list.begin(), _list.end(), _list.at(0)), _list.end()); // Remove picked result
 		}
 		snprintf(outBuff, sizeof(outBuff), "%s   \n", jsonParser.btResultsToJson(sendList).c_str());
-		write(connfd, outBuff, strlen(outBuff)); // Send data
-		memset(outBuff, sizeof(outBuff), 0);
+		send(connfd, outBuff, strlen(outBuff), MSG_NOSIGNAL);
+		memset(&outBuff[0], 0, sizeof(outBuff));
 		sendList.clear();
 	}
 }
@@ -140,8 +140,8 @@ void sendResults(vector<Wifiresult>& _list){
 			_list.erase(remove(_list.begin(), _list.end(), _list.at(0)), _list.end());
 		}
 		snprintf(outBuff, sizeof(outBuff), "%s   \n", jsonParser.wifiResultsToJson(sendList).c_str());
-		write(connfd, outBuff, strlen(outBuff));
-		memset(outBuff, sizeof(outBuff), 0);
+		send(connfd, outBuff, strlen(outBuff), MSG_NOSIGNAL);
+		memset(&outBuff[0], 0, sizeof(outBuff));
 		sendList.clear();
 	}
 }
@@ -170,7 +170,8 @@ int main(int argc, char **argv) {
 		timestamp = localtime(&t);
 		snprintf(logBuff, 256, "echo \"\n%d/%d/%d %d:%d\nConnection from: %s:%d \" >> Log.txt",
 				timestamp->tm_mday, 1+timestamp->tm_mon, 1900+timestamp->tm_year, timestamp->tm_hour, timestamp->tm_min, // Timestamp
-				inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port)); // Convert clients address from binary to text form. Save it to clientBuff. Convert clients port from network byte order to host byte order
+				inet_ntop(AF_INET, &cliaddr.sin_addr, clientBuff, sizeof(clientBuff)), ntohs(cliaddr.sin_port)); // Convert clients address from binary to text form. 
+				//Save it to clientBuff. Convert clients port from network byte order to host byte order
 		system(logBuff); // Append log
 
 		// Timeout requests
@@ -195,7 +196,7 @@ int main(int argc, char **argv) {
 		if (n < 0)  // Error with data reading
 			snprintf(outBuff, sizeof(outBuff), "Error reading data\n");
 		else
-			write(connfd, HTTP_OK_HEADER, strlen(HTTP_OK_HEADER)); // Request read successfully
+			send(connfd, HTTP_OK_HEADER, strlen(HTTP_OK_HEADER), MSG_NOSIGNAL); // Request read successfully
 
 		// Parse Content Type and Length
 		std::istringstream req(inBuff);
@@ -205,7 +206,7 @@ int main(int argc, char **argv) {
 		}
 		char dataBuff[atoi(contentLength)]; // Buffer to hold payload
 
-		cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type << "\nPath: " << path;
+		std::cout << "\n\nRequest details\nCommand: "<< cmd <<"\nContent-Type: "<< type << "\nPath: " << path;
 		switch(processCmd(cmd)){
 			case GET:
 				switch(processPath(path)){
@@ -266,6 +267,8 @@ int main(int argc, char **argv) {
 						}while(n>0);
 						dataBuff[charCounter+1] = 0; //Null terminate
 
+						cout << "\nData: " << dataBuff << "\n";
+
 						switch(processPath(path)){
 							case UPLOAD:
 								listBtDevices = jsonParser.parseBtJson(dataBuff, sizeof(dataBuff));
@@ -304,7 +307,8 @@ int main(int argc, char **argv) {
 		system(logBuff); // Append log
 
 		std::cout << "\nSending: " << outBuff << std::endl; // Print out-going data to server
-		write(connfd, outBuff, strlen(outBuff)); // Send data
+		send(connfd, outBuff, strlen(outBuff), MSG_NOSIGNAL);
+
 		close(connfd); //Close current connection, loop back to polling connection
 		std::cout << "\nConnection closed.\n";
 		// Clear everything
