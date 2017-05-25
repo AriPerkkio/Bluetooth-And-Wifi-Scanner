@@ -32,10 +32,16 @@ class Dao {
 
   }
   countBt() {
-
+    var statement = 'SELECT COUNT(*) FROM BluetoothResults'
+    this.dbHandle.prepare(statement);
+    this.dbHandle.execute(statement);
+    return this.dbHandle.fetch(statement);
   }
   countWifi() {
-
+    var statement = 'SELECT COUNT(*) FROM WifiResults'
+    this.dbHandle.prepare(statement);
+    this.dbHandle.execute(statement);
+    return this.dbHandle.fetch(statement);
   }
 }
 

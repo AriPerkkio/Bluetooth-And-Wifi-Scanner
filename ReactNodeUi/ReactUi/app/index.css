@@ -5,35 +5,35 @@
 }
 
 html, body, #app, #app-wrapper {
-    height: 100%;
-    width: 100%;
+  height: 100%;
+  width: 100%;
 }
 
 header, footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #FFF;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #FFF;
 }
 
 header {
-    height: 20%;
-    background: #1E90FF; /* For browsers that do not support gradients */
-    background: -webkit-linear-gradient(#1E90FF, #00BFFF); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(#1E90FF, #00BFFF); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(#1E90FF, #00BFFF); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(#1E90FF, #00BFFF); /* Standard syntax */
+  height: 20%;
+  background: #1E90FF; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(#1E90FF, #00BFFF); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#1E90FF, #00BFFF); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#1E90FF, #00BFFF); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#1E90FF, #00BFFF); /* Standard syntax */
 }
 footer {
-    height: 10%;
+  height: 10%;
 }
 
-footer, .button { 
-    background: #00BFFF; /* For browsers that do not support gradients */
-    background: -webkit-linear-gradient(#00BFFF, #1E90FF); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(#00BFFF, #1E90FF); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(#00BFFF, #1E90FF); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(#00BFFF, #1E90FF); /* Standard syntax */
+footer, .button {
+  background: #00BFFF; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(#00BFFF, #1E90FF); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#00BFFF, #1E90FF); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#00BFFF, #1E90FF); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#00BFFF, #1E90FF); /* Standard syntax */
 }
 
 footer p {
@@ -43,38 +43,43 @@ footer p {
 }
 
 main {
-    background: #00BFAA; /* For browsers that do not support gradients */
-    background: -webkit-radial-gradient(#00BFAA, #00BFCC, #00BFFF); /* Safari 5.1 to 6.0 */
-    background: -o-radial-gradient(#00BFAA, #00BFCC, #00BFFF); /* For Opera 11.6 to 12.0 */
-    background: -moz-radial-gradient(#00BFAA, #00BFCC, #00BFFF); /* For Firefox 3.6 to 15 */
-    background: radial-gradient(#00BFAA, #00BFCC, #00BFFF); /* Standard syntax */
+  background: #00BFAA; /* For browsers that do not support gradients */
+  background: -webkit-radial-gradient(#00BFAA, #00BFCC, #00BFFF); /* Safari 5.1 to 6.0 */
+  background: -o-radial-gradient(#00BFAA, #00BFCC, #00BFFF); /* For Opera 11.6 to 12.0 */
+  background: -moz-radial-gradient(#00BFAA, #00BFCC, #00BFFF); /* For Firefox 3.6 to 15 */
+  background: radial-gradient(#00BFAA, #00BFCC, #00BFFF); /* Standard syntax */
 
-    height: 70%;
-    overflow: auto;
-    display:  flex;
+  height: 70%;
+  overflow: auto;
+  display:  flex;
 }
 
 section {
-    flex:  1;
-    height: 100%;
-    overflow: auto;
+  flex:  1;
+  height: 100%;
+  overflow: auto;
 }
 
 .button {
-    border: 1px solid #79BDC7;
-    padding: 10px;
-    margin:  0px 5px;
-    border-radius: 40%;
-    text-align: center;
+  border: 1px solid #79BDC7;
+  padding: 10px;
+  margin:  0px 5px;
+  border-radius: 40%;
+  text-align: center;
+}
+
+header a {
+  color: #FFF;
+  text-decoration: none;
 }
 
 .button:hover {
-    cursor: pointer;
-    background: #91E4FF; /* For browsers that do not support gradients */
-    background: -webkit-linear-gradient(#91E4FF, #1E90FF); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(#91E4FF, #1E90FF); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(#91E4FF, #1E90FF); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(#91E4FF, #1E90FF); /* Standard syntax */
+  cursor: pointer;
+  background: #91E4FF; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(#91E4FF, #1E90FF); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#91E4FF, #1E90FF); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#91E4FF, #1E90FF); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#91E4FF, #1E90FF); /* Standard syntax */
 }
 
 .button:active {
@@ -82,45 +87,51 @@ section {
 }
 
 .map {
-    height: 100%;
-    border-radius: 5%;
+  height: 100%;
+  border-radius: 5%;
 }
 
 .results-table, .tablefilter {
-    border: 3px solid #0FF;
-    background: rgba(50, 240, 240, 0.75);
-    color: #191970;
-    font-family: 'Inknut Antiqua', serif;
-    font-size: 0.8rem;
+  border: 3px solid #0FF;
+  background: rgba(50, 240, 240, 0.75);
+  color: #191970;
+  font-family: 'Inknut Antiqua', serif;
+  font-size: 0.75rem;
 }
 
 .results-table {
-    margin: auto;
+  margin: auto;
 }
 
 .tablefilter {
-    resize: none;
-    border: none;
+  resize: none;
+  border: none;
 }
 
 .results-table thead tr:first-child {
-    font-size: 1.1rem;
+  font-size: 1.1rem;
 }
 
 .results-table thead tr:nth-child(2) {
-    font-size: 0.9rem;
+  font-size: 0.9rem;
 }
 
 .results-table tbody td{
-    outline: 1px solid #F7F7F7;
-    text-align: center;
+  outline: 1px solid #F7F7F7;
+  text-align: center;
 }
 
 .results-table th:first-letter{
-    text-transform: capitalize;
+  text-transform: capitalize;
 }
 
 .results-table tbody tr:hover {
-    box-shadow: 0px 0px 25px 5px #FFF;
-    cursor: pointer;
+  box-shadow: 0px 0px 25px 5px #FFF;
+  cursor: pointer;
+}
+
+.count-text {
+  position: relative;
+  text-align: center;
+  top: 10%;
 }

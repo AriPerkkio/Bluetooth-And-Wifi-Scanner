@@ -1,20 +1,23 @@
-var React = require('react');
+var React   = require('react');
+var NavLink = require('react-router-dom').NavLink;
 
 var Button = function(props) {
-    return (
-        <div className='button'>
-            {props.text}
-        </div>
-    )
+  return (
+    <NavLink to={props.link}>
+      <div className='button'>
+        {props.text}
+      </div>
+    </NavLink>
+  )
 }
 
 class Header extends React.Component {
   render() {
     return (
       <header>
-          <Button text='Menu'/>
-          <Button text='About'/>
-          <Button text='Contact'/>
+        <Button text='Main'      link='/'/>
+        <Button text='Bluetooth' link='/results/bt'/>
+        <Button text='Wifi'      link='/results/wifi'/>
       </header>
     )
   }

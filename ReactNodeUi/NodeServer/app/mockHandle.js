@@ -30,7 +30,14 @@ class MockHandle {
   execute(args) { }
 
   fetch(args) {
-    if(args.match(/wifi/i)) {
+
+    if(args.match(/count/i) && args.match(/wifi/i)) {
+      return this.data.wifiResults.length;
+    }
+    else if(args.match(/count/i) && args.match(/bluetooth/i)) {
+      return this.data.bluetoothResults.length;
+    }
+    else if(args.match(/wifi/i)) {
       return this.data.wifiResults;
     }
     else if (args.match(/bluetooth/i)) {

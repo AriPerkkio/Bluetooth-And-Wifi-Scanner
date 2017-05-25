@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server --hot"
   },
   "babel": {
     "presets": [
@@ -28,6 +28,9 @@
   "dependencies": {
     "google-maps-react": "^1.0.19",
     "react-google-map": "^3.0.1",
-    "react-google-maps-loader": "^2.0.2"
+    "react-google-maps-loader": "^2.0.2",
+    "react-redux": "^5.0.5",
+    "react-router": "^4.1.1",
+    "react-router-dom": "^4.1.1"
   }
 }

@@ -1,17 +1,26 @@
-var React = require('react');
+var React     = require('react');
+var PropTypes = require('prop-types');
+
+var Content = require('./Content');
 
 class Map extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if(nextProps.markedObj) {
       var [lat, long] = nextProps.markedObj.loc.split(',')
-        .map( (item) => item.trim() );
+        .map( item => item.trim() );
 
       var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(lat, long)
+        position: new google.maps.LatLng(lat, long),
+        animation: google.maps.Animation.DROP,
+        map: this.map,
       });
 
-      marker.setMap(this.map);
+      var infowindow = new google.maps.InfoWindow({
+        content: '<pre>'+JSON.stringify(nextProps.markedObj, null, 2)+'</pre>'
+      });
+
+      marker.addListener('click', () => infowindow.open(this.map, marker));
       this.map.setCenter(marker.getPosition());
     }
   }
@@ -25,8 +34,12 @@ class Map extends React.Component {
   }
 
   render() {
-    return <div className='map' id='googleMap' />
+    return <Content className="map" id="googleMap"/>
   }
 }
+
+Map.propTypes = {
+  markedObj: PropTypes.object
+};
 
 module.exports = Map;

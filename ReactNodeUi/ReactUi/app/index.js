@@ -1,22 +1,8 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
+
+var App = require('./Components/App');
 require('./index.css');
-
-var Header    = require('./Components/Header');
-var Container = require('./Components/Container');
-var Footer    = require('./Components/Footer');
-
-class App extends React.Component {
-  render() {
-    return (
-      <div id='app-wrapper'>
-        <Header />
-        <Container />
-        <Footer />
-      </div>
-    )
-  }
-}
 
 ReactDOM.render(
   <App />,

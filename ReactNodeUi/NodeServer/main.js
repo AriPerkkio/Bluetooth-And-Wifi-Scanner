@@ -36,6 +36,8 @@ if(argv) {
 
 function getHandler(req, res) {
 
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   switch(req.url) {
     case PINGAZURE :
     case PINGOKEANOS :
@@ -43,15 +45,15 @@ function getHandler(req, res) {
       res.send('GET, ping cmd: '+ req.url);
       break;
     case COUNTBT :
+      res.send("Bluetooth: " + dao.countBt());
+      break;
     case COUNTWIFI :
-      res.send('GET, count cmd: '+ req.url);
+      res.send("Wifi: " + dao.countWifi());
       break;
     case GETALLBT :
-      res.setHeader('Access-Control-Allow-Origin', '*');
       res.json(dao.getAllBt());
       break;
     case GETALLWIFI :
-      res.setHeader('Access-Control-Allow-Origin', '*');
       res.json(dao.getAllWifi());
       break;
     default:
