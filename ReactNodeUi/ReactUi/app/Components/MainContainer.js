@@ -14,14 +14,12 @@ class MainContainer extends React.Component {
   }
 
   componentDidMount() {
-    setTimeout( () =>
     [ 'countBt', 'countWifi' ].forEach( key =>
       fetch('http://localhost:8081/'+key)
         .then((response) => response.text())
         .then((responseJson) => this.setState({ [key] : responseJson }))
         .catch((error) => console.log(error))
-    )
-    , 1500);
+    );
   }
 
   render() {

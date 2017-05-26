@@ -108,6 +108,19 @@ header a {
   border: none;
 }
 
+::-webkit-input-placeholder {
+    font-size: 0.6rem;
+}
+:-moz-placeholder {
+    font-size: 0.6rem;
+}
+::-moz-placeholder {
+    font-size: 0.6rem;
+}
+:-ms-input-placeholder {
+    font-size: 0.6rem;
+}
+
 .results-table thead tr:first-child {
   font-size: 1.1rem;
 }
