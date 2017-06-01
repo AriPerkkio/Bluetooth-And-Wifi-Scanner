@@ -1,38 +1,20 @@
 var React       = require('react');
-var ReactRouter = require('react-router-dom');
-var Router      = ReactRouter.BrowserRouter;
-var Route       = ReactRouter.Route;
-var Switch      = ReactRouter.Switch;
-var PropTypes   = require('prop-types');
+var Route       = require('react-router-dom').Route;
 
-
-var WifiResultsContainer      = require('./WifiResultsContainer');
-var BluetoothResultsContainer = require('./BluetoothResultsContainer');
-var MapComponent              = require('./Map');
-var MainContainer             = require('./MainContainer');
+var ResultsContainer = require('./ResultContainer');
+var MapContainer     = require('./MapContainer');
+var MainContainer    = require('./MainContainer');
+var ComponentTester  = require('./ComponentTester');
 
 class Container extends React.Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedResult: null
-    }
-  }
-
-  onResultClick(result) {
-    this.setState({
-      selectedResult: result
-    })
-  }
-
   render() {
     return (
       <main>
         <Route exact path='/' component={MainContainer} />
-        <Route path="/results/wifi" render={() => <WifiResultsContainer      onResultClick={this.onResultClick.bind(this)} />} />
-        <Route path="/results/bt"   render={() => <BluetoothResultsContainer onResultClick={this.onResultClick.bind(this)} />} />
-        <Route path="/results/"     render={() => <MapComponent markedObj={this.state.selectedResult} />} />
+        <Route path="/results/wifi"      render={() => <ResultsContainer path='/getAllWifi' resultType='Wifi'      />} />
+        <Route path="/results/bt"        render={() => <ResultsContainer path='/getAllBt'   resultType='Bluetooth' />} />
+        <Route path="/results/"          render={() => <MapContainer />} />
+        <Route path="/component-tester/" render={() => <ComponentTester /> } />
       </main>
     )
   }

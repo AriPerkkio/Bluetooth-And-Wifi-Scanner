@@ -1,41 +1,46 @@
-var React     = require('react');
+var React = require('react');
 
-var Content   = require('./Content');
-var Loading   = require('./Loading');
+var Content     = require('./Content');
+var Loading     = require('./Loading');
+var TestingUtil = require('../Utils/TestingUtil');
+
+var Store        = require('../State/Store');
+var { setCount } = require('../State/Actions');
+var { connect }  = require('react-redux');
+
+const countText = (props) => {
+  if (props.text)
+    return <p className='count-text'>{props.text}</p>;
+
+  return <Loading text={'Loading '+ props.type +' result counts...'}/>;
+}
 
 class MainContainer extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      countBt: null,
-      countWifi: null
-    };
-  }
-
   componentDidMount() {
-    [ 'countBt', 'countWifi' ].forEach( key =>
-      fetch('http://localhost:8081/'+key)
-        .then((response) => response.text())
-        .then((responseJson) => this.setState({ [key] : responseJson }))
-        .catch((error) => console.log(error))
+    [ {key: 'bluetooth', path: '/countBt' }, {key: 'wifi', path: '/countWifi' } ]
+      .forEach( opt =>
+        fetch(TestingUtil.getExtServerIp()+opt.path)
+          .then(response => response.text())
+          .then(responseText => Store.dispatch(Object.assign({}, setCount, {resultCount: {[opt.key]:responseText} })))
+          .catch(error => console.log(error))
     );
   }
 
   render() {
     return (
       <Content>
-        { this.state.countBt ?
-          <p className='count-text'>{this.state.countBt}</p> :
-          <Loading text="Loading Bluetooth result count..."/>
-        }
-        { this.state.countWifi ?
-          <p className='count-text'>{this.state.countWifi}</p> :
-          <Loading text="Loading Wifi result count..."/>
-        }
+        <WifiCountText      type="Wifi"/>
+        <BluetoothCountText type="Bluetooth"/>
       </Content>
     )
   }
 }
+
+const wifiStateToProps      = store => ( { text: store.counts.wifi } );
+const bluetoothStateToProps = store => ( { text: store.counts.bluetooth } );
+
+const WifiCountText      = connect(wifiStateToProps)(countText);
+const BluetoothCountText = connect(bluetoothStateToProps)(countText);
 
 module.exports = MainContainer;

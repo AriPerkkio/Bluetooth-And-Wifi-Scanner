@@ -20,21 +20,44 @@ const UPLOAD   = '/upload';
 var pathsPost = [ SYNCBT, SYNCWIFI, UPLOAD ];
 
 var argv = process.argv.slice(2);
+var _debug = false;
+var port  = 8081;
 
 if(argv) {
-  argv.forEach((arg) => {
+  for(var i = 0; i < argv.length; i++) {
+    var arg = argv[i];
     switch(arg.replace(/-/g, '')) {
       case 'help':
       case 'usage':
-        console.log('Todo, Print usage');
+        console.log('Valid args: ', '\n--debug', '\n--port <port_number>', '\n');
         process.exit();
+      case 'debug':
+        _debug = true;
+        break;
+      case 'port':
+        i++;
+        port = argv[i];
+        break;
       default:
-        console.log('Unknown arg : ' +arg);
+        console.log('Skipped unknown arg : ' +arg);
     }
-  });
+  }
+}
+
+app.get(pathsGet, getHandler);
+app.post(pathsPost, postHandler);
+
+app.listen(port, () => debug("Server running on "+port));
+
+function debug() {
+  if(_debug) {
+    console.log(" ");
+    Object.values(arguments).forEach( (arg) => console.log(arg));
+  }
 }
 
 function getHandler(req, res) {
+  debug("getHandler", "GET "+req.url);
 
   res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -62,7 +85,8 @@ function getHandler(req, res) {
 }
 
 function postHandler(req, res) {
-    var responseText;
+  debug("postHandler", "POST "+req.url);
+  var responseText;
 
   switch(req.url) {
     case SYNCBT :
@@ -79,8 +103,3 @@ function postHandler(req, res) {
   }
   res.send(responseText+'\n');
 }
-
-app.get(pathsGet, getHandler);
-app.post(pathsPost, postHandler);
-
-app.listen(8081)

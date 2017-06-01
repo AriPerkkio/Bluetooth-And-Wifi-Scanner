@@ -1,7 +1,10 @@
 var React     = require('react');
 var PropTypes = require('prop-types');
 
-var debounce = require('debounce');
+var debounce  = require('debounce');
+
+var Store            = require('../State/Store');
+var { selectResult } = require('../State/Actions');
 
 var Textarea = (props) => (
   <textarea
@@ -24,26 +27,29 @@ class Table extends React.Component {
     };
   }
 
+  selectResult(result) {
+    Store.dispatch(Object.assign({}, selectResult, { result: result }));
+  }
+
   onChangeHandler(column, e) {
     this.setFilter(column, e.target.value);
   }
 
   setFilter(filter, value) {
-    var allFilters = this.state.filters;
-    allFilters[ filter ] = value;
-    this.setState({
-      filters: allFilters
+    this.setState((state, props) => {
+      var newFilters = { filters: Object.assign({}, state.filters, { [filter]: value }) };
+      return Object.assign({}, state, newFilters);
     });
   }
 
   dataFilter(item) {
-    var matches = 1;
+    var matches = true;
 
     Object.keys(this.state.filters).forEach(
-      (filter) => {
+      filter => {
         var filterValue = this.state.filters[ filter ];
         if( !item[filter].toLowerCase().includes(filterValue.toLowerCase()) ) {
-          matches = 0;
+          matches = false;
         }
     });
 
@@ -80,7 +86,7 @@ class Table extends React.Component {
 
         <tbody>
           {filteredData.map( (dataItem, dataIdx) =>
-          <tr key={dataIdx} onClick={this.props.onResultClick.bind(null, dataItem)} >
+          <tr key={dataIdx} onClick={this.selectResult.bind(this, dataItem)} >
             {this.props.columns.map( (colItem, colIdx) =>
             colItem !== 'loc' &&
             <td key={colIdx}>
@@ -99,8 +105,7 @@ class Table extends React.Component {
 Table.propTypes = {
   columns: PropTypes.array.isRequired,
   title: PropTypes.string.isRequired,
-  data: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onResultClick: PropTypes.func.isRequired
+  data: PropTypes.arrayOf(PropTypes.object).isRequired
 };
 
 module.exports = Table;

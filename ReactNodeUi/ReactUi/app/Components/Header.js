@@ -15,9 +15,10 @@ class Header extends React.Component {
   render() {
     return (
       <header>
-        <Button text='Main'      link='/'/>
-        <Button text='Bluetooth' link='/results/bt'/>
-        <Button text='Wifi'      link='/results/wifi'/>
+        <Button text='Main'             link='/'/>
+        <Button text='Bluetooth'        link='/results/bt'/>
+        <Button text='Wifi'             link='/results/wifi'/>
+        <Button text='Component Tester' link='/component-tester'/>
       </header>
     )
   }
